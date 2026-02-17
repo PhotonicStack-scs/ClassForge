@@ -5,8 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build & Run
 
 ```bash
-dotnet build ClassForge.slnx          # Build entire solution
-dotnet run --project src/ClassForge.API  # Run the API (requires PostgreSQL)
+dotnet build ClassForge.sln               # Build entire solution
+dotnet run --project src/ClassForge.API    # Run the API (requires PostgreSQL)
 ```
 
 EF Core migrations (run from repo root):
@@ -16,6 +16,7 @@ dotnet ef database update --project src/ClassForge.Infrastructure --startup-proj
 ```
 
 Health check: `GET /health`
+Swagger UI: `/swagger` (includes JWT Bearer authorize button)
 
 ## Architecture
 
@@ -42,8 +43,9 @@ Auth endpoints (login, register, refresh) use `IgnoreQueryFilters()` since tenan
 - **DTOs**: Records in `Application/DTOs/{Feature}/`. Named `CreateXxxRequest`, `UpdateXxxRequest`, `XxxResponse`.
 - **Mapping**: Static extension methods in `Application/Mapping/MappingExtensions.cs` — `ToResponse()` and `ToEntity()`. No AutoMapper.
 - **Validation**: FluentValidation with `ValidationFilter<T>` endpoint filter. Validators in `Application/Validators/`.
-- **EF Configurations**: One `IEntityTypeConfiguration<T>` per entity in `Infrastructure/Data/Configurations/`.
+- **EF Configurations**: One `IEntityTypeConfiguration<T>` per entity in `Infrastructure/Data/Configurations/`. Unique indexes typically on `TenantId + Name`.
 - **Authorization policies**: `"OrgAdmin"` and `"ScheduleManagerOrAbove"` (OrgAdmin + ScheduleManager).
+- **Entity patterns**: All entities use `Guid` primary keys. Navigation properties assigned `= null!`. Collections initialized with `= []`. `TimeOnly` used for time slots.
 
 ## Database
 
@@ -55,4 +57,4 @@ All under `/api/v1/`. Auth routes are anonymous. Most resource routes require `S
 
 ## Tech Stack
 
-.NET 10 (SDK 10.0.101), PostgreSQL, EF Core, Serilog, FluentValidation, JWT Bearer auth.
+.NET 10 (SDK 10.0.101), PostgreSQL, EF Core, Serilog, FluentValidation, JWT Bearer auth, Swashbuckle (Swagger).

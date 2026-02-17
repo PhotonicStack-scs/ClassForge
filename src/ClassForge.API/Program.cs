@@ -6,6 +6,7 @@ using ClassForge.Infrastructure;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -77,6 +78,32 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole("OrgAdmin", "ScheduleManager"));
 });
 
+// Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "ClassForge API",
+        Version = "v1"
+    });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter your JWT token"
+    });
+
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        { new OpenApiSecuritySchemeReference("Bearer", document), [] }
+    });
+});
+
 // Health checks
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);
@@ -84,6 +111,8 @@ builder.Services.AddHealthChecks()
 var app = builder.Build();
 
 app.UseExceptionHandler();
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
