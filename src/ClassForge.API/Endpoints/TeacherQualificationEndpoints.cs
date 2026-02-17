@@ -14,11 +14,34 @@ public static class TeacherQualificationEndpoints
             .WithTags("Teacher Qualifications")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
-        group.MapPost("/", Create).AddEndpointFilter<ValidationFilter<CreateTeacherQualificationRequest>>();
-        group.MapPut("/{id:guid}", Update).AddEndpointFilter<ValidationFilter<UpdateTeacherQualificationRequest>>();
-        group.MapDelete("/{id:guid}", Delete);
+        group.MapGet("/", GetAll)
+            .WithSummary("List qualifications for a teacher")
+            .WithDescription("Returns all subject qualifications for the specified teacher. Each qualification defines which subject and grade range a teacher can teach.")
+            .Produces<List<TeacherQualificationResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a qualification by ID")
+            .Produces<TeacherQualificationResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPost("/", Create)
+            .AddEndpointFilter<ValidationFilter<CreateTeacherQualificationRequest>>()
+            .WithSummary("Create a qualification")
+            .WithDescription("Assigns a subject qualification to a teacher, with optional min/max grade range to restrict which grades they can teach.")
+            .Produces<TeacherQualificationResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
+        group.MapPut("/{id:guid}", Update)
+            .AddEndpointFilter<ValidationFilter<UpdateTeacherQualificationRequest>>()
+            .WithSummary("Update a qualification")
+            .Produces<TeacherQualificationResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
+
+        group.MapDelete("/{id:guid}", Delete)
+            .WithSummary("Delete a qualification")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

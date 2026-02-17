@@ -14,11 +14,34 @@ public static class TeacherSlotBlockEndpoints
             .WithTags("Teacher Blocked Slots")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
-        group.MapPost("/", Create).AddEndpointFilter<ValidationFilter<CreateTeacherSlotBlockRequest>>();
-        group.MapPut("/{id:guid}", Update);
-        group.MapDelete("/{id:guid}", Delete);
+        group.MapGet("/", GetAll)
+            .WithSummary("List blocked slots for a teacher")
+            .WithDescription("Returns all time slots that are blocked for the specified teacher. Blocked slots prevent the scheduler from assigning lessons during those times.")
+            .Produces<List<TeacherSlotBlockResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a blocked slot by ID")
+            .Produces<TeacherSlotBlockResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPost("/", Create)
+            .AddEndpointFilter<ValidationFilter<CreateTeacherSlotBlockRequest>>()
+            .WithSummary("Block a time slot for a teacher")
+            .WithDescription("Marks a specific time slot as unavailable for this teacher, with an optional reason.")
+            .Produces<TeacherSlotBlockResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
+        group.MapPut("/{id:guid}", Update)
+            .WithSummary("Update a blocked slot")
+            .WithDescription("Updates the reason for a blocked time slot.")
+            .Produces<TeacherSlotBlockResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapDelete("/{id:guid}", Delete)
+            .WithSummary("Unblock a time slot")
+            .WithDescription("Removes the block, making this time slot available again for the teacher.")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

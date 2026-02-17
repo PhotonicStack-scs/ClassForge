@@ -14,11 +14,34 @@ public static class SubjectEndpoints
             .WithTags("Subjects")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
-        group.MapPost("/", Create).AddEndpointFilter<ValidationFilter<CreateSubjectRequest>>();
-        group.MapPut("/{id:guid}", Update).AddEndpointFilter<ValidationFilter<UpdateSubjectRequest>>();
-        group.MapDelete("/{id:guid}", Delete);
+        group.MapGet("/", GetAll)
+            .WithSummary("List all subjects")
+            .WithDescription("Returns all subjects for the current tenant, ordered by name.")
+            .Produces<List<SubjectResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a subject by ID")
+            .Produces<SubjectResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPost("/", Create)
+            .AddEndpointFilter<ValidationFilter<CreateSubjectRequest>>()
+            .WithSummary("Create a subject")
+            .WithDescription("Creates a new subject. Optionally link it to a special room and configure scheduling constraints like max periods per day and double-period allowance.")
+            .Produces<SubjectResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
+        group.MapPut("/{id:guid}", Update)
+            .AddEndpointFilter<ValidationFilter<UpdateSubjectRequest>>()
+            .WithSummary("Update a subject")
+            .Produces<SubjectResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
+
+        group.MapDelete("/{id:guid}", Delete)
+            .WithSummary("Delete a subject")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

@@ -14,11 +14,36 @@ public static class TeachingDayEndpoints
             .WithTags("Teaching Days")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
-        group.MapPost("/", Create).AddEndpointFilter<ValidationFilter<CreateTeachingDayRequest>>();
-        group.MapPut("/{id:guid}", Update).AddEndpointFilter<ValidationFilter<UpdateTeachingDayRequest>>();
-        group.MapDelete("/{id:guid}", Delete);
+        group.MapGet("/", GetAll)
+            .WithSummary("List all teaching days")
+            .WithDescription("Returns all teaching days for the current tenant, ordered by sort order. Teaching days represent the weekly schedule (e.g. Monday–Friday).")
+            .Produces<List<TeachingDayResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a teaching day by ID")
+            .Produces<TeachingDayResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPost("/", Create)
+            .AddEndpointFilter<ValidationFilter<CreateTeachingDayRequest>>()
+            .WithSummary("Create a teaching day")
+            .WithDescription("Creates a new teaching day. Each day has a day-of-week, active flag, and sort order.")
+            .Produces<TeachingDayResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
+        group.MapPut("/{id:guid}", Update)
+            .AddEndpointFilter<ValidationFilter<UpdateTeachingDayRequest>>()
+            .WithSummary("Update a teaching day")
+            .WithDescription("Updates the active status and sort order of a teaching day.")
+            .Produces<TeachingDayResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
+
+        group.MapDelete("/{id:guid}", Delete)
+            .WithSummary("Delete a teaching day")
+            .WithDescription("Permanently removes a teaching day and its associated time slots.")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

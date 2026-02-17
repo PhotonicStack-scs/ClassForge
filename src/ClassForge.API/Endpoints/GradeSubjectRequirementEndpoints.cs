@@ -14,11 +14,34 @@ public static class GradeSubjectRequirementEndpoints
             .WithTags("Grade Subject Requirements")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
-        group.MapPost("/", Create).AddEndpointFilter<ValidationFilter<CreateGradeSubjectRequirementRequest>>();
-        group.MapPut("/{id:guid}", Update).AddEndpointFilter<ValidationFilter<UpdateGradeSubjectRequirementRequest>>();
-        group.MapDelete("/{id:guid}", Delete);
+        group.MapGet("/", GetAll)
+            .WithSummary("List subject requirements for a grade")
+            .WithDescription("Returns all subject-period requirements for the specified grade. Each defines how many periods per week a subject needs.")
+            .Produces<List<GradeSubjectRequirementResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a subject requirement by ID")
+            .Produces<GradeSubjectRequirementResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPost("/", Create)
+            .AddEndpointFilter<ValidationFilter<CreateGradeSubjectRequirementRequest>>()
+            .WithSummary("Create a subject requirement")
+            .WithDescription("Defines how many periods per week a subject needs for this grade, and whether double periods are preferred.")
+            .Produces<GradeSubjectRequirementResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
+        group.MapPut("/{id:guid}", Update)
+            .AddEndpointFilter<ValidationFilter<UpdateGradeSubjectRequirementRequest>>()
+            .WithSummary("Update a subject requirement")
+            .Produces<GradeSubjectRequirementResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
+
+        group.MapDelete("/{id:guid}", Delete)
+            .WithSummary("Delete a subject requirement")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

@@ -14,11 +14,35 @@ public static class TeacherEndpoints
             .WithTags("Teachers")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
-        group.MapPost("/", Create).AddEndpointFilter<ValidationFilter<CreateTeacherRequest>>();
-        group.MapPut("/{id:guid}", Update).AddEndpointFilter<ValidationFilter<UpdateTeacherRequest>>();
-        group.MapDelete("/{id:guid}", Delete);
+        group.MapGet("/", GetAll)
+            .WithSummary("List all teachers")
+            .WithDescription("Returns all teachers for the current tenant, ordered by name.")
+            .Produces<List<TeacherResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a teacher by ID")
+            .Produces<TeacherResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPost("/", Create)
+            .AddEndpointFilter<ValidationFilter<CreateTeacherRequest>>()
+            .WithSummary("Create a teacher")
+            .WithDescription("Creates a new teacher. Email is optional and can be used to link the teacher to a Viewer user account.")
+            .Produces<TeacherResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
+        group.MapPut("/{id:guid}", Update)
+            .AddEndpointFilter<ValidationFilter<UpdateTeacherRequest>>()
+            .WithSummary("Update a teacher")
+            .Produces<TeacherResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
+
+        group.MapDelete("/{id:guid}", Delete)
+            .WithSummary("Delete a teacher")
+            .WithDescription("Permanently removes a teacher and cascades to qualifications, day configs, and blocked slots.")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

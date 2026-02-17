@@ -39,10 +39,11 @@ Auth endpoints (login, register, refresh) use `IgnoreQueryFilters()` since tenan
 
 ## Conventions
 
-- **Endpoints**: Static classes with `MapXxxEndpoints()` extension method on `IEndpointRouteBuilder`. Each returns a `RouteGroupBuilder`.
+- **Endpoints**: Static classes with `MapXxxEndpoints()` extension method on `IEndpointRouteBuilder`. Each returns a `RouteGroupBuilder`. New endpoints must be registered in `Program.cs` via `app.MapXxxEndpoints()`.
 - **DTOs**: Records in `Application/DTOs/{Feature}/`. Named `CreateXxxRequest`, `UpdateXxxRequest`, `XxxResponse`.
 - **Mapping**: Static extension methods in `Application/Mapping/MappingExtensions.cs` — `ToResponse()` and `ToEntity()`. No AutoMapper.
 - **Validation**: FluentValidation with `ValidationFilter<T>` endpoint filter. Validators in `Application/Validators/`.
+- **Swagger**: Every endpoint has `.WithSummary()`, `.Produces<T>()`, and where applicable `.WithDescription()`, `.ProducesValidationProblem()`, `.ProducesProblem(StatusCodes.Status404NotFound)`. Maintain these when adding or modifying endpoints.
 - **EF Configurations**: One `IEntityTypeConfiguration<T>` per entity in `Infrastructure/Data/Configurations/`. Unique indexes typically on `TenantId + Name`.
 - **Authorization policies**: `"OrgAdmin"` and `"ScheduleManagerOrAbove"` (OrgAdmin + ScheduleManager).
 - **Entity patterns**: All entities use `Guid` primary keys. Navigation properties assigned `= null!`. Collections initialized with `= []`. `TimeOnly` used for time slots.
@@ -55,6 +56,10 @@ PostgreSQL via Npgsql. Connection string in `appsettings.json` under `Connection
 
 All under `/api/v1/`. Auth routes are anonymous. Most resource routes require `ScheduleManagerOrAbove`. User management requires `OrgAdmin`. Sub-resources are nested (e.g., `/grades/{gradeId}/groups`, `/teachers/{teacherId}/qualifications`).
 
+## Testing
+
+No test project exists yet. Verify changes with `dotnet build ClassForge.sln` and manual testing via Swagger UI.
+
 ## Tech Stack
 
-.NET 10 (SDK 10.0.101), PostgreSQL, EF Core, Serilog, FluentValidation, JWT Bearer auth, Swashbuckle (Swagger).
+.NET 10 (SDK 10.0.101), PostgreSQL, EF Core, Serilog, FluentValidation, JWT Bearer auth, Swashbuckle (Swagger). `Directory.Build.props` sets `<Nullable>enable</Nullable>`, `<ImplicitUsings>enable</ImplicitUsings>`, and `<LangVersion>latest</LangVersion>` for all projects.

@@ -14,11 +14,34 @@ public static class TeacherDayConfigEndpoints
             .WithTags("Teacher Day Config")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
-        group.MapPost("/", Create).AddEndpointFilter<ValidationFilter<CreateTeacherDayConfigRequest>>();
-        group.MapPut("/{id:guid}", Update).AddEndpointFilter<ValidationFilter<UpdateTeacherDayConfigRequest>>();
-        group.MapDelete("/{id:guid}", Delete);
+        group.MapGet("/", GetAll)
+            .WithSummary("List day configs for a teacher")
+            .WithDescription("Returns all day-specific period limits for the specified teacher. Each config caps how many periods a teacher can teach on a given day.")
+            .Produces<List<TeacherDayConfigResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a teacher day config by ID")
+            .Produces<TeacherDayConfigResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPost("/", Create)
+            .AddEndpointFilter<ValidationFilter<CreateTeacherDayConfigRequest>>()
+            .WithSummary("Create a teacher day config")
+            .WithDescription("Sets the maximum number of teaching periods a teacher can have on a specific teaching day.")
+            .Produces<TeacherDayConfigResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
+        group.MapPut("/{id:guid}", Update)
+            .AddEndpointFilter<ValidationFilter<UpdateTeacherDayConfigRequest>>()
+            .WithSummary("Update a teacher day config")
+            .Produces<TeacherDayConfigResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
+
+        group.MapDelete("/{id:guid}", Delete)
+            .WithSummary("Delete a teacher day config")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

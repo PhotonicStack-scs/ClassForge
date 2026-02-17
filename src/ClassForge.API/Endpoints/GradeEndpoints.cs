@@ -14,11 +14,35 @@ public static class GradeEndpoints
             .WithTags("Grades")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
-        group.MapPost("/", Create).AddEndpointFilter<ValidationFilter<CreateGradeRequest>>();
-        group.MapPut("/{id:guid}", Update).AddEndpointFilter<ValidationFilter<UpdateGradeRequest>>();
-        group.MapDelete("/{id:guid}", Delete);
+        group.MapGet("/", GetAll)
+            .WithSummary("List all grades")
+            .WithDescription("Returns all grades (e.g. Grade 1, Grade 2) for the current tenant, ordered by sort order.")
+            .Produces<List<GradeResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a grade by ID")
+            .Produces<GradeResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPost("/", Create)
+            .AddEndpointFilter<ValidationFilter<CreateGradeRequest>>()
+            .WithSummary("Create a grade")
+            .WithDescription("Creates a new grade level. Grades represent year levels in the school (e.g. Grade 8, Grade 9).")
+            .Produces<GradeResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
+        group.MapPut("/{id:guid}", Update)
+            .AddEndpointFilter<ValidationFilter<UpdateGradeRequest>>()
+            .WithSummary("Update a grade")
+            .Produces<GradeResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
+
+        group.MapDelete("/{id:guid}", Delete)
+            .WithSummary("Delete a grade")
+            .WithDescription("Permanently removes a grade and cascades to associated groups and configurations.")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

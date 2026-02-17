@@ -54,6 +54,8 @@ dotnet run --project src/ClassForge.API
 
 The API starts at `https://localhost:5001` (or `http://localhost:5000`). Verify with `GET /health`.
 
+Browse to `/swagger` for interactive API documentation with typed request/response schemas for all endpoints.
+
 ## Configuration
 
 ### JWT

@@ -15,11 +15,35 @@ public static class CombinedLessonEndpoints
             .WithTags("Combined Lessons")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
-        group.MapPost("/", Create).AddEndpointFilter<ValidationFilter<CreateCombinedLessonConfigRequest>>();
-        group.MapPut("/{id:guid}", Update).AddEndpointFilter<ValidationFilter<UpdateCombinedLessonConfigRequest>>();
-        group.MapDelete("/{id:guid}", Delete);
+        group.MapGet("/", GetAll)
+            .WithSummary("List combined lesson configs for a grade")
+            .WithDescription("Returns all combined lesson configurations for the specified grade. Combined lessons allow multiple groups to share a time slot for the same subject.")
+            .Produces<List<CombinedLessonConfigResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a combined lesson config by ID")
+            .Produces<CombinedLessonConfigResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPost("/", Create)
+            .AddEndpointFilter<ValidationFilter<CreateCombinedLessonConfigRequest>>()
+            .WithSummary("Create a combined lesson config")
+            .WithDescription("Defines a combined lesson where specified groups share a time slot for a subject. Set isMandatory to true if groups must always be combined.")
+            .Produces<CombinedLessonConfigResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
+        group.MapPut("/{id:guid}", Update)
+            .AddEndpointFilter<ValidationFilter<UpdateCombinedLessonConfigRequest>>()
+            .WithSummary("Update a combined lesson config")
+            .WithDescription("Updates the combined lesson settings and replaces the list of participating groups.")
+            .Produces<CombinedLessonConfigResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
+
+        group.MapDelete("/{id:guid}", Delete)
+            .WithSummary("Delete a combined lesson config")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

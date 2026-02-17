@@ -14,11 +14,34 @@ public static class GradeDayConfigEndpoints
             .WithTags("Grade Day Config")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
-        group.MapPost("/", Create).AddEndpointFilter<ValidationFilter<CreateGradeDayConfigRequest>>();
-        group.MapPut("/{id:guid}", Update).AddEndpointFilter<ValidationFilter<UpdateGradeDayConfigRequest>>();
-        group.MapDelete("/{id:guid}", Delete);
+        group.MapGet("/", GetAll)
+            .WithSummary("List day configs for a grade")
+            .WithDescription("Returns all day-specific period limits for the specified grade. Each config caps how many periods a grade can have on a given teaching day.")
+            .Produces<List<GradeDayConfigResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a grade day config by ID")
+            .Produces<GradeDayConfigResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPost("/", Create)
+            .AddEndpointFilter<ValidationFilter<CreateGradeDayConfigRequest>>()
+            .WithSummary("Create a grade day config")
+            .WithDescription("Sets the maximum number of teaching periods a grade can have on a specific teaching day.")
+            .Produces<GradeDayConfigResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
+        group.MapPut("/{id:guid}", Update)
+            .AddEndpointFilter<ValidationFilter<UpdateGradeDayConfigRequest>>()
+            .WithSummary("Update a grade day config")
+            .Produces<GradeDayConfigResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
+
+        group.MapDelete("/{id:guid}", Delete)
+            .WithSummary("Delete a grade day config")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

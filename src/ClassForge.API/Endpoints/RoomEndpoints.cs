@@ -14,11 +14,34 @@ public static class RoomEndpoints
             .WithTags("Rooms")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
-        group.MapPost("/", Create).AddEndpointFilter<ValidationFilter<CreateRoomRequest>>();
-        group.MapPut("/{id:guid}", Update).AddEndpointFilter<ValidationFilter<UpdateRoomRequest>>();
-        group.MapDelete("/{id:guid}", Delete);
+        group.MapGet("/", GetAll)
+            .WithSummary("List all rooms")
+            .WithDescription("Returns all rooms for the current tenant, ordered by name.")
+            .Produces<List<RoomResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a room by ID")
+            .Produces<RoomResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPost("/", Create)
+            .AddEndpointFilter<ValidationFilter<CreateRoomRequest>>()
+            .WithSummary("Create a room")
+            .WithDescription("Creates a new room. Rooms can be referenced by subjects that require a special room (e.g. science lab, gym).")
+            .Produces<RoomResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
+        group.MapPut("/{id:guid}", Update)
+            .AddEndpointFilter<ValidationFilter<UpdateRoomRequest>>()
+            .WithSummary("Update a room")
+            .Produces<RoomResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
+
+        group.MapDelete("/{id:guid}", Delete)
+            .WithSummary("Delete a room")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

@@ -14,11 +14,34 @@ public static class TimeSlotEndpoints
             .WithTags("Time Slots")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
-        group.MapPost("/", Create).AddEndpointFilter<ValidationFilter<CreateTimeSlotRequest>>();
-        group.MapPut("/{id:guid}", Update).AddEndpointFilter<ValidationFilter<UpdateTimeSlotRequest>>();
-        group.MapDelete("/{id:guid}", Delete);
+        group.MapGet("/", GetAll)
+            .WithSummary("List time slots for a teaching day")
+            .WithDescription("Returns all time slots for the specified teaching day, ordered by slot number. Includes both lesson slots and breaks.")
+            .Produces<List<TimeSlotResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a time slot by ID")
+            .Produces<TimeSlotResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPost("/", Create)
+            .AddEndpointFilter<ValidationFilter<CreateTimeSlotRequest>>()
+            .WithSummary("Create a time slot")
+            .WithDescription("Creates a new time slot within a teaching day. Specify start/end times (HH:mm) and whether this slot is a break.")
+            .Produces<TimeSlotResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
+        group.MapPut("/{id:guid}", Update)
+            .AddEndpointFilter<ValidationFilter<UpdateTimeSlotRequest>>()
+            .WithSummary("Update a time slot")
+            .Produces<TimeSlotResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
+
+        group.MapDelete("/{id:guid}", Delete)
+            .WithSummary("Delete a time slot")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

@@ -17,16 +17,39 @@ public static class UserEndpoints
             .WithTags("Users")
             .RequireAuthorization();
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
+        group.MapGet("/", GetAll)
+            .WithSummary("List all users")
+            .WithDescription("Returns all users for the current tenant, ordered by display name.")
+            .Produces<List<UserResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a user by ID")
+            .Produces<UserResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
         group.MapPost("/", Create)
             .AddEndpointFilter<ValidationFilter<CreateUserRequest>>()
-            .RequireAuthorization("OrgAdmin");
+            .RequireAuthorization("OrgAdmin")
+            .WithSummary("Create a user")
+            .WithDescription("Creates a new user within the current tenant. Requires OrgAdmin role. Valid roles: OrgAdmin, ScheduleManager, Viewer.")
+            .Produces<UserResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
         group.MapPut("/{id:guid}", Update)
             .AddEndpointFilter<ValidationFilter<UpdateUserRequest>>()
-            .RequireAuthorization("OrgAdmin");
+            .RequireAuthorization("OrgAdmin")
+            .WithSummary("Update a user")
+            .WithDescription("Updates the user's display name and role. Requires OrgAdmin role.")
+            .Produces<UserResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
+
         group.MapDelete("/{id:guid}", Delete)
-            .RequireAuthorization("OrgAdmin");
+            .RequireAuthorization("OrgAdmin")
+            .WithSummary("Delete a user")
+            .WithDescription("Permanently removes a user from the tenant. Requires OrgAdmin role.")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

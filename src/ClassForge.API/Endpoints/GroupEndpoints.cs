@@ -14,11 +14,34 @@ public static class GroupEndpoints
             .WithTags("Groups")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id:guid}", GetById);
-        group.MapPost("/", Create).AddEndpointFilter<ValidationFilter<CreateGroupRequest>>();
-        group.MapPut("/{id:guid}", Update).AddEndpointFilter<ValidationFilter<UpdateGroupRequest>>();
-        group.MapDelete("/{id:guid}", Delete);
+        group.MapGet("/", GetAll)
+            .WithSummary("List groups for a grade")
+            .WithDescription("Returns all groups (class divisions) within the specified grade, ordered by sort order.")
+            .Produces<List<GroupResponse>>();
+
+        group.MapGet("/{id:guid}", GetById)
+            .WithSummary("Get a group by ID")
+            .Produces<GroupResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
+        group.MapPost("/", Create)
+            .AddEndpointFilter<ValidationFilter<CreateGroupRequest>>()
+            .WithSummary("Create a group")
+            .WithDescription("Creates a new group within a grade. Groups represent class divisions (e.g. 8A, 8B).")
+            .Produces<GroupResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
+        group.MapPut("/{id:guid}", Update)
+            .AddEndpointFilter<ValidationFilter<UpdateGroupRequest>>()
+            .WithSummary("Update a group")
+            .Produces<GroupResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
+
+        group.MapDelete("/{id:guid}", Delete)
+            .WithSummary("Delete a group")
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return group;
     }

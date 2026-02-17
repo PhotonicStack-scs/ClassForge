@@ -19,23 +19,42 @@ public static class AuthEndpoints
 
         group.MapPost("/register", Register)
             .AddEndpointFilter<ValidationFilter<RegisterRequest>>()
-            .AllowAnonymous();
+            .AllowAnonymous()
+            .WithSummary("Register a new school")
+            .WithDescription("Creates a new tenant (school) and an OrgAdmin user account. Returns JWT tokens for immediate use.")
+            .Produces<AuthResponse>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
 
         group.MapPost("/login", Login)
             .AddEndpointFilter<ValidationFilter<LoginRequest>>()
-            .AllowAnonymous();
+            .AllowAnonymous()
+            .WithSummary("Log in with email and password")
+            .WithDescription("Authenticates a user and returns a JWT access token and a refresh token.")
+            .Produces<AuthResponse>()
+            .ProducesValidationProblem();
 
         group.MapPost("/refresh", Refresh)
-            .AllowAnonymous();
+            .AllowAnonymous()
+            .WithSummary("Refresh an access token")
+            .WithDescription("Exchanges an expired access token and a valid refresh token for a new token pair.")
+            .Produces<AuthResponse>();
 
         group.MapGet("/me", Me)
-            .RequireAuthorization();
+            .RequireAuthorization()
+            .WithSummary("Get current user profile")
+            .WithDescription("Returns the profile of the currently authenticated user.")
+            .Produces<UserProfileResponse>()
+            .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapGet("/oauth/{provider}", OAuthChallenge)
-            .AllowAnonymous();
+            .AllowAnonymous()
+            .WithSummary("Start OAuth flow (stub)")
+            .WithDescription("Redirects to the external OAuth provider for authentication. Currently a stub.");
 
         group.MapGet("/oauth/{provider}/callback", OAuthCallback)
-            .AllowAnonymous();
+            .AllowAnonymous()
+            .WithSummary("OAuth callback (stub)")
+            .WithDescription("Handles the callback from an external OAuth provider. Currently a stub.");
 
         return group;
     }

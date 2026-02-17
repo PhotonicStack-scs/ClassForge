@@ -14,10 +14,20 @@ public static class TenantEndpoints
             .WithTags("School")
             .RequireAuthorization();
 
-        group.MapGet("/", GetSchool);
+        group.MapGet("/", GetSchool)
+            .WithSummary("Get school details")
+            .WithDescription("Returns the current tenant's school name and creation date.")
+            .Produces<TenantResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
+
         group.MapPut("/", UpdateSchool)
             .AddEndpointFilter<ValidationFilter<UpdateTenantRequest>>()
-            .RequireAuthorization("OrgAdmin");
+            .RequireAuthorization("OrgAdmin")
+            .WithSummary("Update school details")
+            .WithDescription("Updates the school name. Requires OrgAdmin role.")
+            .Produces<TenantResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesValidationProblem();
 
         return group;
     }
