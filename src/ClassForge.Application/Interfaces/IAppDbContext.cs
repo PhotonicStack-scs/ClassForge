@@ -21,6 +21,10 @@ public interface IAppDbContext
     DbSet<TeacherSubjectQualification> TeacherSubjectQualifications { get; }
     DbSet<TeacherDayConfig> TeacherDayConfigs { get; }
     DbSet<TeacherSlotBlock> TeacherSlotBlocks { get; }
+    DbSet<Timetable> Timetables { get; }
+    DbSet<TimetableEntry> TimetableEntries { get; }
+    DbSet<TimetableEntryGroup> TimetableEntryGroups { get; }
+    DbSet<TimetableReport> TimetableReports { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

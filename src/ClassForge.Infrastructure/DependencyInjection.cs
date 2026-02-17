@@ -25,6 +25,12 @@ public static class DependencyInjection
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+        services.AddScoped<IPreflightValidator, PreflightValidator>();
+        services.AddScoped<ITimetableEntryValidator, TimetableEntryValidator>();
+        services.AddScoped<SchedulingInputBuilder>();
+        services.AddSingleton<TimetableGenerationQueue>();
+        services.AddSingleton<ITimetableGenerationQueue>(sp => sp.GetRequiredService<TimetableGenerationQueue>());
+        services.AddHostedService<TimetableGenerationService>();
 
         return services;
     }

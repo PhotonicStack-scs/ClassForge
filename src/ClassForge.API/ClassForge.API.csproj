@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClassForge.Infrastructure\ClassForge.Infrastructure.csproj" />
+    <ProjectReference Include="..\ClassForge.Scheduling\ClassForge.Scheduling.csproj" />
   </ItemGroup>
 
 </Project>

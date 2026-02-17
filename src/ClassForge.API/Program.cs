@@ -21,6 +21,9 @@ builder.Host.UseSerilog((context, config) =>
 // Infrastructure (EF, services)
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// Scheduling
+builder.Services.AddScoped<ClassForge.Application.Interfaces.ITimetableGenerator, ClassForge.Scheduling.TimetableGenerator>();
+
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<ClassForge.Application.Validators.RegisterRequestValidator>();
 
@@ -110,6 +113,14 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
+// Seed demo data in Development
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<ClassForge.Infrastructure.Data.AppDbContext>();
+    await ClassForge.Infrastructure.Data.SeedData.SeedDemoSchoolAsync(db);
+}
+
 app.UseExceptionHandler();
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -137,5 +148,8 @@ app.MapTeacherEndpoints();
 app.MapTeacherQualificationEndpoints();
 app.MapTeacherDayConfigEndpoints();
 app.MapTeacherSlotBlockEndpoints();
+app.MapTimetableEndpoints();
 
 app.Run();
+
+public partial class Program { }

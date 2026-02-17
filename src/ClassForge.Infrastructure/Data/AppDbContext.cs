@@ -32,6 +32,10 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<TeacherSubjectQualification> TeacherSubjectQualifications => Set<TeacherSubjectQualification>();
     public DbSet<TeacherDayConfig> TeacherDayConfigs => Set<TeacherDayConfig>();
     public DbSet<TeacherSlotBlock> TeacherSlotBlocks => Set<TeacherSlotBlock>();
+    public DbSet<Timetable> Timetables => Set<Timetable>();
+    public DbSet<TimetableEntry> TimetableEntries => Set<TimetableEntry>();
+    public DbSet<TimetableEntryGroup> TimetableEntryGroups => Set<TimetableEntryGroup>();
+    public DbSet<TimetableReport> TimetableReports => Set<TimetableReport>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

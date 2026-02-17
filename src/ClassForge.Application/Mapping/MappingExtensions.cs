@@ -12,6 +12,7 @@ using ClassForge.Application.DTOs.Teachers;
 using ClassForge.Application.DTOs.TeacherSlotBlocks;
 using ClassForge.Application.DTOs.TeachingDays;
 using ClassForge.Application.DTOs.Tenants;
+using ClassForge.Application.DTOs.Timetables;
 using ClassForge.Application.DTOs.TimeSlots;
 using ClassForge.Application.DTOs.Users;
 using ClassForge.Domain.Entities;
@@ -160,4 +161,20 @@ public static class MappingExtensions
             Id = Guid.NewGuid(), TeacherId = teacherId,
             TimeSlotId = request.TimeSlotId, Reason = request.Reason
         };
+
+    // Timetable
+    public static TimetableResponse ToResponse(this Timetable timetable) =>
+        new(timetable.Id, timetable.Name, timetable.Status.ToString(), timetable.GeneratedAt,
+            timetable.QualityScore, timetable.CreatedBy, timetable.ErrorMessage, timetable.CreatedAt);
+
+    // TimetableEntry
+    public static TimetableEntryResponse ToResponse(this TimetableEntry entry) =>
+        new(entry.Id, entry.TimeSlotId, entry.SubjectId, entry.TeacherId,
+            entry.RoomId, entry.IsDoublePeriod, entry.CombinedLessonGroupId,
+            entry.Groups.Select(g => g.GroupId).ToList());
+
+    // TimetableReport
+    public static TimetableReportResponse ToResponse(this TimetableReport report) =>
+        new(report.Id, report.Type.ToString(), report.Category, report.Message,
+            report.RelatedEntityType, report.RelatedEntityId);
 }
