@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Testcontainers.PostgreSql;
 
 namespace ClassForge.Tests.Integration.Infrastructure;
@@ -46,13 +47,5 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
     {
         await base.DisposeAsync();
         await _postgres.DisposeAsync();
-    }
-
-    public async Task<AppDbContext> CreateDbContextAsync()
-    {
-        var scope = Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await db.Database.EnsureCreatedAsync();
-        return db;
     }
 }

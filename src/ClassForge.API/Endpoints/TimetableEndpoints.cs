@@ -147,13 +147,13 @@ public static class TimetableEndpoints
 
     private static async Task<IResult> GetById(Guid id, IAppDbContext db)
     {
-        var timetable = await db.Timetables.FindAsync(id);
+        var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id);
         return timetable is null ? Results.NotFound() : Results.Ok(timetable.ToResponse());
     }
 
     private static async Task<IResult> Update(Guid id, UpdateTimetableRequest request, IAppDbContext db)
     {
-        var timetable = await db.Timetables.FindAsync(id);
+        var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id);
         if (timetable is null) return Results.NotFound();
 
         timetable.Name = request.Name;
@@ -164,7 +164,7 @@ public static class TimetableEndpoints
 
     private static async Task<IResult> Delete(Guid id, IAppDbContext db)
     {
-        var timetable = await db.Timetables.FindAsync(id);
+        var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id);
         if (timetable is null) return Results.NotFound();
 
         db.Timetables.Remove(timetable);
@@ -177,7 +177,7 @@ public static class TimetableEndpoints
         Guid id, IAppDbContext db,
         Guid? groupId = null, Guid? teacherId = null, Guid? teachingDayId = null)
     {
-        var timetable = await db.Timetables.FindAsync(id);
+        var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id);
         if (timetable is null) return Results.NotFound();
 
         var query = db.TimetableEntries
@@ -205,7 +205,7 @@ public static class TimetableEndpoints
 
     private static async Task<IResult> GetReport(Guid id, IAppDbContext db)
     {
-        var timetable = await db.Timetables.FindAsync(id);
+        var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id);
         if (timetable is null) return Results.NotFound();
 
         var reports = await db.TimetableReports
@@ -217,7 +217,7 @@ public static class TimetableEndpoints
 
     private static async Task<IResult> Publish(Guid id, IAppDbContext db)
     {
-        var timetable = await db.Timetables.FindAsync(id);
+        var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id);
         if (timetable is null) return Results.NotFound();
 
         if (timetable.Status != TimetableStatus.Draft)
@@ -234,7 +234,7 @@ public static class TimetableEndpoints
     private static async Task<IResult> ValidateEntries(
         Guid id, IAppDbContext db, ITimetableEntryValidator validator, CancellationToken ct)
     {
-        var timetable = await db.Timetables.FindAsync(id);
+        var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id);
         if (timetable is null) return Results.NotFound();
 
         var entries = await db.TimetableEntries
@@ -254,10 +254,10 @@ public static class TimetableEndpoints
 
     private static async Task<IResult> GetByGroup(Guid id, Guid groupId, IAppDbContext db)
     {
-        var timetable = await db.Timetables.FindAsync(id);
+        var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id);
         if (timetable is null) return Results.NotFound();
 
-        var group = await db.Groups.FindAsync(groupId);
+        var group = await db.Groups.FirstOrDefaultAsync(g => g.Id == groupId);
         if (group is null) return Results.NotFound();
 
         var entries = await BuildViewEntries(db, id, e => e.Groups.Any(g => g.GroupId == groupId));
@@ -266,10 +266,10 @@ public static class TimetableEndpoints
 
     private static async Task<IResult> GetByTeacher(Guid id, Guid teacherId, IAppDbContext db)
     {
-        var timetable = await db.Timetables.FindAsync(id);
+        var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id);
         if (timetable is null) return Results.NotFound();
 
-        var teacher = await db.Teachers.FindAsync(teacherId);
+        var teacher = await db.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId);
         if (teacher is null) return Results.NotFound();
 
         var entries = await BuildViewEntries(db, id, e => e.TeacherId == teacherId);
@@ -278,10 +278,10 @@ public static class TimetableEndpoints
 
     private static async Task<IResult> GetByRoom(Guid id, Guid roomId, IAppDbContext db)
     {
-        var timetable = await db.Timetables.FindAsync(id);
+        var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id);
         if (timetable is null) return Results.NotFound();
 
-        var room = await db.Rooms.FindAsync(roomId);
+        var room = await db.Rooms.FirstOrDefaultAsync(r => r.Id == roomId);
         if (room is null) return Results.NotFound();
 
         var entries = await BuildViewEntries(db, id, e => e.RoomId == roomId);
@@ -321,7 +321,7 @@ public static class TimetableEndpoints
         ITimetableEntryValidator validator,
         CancellationToken ct)
     {
-        var timetable = await db.Timetables.FindAsync([id], ct);
+        var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id, ct);
         if (timetable is null) return Results.NotFound();
 
         if (timetable.Status != TimetableStatus.Draft)

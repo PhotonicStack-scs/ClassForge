@@ -10,32 +10,36 @@ namespace ClassForge.Tests.Integration.Endpoints;
 
 public class TimetableEndpointTests : IClassFixture<CustomWebApplicationFactory>
 {
-    private readonly HttpClient _client;
     private readonly CustomWebApplicationFactory _factory;
 
     public TimetableEndpointTests(CustomWebApplicationFactory factory)
     {
         _factory = factory;
-        _client = factory.CreateClient();
     }
 
-    private async Task<string> GetTokenAsync()
+    private async Task<(HttpClient client, string token)> CreateAuthenticatedClientAsync()
     {
-        var db = await _factory.CreateDbContextAsync();
+        var client = _factory.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions
+        {
+            HandleCookies = false,
+            AllowAutoRedirect = false
+        });
+
         var email = $"tt-{Guid.NewGuid()}@test.com";
-        var response = await _client.PostAsJsonAsync("/api/v1/auth/register",
+        var response = await client.PostAsJsonAsync("/api/v1/auth/register",
             new RegisterRequest("Timetable School", email, "Password123!", "TT User"));
         var auth = await response.Content.ReadFromJsonAsync<AuthResponse>();
-        return auth!.AccessToken;
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth!.AccessToken);
+
+        return (client, auth.AccessToken);
     }
 
     [Fact]
     public async Task Preflight_ReturnsValidResponse()
     {
-        var token = await GetTokenAsync();
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var (client, _) = await CreateAuthenticatedClientAsync();
 
-        var response = await _client.PostAsync("/api/v1/timetables/preflight", null);
+        var response = await client.PostAsync("/api/v1/timetables/preflight", null);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var result = await response.Content.ReadFromJsonAsync<PreflightResponse>();
@@ -46,10 +50,9 @@ public class TimetableEndpointTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task CreateTimetable_Returns202()
     {
-        var token = await GetTokenAsync();
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var (client, _) = await CreateAuthenticatedClientAsync();
 
-        var response = await _client.PostAsJsonAsync("/api/v1/timetables",
+        var response = await client.PostAsJsonAsync("/api/v1/timetables",
             new CreateTimetableRequest("Test Timetable"));
 
         response.StatusCode.Should().Be(HttpStatusCode.Accepted);
@@ -61,26 +64,24 @@ public class TimetableEndpointTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task GetTimetable_AfterCreate_ReturnsIt()
     {
-        var token = await GetTokenAsync();
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var (client, _) = await CreateAuthenticatedClientAsync();
 
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/timetables",
+        var createResponse = await client.PostAsJsonAsync("/api/v1/timetables",
             new CreateTimetableRequest("Get Test"));
         var created = await createResponse.Content.ReadFromJsonAsync<TimetableResponse>();
 
-        var getResponse = await _client.GetAsync($"/api/v1/timetables/{created!.Id}");
+        var getResponse = await client.GetAsync($"/api/v1/timetables/{created!.Id}");
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]
     public async Task ListTimetables_ReturnsCreated()
     {
-        var token = await GetTokenAsync();
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var (client, _) = await CreateAuthenticatedClientAsync();
 
-        await _client.PostAsJsonAsync("/api/v1/timetables", new CreateTimetableRequest("List Test"));
+        await client.PostAsJsonAsync("/api/v1/timetables", new CreateTimetableRequest("List Test"));
 
-        var response = await _client.GetAsync("/api/v1/timetables");
+        var response = await client.GetAsync("/api/v1/timetables");
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var list = await response.Content.ReadFromJsonAsync<List<TimetableResponse>>();
         list.Should().Contain(t => t.Name == "List Test");
@@ -89,14 +90,14 @@ public class TimetableEndpointTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task DeleteTimetable_Returns204()
     {
-        var token = await GetTokenAsync();
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var (client, _) = await CreateAuthenticatedClientAsync();
 
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/timetables",
+        var createResponse = await client.PostAsJsonAsync("/api/v1/timetables",
             new CreateTimetableRequest("Delete Test"));
+        createResponse.StatusCode.Should().Be(HttpStatusCode.Accepted);
         var created = await createResponse.Content.ReadFromJsonAsync<TimetableResponse>();
 
-        var deleteResponse = await _client.DeleteAsync($"/api/v1/timetables/{created!.Id}");
+        var deleteResponse = await client.DeleteAsync($"/api/v1/timetables/{created!.Id}");
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 }

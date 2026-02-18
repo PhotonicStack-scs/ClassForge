@@ -118,6 +118,7 @@ if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<ClassForge.Infrastructure.Data.AppDbContext>();
+    await db.Database.EnsureCreatedAsync();
     await ClassForge.Infrastructure.Data.SeedData.SeedDemoSchoolAsync(db);
 }
 

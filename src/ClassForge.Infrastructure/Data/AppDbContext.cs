@@ -9,6 +9,7 @@ namespace ClassForge.Infrastructure.Data;
 public class AppDbContext : DbContext, IAppDbContext
 {
     private readonly ITenantProvider _tenantProvider;
+    private Guid? _currentTenantId => _tenantProvider.TenantId;
 
     public AppDbContext(DbContextOptions<AppDbContext> options, ITenantProvider tenantProvider)
         : base(options)
@@ -43,6 +44,7 @@ public class AppDbContext : DbContext, IAppDbContext
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
         // Apply global query filter for all ITenantEntity types
+        // Use a DbContext member reference so EF Core re-evaluates per DbContext instance
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (!typeof(ITenantEntity).IsAssignableFrom(entityType.ClrType))
@@ -50,11 +52,12 @@ public class AppDbContext : DbContext, IAppDbContext
 
             var parameter = Expression.Parameter(entityType.ClrType, "e");
             var tenantIdProperty = Expression.Property(parameter, nameof(ITenantEntity.TenantId));
-            var tenantProvider = Expression.Constant(_tenantProvider);
-            var currentTenantId = Expression.Property(tenantProvider, nameof(ITenantProvider.TenantId));
 
-            // e.TenantId == _tenantProvider.TenantId
-            // We need to handle nullable Guid from ITenantProvider
+            // Reference _currentTenantId on 'this' (the DbContext) — EF Core recognizes
+            // member access on the DbContext and re-evaluates per instance at query time
+            var dbContext = Expression.Constant(this);
+            var currentTenantId = Expression.Property(dbContext, nameof(_currentTenantId));
+
             var tenantIdAsNullable = Expression.Convert(tenantIdProperty, typeof(Guid?));
             var filter = Expression.Equal(tenantIdAsNullable, currentTenantId);
             var lambda = Expression.Lambda(filter, parameter);
