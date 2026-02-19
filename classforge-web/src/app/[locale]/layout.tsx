@@ -5,6 +5,7 @@ import { Nunito } from "next/font/google";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { ForbiddenToastListener } from "@/components/providers/forbidden-toast-listener";
+import { AuthInitializer } from "@/components/providers/auth-initializer";
 import { locales } from "@/i18n/config";
 import type { Locale } from "@/i18n/config";
 
@@ -35,6 +36,7 @@ export default async function LocaleLayout({
       <body className="font-sans antialiased bg-background text-foreground">
         <NextIntlClientProvider messages={messages}>
           <QueryProvider>
+            <AuthInitializer />
             <ForbiddenToastListener />
             {children}
             <Toaster position="top-right" />
