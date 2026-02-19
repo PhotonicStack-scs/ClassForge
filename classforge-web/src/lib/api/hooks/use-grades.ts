@@ -1,82 +1,92 @@
+
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api/client";
-import { useAuthStore, initAuth } from "@/lib/stores/auth-store";
 import type { components } from "@/lib/api/schema";
-import { useEffect } from "react";
 
-type LoginRequest = components["schemas"]["LoginRequest"];
-type RegisterRequest = components["schemas"]["RegisterRequest"];
+type GradeResponse = components["schemas"]["GradeResponse"];
+type GroupResponse = components["schemas"]["GroupResponse"];
+type CreateGradeRequest = components["schemas"]["CreateGradeRequest"];
+type UpdateGradeRequest = components["schemas"]["UpdateGradeRequest"];
+type CreateGroupRequest = components["schemas"]["CreateGroupRequest"];
 
-function parseJwt(token: string) {
-  const base64 = token.split(".")[1];
-  return JSON.parse(atob(base64));
-}
-
-export function useLogin() {
-  const { login } = useAuthStore();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: LoginRequest) => {
-      const { data: result, error } = await apiClient.POST("/api/v1/auth/login", {
-        body: data,
-      });
+export function useGrades() {
+  return useQuery({
+    queryKey: ["grades"],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET("/api/v1/grades");
       if (error) throw error;
-      return result!;
-    },
-    onSuccess: (data) => {
-      const accessToken = data.accessToken ?? "";
-      const refreshToken = data.refreshToken ?? "";
-      const payload = parseJwt(accessToken);
-      login(accessToken, refreshToken, {
-        id: payload.sub,
-        email: payload.email,
-        displayName: payload.name || payload.email,
-        role: payload.role,
-        tenantId: payload.tenant_id,
-        languagePreference: payload.language_preference,
-      });
-      // Set session cookie for proxy/middleware
-      document.cookie = `cf_has_session=1; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
-      queryClient.clear();
+      return (data ?? []) as GradeResponse[];
     },
   });
 }
 
-export function useRegister() {
-  const { login } = useAuthStore();
-
+export function useCreateGrade() {
+  const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data: RegisterRequest) => {
-      const { data: result, error } = await apiClient.POST("/api/v1/auth/register", {
-        body: data,
-      });
+    mutationFn: async (body: CreateGradeRequest) => {
+      const { data, error } = await apiClient.POST("/api/v1/grades", { body });
       if (error) throw error;
-      return result!;
+      return data!;
     },
-    onSuccess: (data) => {
-      const accessToken = data.accessToken ?? "";
-      const refreshToken = data.refreshToken ?? "";
-      const payload = parseJwt(accessToken);
-      login(accessToken, refreshToken, {
-        id: payload.sub,
-        email: payload.email,
-        displayName: payload.name || payload.email,
-        role: payload.role,
-        tenantId: payload.tenant_id,
-        languagePreference: payload.language_preference,
-      });
-      document.cookie = `cf_has_session=1; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
-    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["grades"] }),
   });
 }
 
-export function useInitAuth() {
-  const { setLoading } = useAuthStore();
+export function useUpdateGrade() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, body }: { id: string; body: UpdateGradeRequest }) => {
+      const { data, error } = await apiClient.PUT("/api/v1/grades/{id}", {
+        params: { path: { id } }, body,
+      });
+      if (error) throw error;
+      return data!;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["grades"] }),
+  });
+}
 
-  useEffect(() => {
-    initAuth().finally(() => setLoading(false));
-  }, [setLoading]);
+export function useDeleteGrade() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await apiClient.DELETE("/api/v1/grades/{id}", {
+        params: { path: { id } },
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["grades"] }),
+  });
+}
+
+export function useGroups(gradeId: string) {
+  return useQuery({
+    queryKey: ["grades", gradeId, "groups"],
+    queryFn: async () => {
+      const { data, error } = await apiClient.GET(
+        "/api/v1/grades/{gradeId}/groups",
+        { params: { path: { gradeId } } }
+      );
+      if (error) throw error;
+      return (data ?? []) as GroupResponse[];
+    },
+    enabled: !!gradeId,
+  });
+}
+
+export function useCreateGroup(gradeId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: CreateGroupRequest) => {
+      const { data, error } = await apiClient.POST(
+        "/api/v1/grades/{gradeId}/groups",
+        { params: { path: { gradeId } }, body }
+      );
+      if (error) throw error;
+      return data!;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["grades", gradeId, "groups"] }),
+  });
 }
