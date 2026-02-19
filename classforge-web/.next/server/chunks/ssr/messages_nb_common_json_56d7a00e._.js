@@ -1,0 +1,3 @@
+module.exports=[44355,a=>{a.v({appName:"ClassForge",save:"Lagre",cancel:"Avbryt",delete:"Slett",edit:"Rediger",add:"Legg til",back:"Tilbake",next:"Neste",skip:"Hopp over",close:"Lukk",search:"Søk",loading:"Laster...",error:"Noe gikk galt",noData:"Ingen data",confirm:"Bekreft",name:"Navn",description:"Beskrivelse",actions:"Handlinger",status:"Status",required:"Påkrevd",optional:"Valgfritt",yes:"Ja",no:"Nei",insufficientPermissions:"Utilstrekkelige rettigheter",dashboard:"Oversikt",grades:"Trinn og grupper",subjects:"Fag",rooms:"Rom",teachers:"Lærere",timeStructure:"Tidsstruktur",timetables:"Timeplaner",users:"Brukere",settings:"Innstillinger",mySchedule:"Min timeplan"})}];
+
+//# sourceMappingURL=messages_nb_common_json_56d7a00e._.js.map

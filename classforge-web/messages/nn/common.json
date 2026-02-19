@@ -22,5 +22,15 @@
   "optional": "Valfritt",
   "yes": "Ja",
   "no": "Nei",
-  "insufficientPermissions": "Utilstrekkelege rettar"
+  "insufficientPermissions": "Utilstrekkelege rettar",
+  "dashboard": "Oversikt",
+  "grades": "Trinn og grupper",
+  "subjects": "Fag",
+  "rooms": "Rom",
+  "teachers": "Lærarar",
+  "timeStructure": "Tidsstruktur",
+  "timetables": "Timeplanar",
+  "users": "Brukarar",
+  "settings": "Innstillingar",
+  "mySchedule": "Min timeplan"
 }

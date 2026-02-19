@@ -1,0 +1,3 @@
+module.exports=[9739,a=>{a.v({title:"Teachers",teacher:"Teacher",teachers:"Teachers",addTeacher:"Add teacher",editTeacher:"Edit teacher",deleteTeacher:"Delete teacher",firstName:"First name",lastName:"Last name",email:"Email",qualifications:"Qualifications",availability:"Availability",blockedSlots:"Blocked slots",maxPeriodsPerDay:"Max periods per day",noTeachers:"No teachers added yet",complete:"Complete",incomplete:"Incomplete",csvImport:"CSV import",addQualification:"Add qualification",gradeRange:"Grade range",blockReason:"Reason for blocking"})}];
+
+//# sourceMappingURL=messages_en_teachers_json_04dc7ea4._.js.map

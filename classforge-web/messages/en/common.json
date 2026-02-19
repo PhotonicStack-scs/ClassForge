@@ -22,5 +22,15 @@
   "optional": "Optional",
   "yes": "Yes",
   "no": "No",
-  "insufficientPermissions": "Insufficient permissions"
+  "insufficientPermissions": "Insufficient permissions",
+  "dashboard": "Dashboard",
+  "grades": "Grades & Groups",
+  "subjects": "Subjects",
+  "rooms": "Rooms",
+  "teachers": "Teachers",
+  "timeStructure": "Time Structure",
+  "timetables": "Timetables",
+  "users": "Users",
+  "settings": "Settings",
+  "mySchedule": "My Schedule"
 }

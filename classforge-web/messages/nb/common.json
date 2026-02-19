@@ -22,5 +22,15 @@
   "optional": "Valgfritt",
   "yes": "Ja",
   "no": "Nei",
-  "insufficientPermissions": "Utilstrekkelige rettigheter"
+  "insufficientPermissions": "Utilstrekkelige rettigheter",
+  "dashboard": "Oversikt",
+  "grades": "Trinn og grupper",
+  "subjects": "Fag",
+  "rooms": "Rom",
+  "teachers": "Lærere",
+  "timeStructure": "Tidsstruktur",
+  "timetables": "Timeplaner",
+  "users": "Brukere",
+  "settings": "Innstillinger",
+  "mySchedule": "Min timeplan"
 }

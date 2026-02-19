@@ -1,4 +1,7 @@
 {
+  "/[locale]/(app)/dashboard/page": "/[locale]/dashboard",
+  "/[locale]/(auth)/login/page": "/[locale]/login",
+  "/[locale]/(auth)/register/page": "/[locale]/register",
   "/_global-error/page": "/_global-error",
   "/_not-found/page": "/_not-found",
   "/favicon.ico/route": "/favicon.ico",

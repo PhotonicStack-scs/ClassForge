@@ -1,0 +1,3 @@
+module.exports=[32814,a=>{a.v({login:"Log in",logout:"Log out",register:"Register",email:"Email",password:"Password",confirmPassword:"Confirm password",schoolName:"School name",adminName:"Administrator name",loginTitle:"Log in to ClassForge",registerTitle:"Register your school",loginSubtitle:"Manage your timetables",registerSubtitle:"Get started with ClassForge",forgotPassword:"Forgot password?",noAccount:"Don't have an account?",hasAccount:"Already have an account?",loginError:"Invalid email or password",registerError:"Registration failed",passwordMismatch:"Passwords do not match",tokenExpired:"Your session has expired"})}];
+
+//# sourceMappingURL=messages_en_auth_json_b6fa37d6._.js.map

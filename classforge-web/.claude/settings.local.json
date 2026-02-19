@@ -4,7 +4,11 @@
       "Bash(\"/c/Users/Martin Damm:*)",
       "Bash(cd:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(python3:*)",
+      "Bash(py:*)",
+      "Bash(node --version:*)",
+      "Bash(python:*)"
     ]
   }
 }

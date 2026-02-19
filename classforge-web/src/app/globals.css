@@ -4,11 +4,122 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================
+   ClassForge Brand Tokens
+   ============================================================ */
+:root {
+  /* Brand palette */
+  --brand-firefly: #0f2830;
+  --brand-emerald: #014751;
+  --brand-green: #00d37f;
+  --brand-mint: #aff8c8;
+  --brand-zircon: #f8fbff;
+
+  /* Subject palette (20 colors) */
+  --subject-01: #ff6b6b;
+  --subject-02: #ff8e53;
+  --subject-03: #ffca3a;
+  --subject-04: #8ac926;
+  --subject-05: #1982c4;
+  --subject-06: #6a4c93;
+  --subject-07: #ff595e;
+  --subject-08: #ffee93;
+  --subject-09: #c7efcf;
+  --subject-10: #b5ead7;
+  --subject-11: #ade8f4;
+  --subject-12: #cdb4db;
+  --subject-13: #ffc8dd;
+  --subject-14: #ffafcc;
+  --subject-15: #bde0fe;
+  --subject-16: #a2d2ff;
+  --subject-17: #e0bbe4;
+  --subject-18: #fed9b7;
+  --subject-19: #d0f4de;
+  --subject-20: #a8dadc;
+
+  /* Radius scale */
+  --radius: 0.5rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Shadcn semantic vars — light mode */
+  --background: #f8fbff;        /* Zircon */
+  --foreground: #0f2830;        /* Firefly */
+  --card: #ffffff;
+  --card-foreground: #0f2830;
+  --popover: #ffffff;
+  --popover-foreground: #0f2830;
+  --primary: #00d37f;           /* Green */
+  --primary-foreground: #0f2830;
+  --secondary: #aff8c8;         /* Mint */
+  --secondary-foreground: #014751;
+  --muted: #e8f4f0;
+  --muted-foreground: #4a7a70;
+  --accent: #aff8c8;
+  --accent-foreground: #014751;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #d0e8e0;
+  --input: #d0e8e0;
+  --ring: #00d37f;
+
+  /* Chart colors */
+  --chart-1: #00d37f;
+  --chart-2: #1982c4;
+  --chart-3: #ff8e53;
+  --chart-4: #6a4c93;
+  --chart-5: #ffca3a;
+
+  /* Sidebar — dark Firefly theme */
+  --sidebar: #0f2830;
+  --sidebar-foreground: #f8fbff;
+  --sidebar-primary: #00d37f;
+  --sidebar-primary-foreground: #0f2830;
+  --sidebar-accent: #014751;
+  --sidebar-accent-foreground: #aff8c8;
+  --sidebar-border: #1a3d4a;
+  --sidebar-ring: #00d37f;
+}
+
+.dark {
+  --background: #0f2830;
+  --foreground: #f8fbff;
+  --card: #014751;
+  --card-foreground: #f8fbff;
+  --popover: #014751;
+  --popover-foreground: #f8fbff;
+  --primary: #00d37f;
+  --primary-foreground: #0f2830;
+  --secondary: #1a3d4a;
+  --secondary-foreground: #aff8c8;
+  --muted: #1a3d4a;
+  --muted-foreground: #7ab5a8;
+  --accent: #1a3d4a;
+  --accent-foreground: #aff8c8;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #1a3d4a;
+  --input: #1a3d4a;
+  --ring: #00d37f;
+  --sidebar: #091e26;
+  --sidebar-foreground: #f8fbff;
+  --sidebar-primary: #00d37f;
+  --sidebar-primary-foreground: #0f2830;
+  --sidebar-accent: #0f2830;
+  --sidebar-accent-foreground: #aff8c8;
+  --sidebar-border: #1a3d4a;
+  --sidebar-ring: #00d37f;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-nunito);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -45,75 +156,6 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-}
-
-:root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
 }
 
 @layer base {
