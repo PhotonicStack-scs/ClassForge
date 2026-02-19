@@ -1,0 +1,12 @@
+{
+  "title": "Rom",
+  "room": "Rom",
+  "rooms": "Rom",
+  "addRoom": "Legg til rom",
+  "editRoom": "Rediger rom",
+  "deleteRoom": "Slett rom",
+  "roomName": "Romnavn",
+  "capacity": "Kapasitet",
+  "noRooms": "Ingen rom lagt til ennå",
+  "confirmDelete": "Er du sikker på at du vil slette dette rommet?"
+}

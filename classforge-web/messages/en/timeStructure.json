@@ -1,0 +1,20 @@
+{
+  "title": "Time structure",
+  "teachingDays": "Teaching days",
+  "periods": "Periods",
+  "period": "Period",
+  "addPeriod": "Add period",
+  "editPeriod": "Edit period",
+  "deletePeriod": "Delete period",
+  "startTime": "Start time",
+  "endTime": "End time",
+  "isBreak": "Is break",
+  "copyToAllDays": "Copy to all days",
+  "monday": "Monday",
+  "tuesday": "Tuesday",
+  "wednesday": "Wednesday",
+  "thursday": "Thursday",
+  "friday": "Friday",
+  "gradeDayMatrix": "Grade-day matrix",
+  "maxPeriodsPerDay": "Max periods per day"
+}

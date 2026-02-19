@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/staticwebapp.config.json",
+  "platform": {
+    "apiRuntime": "node:20"
+  },
+  "navigationFallback": {
+    "rewrite": "/api/nextjs",
+    "exclude": [
+      "/_next/static/**",
+      "/favicon.ico",
+      "/*.{png,jpg,jpeg,gif,svg,webp,ico}"
+    ]
+  },
+  "routes": [
+    {
+      "route": "/",
+      "redirect": "/nb",
+      "statusCode": 302
+    }
+  ],
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "SAMEORIGIN",
+    "X-XSS-Protection": "1; mode=block"
+  }
+}

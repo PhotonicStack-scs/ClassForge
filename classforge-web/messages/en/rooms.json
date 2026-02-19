@@ -1,0 +1,12 @@
+{
+  "title": "Rooms",
+  "room": "Room",
+  "rooms": "Rooms",
+  "addRoom": "Add room",
+  "editRoom": "Edit room",
+  "deleteRoom": "Delete room",
+  "roomName": "Room name",
+  "capacity": "Capacity",
+  "noRooms": "No rooms added yet",
+  "confirmDelete": "Are you sure you want to delete this room?"
+}
