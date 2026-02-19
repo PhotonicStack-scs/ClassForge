@@ -1,3 +1,3 @@
 namespace ClassForge.Application.DTOs.Tenants;
 
-public record UpdateTenantRequest(string Name);
+public record UpdateTenantRequest(string Name, string? DefaultLanguage);

@@ -8,5 +8,6 @@ public class UpdateTenantRequestValidator : AbstractValidator<UpdateTenantReques
     public UpdateTenantRequestValidator()
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.DefaultLanguage).MaximumLength(10).When(x => x.DefaultLanguage is not null);
     }
 }

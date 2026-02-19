@@ -6,4 +6,5 @@ public record UserProfileResponse(
     string Email,
     string DisplayName,
     string Role,
-    string? ExternalProvider);
+    string? ExternalProvider,
+    string? LanguagePreference);

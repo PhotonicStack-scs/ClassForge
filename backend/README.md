@@ -105,53 +105,63 @@ All endpoints are under `/api/v1/`. Authentication uses JWT Bearer tokens.
 | POST | `/api/v1/auth/login` | Login, returns JWT + refresh token |
 | POST | `/api/v1/auth/refresh` | Refresh an expired access token |
 | GET | `/api/v1/auth/me` | Get current user profile |
+| GET | `/api/v1/auth/my-teacher` | Get the teacher record linked to the current user |
 
 ### School & Users
 
-| Method | Endpoint | Auth |
-|--------|----------|------|
-| GET/PUT | `/api/v1/school` | Any authenticated / OrgAdmin |
-| CRUD | `/api/v1/users` | OrgAdmin |
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/v1/school` | Any authenticated | Get school details |
+| PUT | `/api/v1/school` | OrgAdmin | Update school details |
+| PUT | `/api/v1/school/setup-progress` | OrgAdmin | Update onboarding setup progress |
+| GET | `/api/v1/school/stats` | Any authenticated | Get dashboard statistics |
+| CRUD | `/api/v1/users` | OrgAdmin | Manage users |
 
 ### Academic Structure
 
-| Method | Endpoint |
-|--------|----------|
-| CRUD | `/api/v1/grades` |
-| CRUD | `/api/v1/grades/{gradeId}/groups` |
-| CRUD | `/api/v1/subjects` |
-| CRUD | `/api/v1/rooms` |
-| CRUD | `/api/v1/grades/{gradeId}/subject-requirements` |
-| CRUD | `/api/v1/grades/{gradeId}/combined-lessons` |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| CRUD | `/api/v1/grades` | Manage grades |
+| POST | `/api/v1/grades/bulk` | Bulk create grades |
+| CRUD | `/api/v1/grades/{gradeId}/groups` | Manage groups within a grade |
+| CRUD | `/api/v1/subjects` | Manage subjects |
+| POST | `/api/v1/subjects/bulk` | Bulk create subjects |
+| CRUD | `/api/v1/rooms` | Manage rooms |
+| CRUD | `/api/v1/grades/{gradeId}/subject-requirements` | Manage curriculum requirements per grade |
+| POST | `/api/v1/grades/{gradeId}/subject-requirements/bulk` | Bulk create subject requirements |
+| CRUD | `/api/v1/grades/{gradeId}/combined-lessons` | Manage combined lesson configurations |
 
 ### Time Structure
 
-| Method | Endpoint |
-|--------|----------|
-| CRUD | `/api/v1/teaching-days` |
-| CRUD | `/api/v1/teaching-days/{dayId}/time-slots` |
-| CRUD | `/api/v1/grades/{gradeId}/day-config` |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| CRUD | `/api/v1/teaching-days` | Manage teaching days |
+| CRUD | `/api/v1/teaching-days/{dayId}/time-slots` | Manage time slots within a day |
+| POST | `/api/v1/teaching-days/{dayId}/time-slots/bulk` | Bulk create time slots |
+| CRUD | `/api/v1/grades/{gradeId}/day-config` | Manage per-grade day configuration |
 
 ### Teachers
 
-| Method | Endpoint |
-|--------|----------|
-| CRUD | `/api/v1/teachers` |
-| CRUD | `/api/v1/teachers/{id}/qualifications` |
-| CRUD | `/api/v1/teachers/{id}/day-config` |
-| CRUD | `/api/v1/teachers/{id}/blocked-slots` |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| CRUD | `/api/v1/teachers` | Manage teachers |
+| POST | `/api/v1/teachers/bulk` | Bulk create teachers |
+| CRUD | `/api/v1/teachers/{id}/qualifications` | Manage subject qualifications |
+| CRUD | `/api/v1/teachers/{id}/day-config` | Manage per-teacher day configuration |
+| CRUD | `/api/v1/teachers/{id}/blocked-slots` | Manage teacher blocked time slots |
 
 ### Timetables
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/v1/timetables/preflight` | Run pre-flight validation on all config |
+| GET | `/api/v1/timetables/published` | Get the currently published timetable |
 | GET | `/api/v1/timetables` | List all timetables |
 | POST | `/api/v1/timetables` | Create timetable + start async generation (returns 202) |
 | GET | `/api/v1/timetables/{id}` | Get timetable with status (poll for generation progress) |
 | PUT | `/api/v1/timetables/{id}` | Update timetable name |
 | DELETE | `/api/v1/timetables/{id}` | Delete timetable with all entries |
-| GET | `/api/v1/timetables/{id}/entries` | Get entries (filter by ?groupId, ?teacherId, ?teachingDayId) |
+| GET | `/api/v1/timetables/{id}/entries` | Get entries (filter by `?groupId`, `?teacherId`, `?teachingDayId`) |
 | PUT | `/api/v1/timetables/{id}/entries/{entryId}` | Edit a single entry (Draft only, validates constraints) |
 | GET | `/api/v1/timetables/{id}/report` | Get quality report |
 | POST | `/api/v1/timetables/{id}/publish` | Change status Draft &rarr; Published |
@@ -233,6 +243,9 @@ dotnet test tests/ClassForge.Tests.Unit
 
 # Integration tests (requires Docker for Testcontainers PostgreSQL)
 dotnet test tests/ClassForge.Tests.Integration
+
+# Single test by name
+dotnet test --filter "FullyQualifiedName~HardConstraintTests.HC1"
 ```
 
 **Unit tests** cover the scheduling algorithm: hard constraints, soft constraint scoring, constraint propagation/domain reduction, and backtracking solver (trivial solve, multi-group, combined lessons, infeasibility detection).

@@ -43,6 +43,12 @@ public static class TimeSlotEndpoints
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
+        group.MapPost("/bulk", BulkCreate)
+            .AddEndpointFilter<ValidationFilter<BulkCreateTimeSlotsRequest>>()
+            .WithSummary("Bulk create time slots")
+            .Produces<List<TimeSlotResponse>>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
         return group;
     }
 
@@ -99,5 +105,17 @@ public static class TimeSlotEndpoints
         await db.SaveChangesAsync();
 
         return Results.NoContent();
+    }
+
+    private static async Task<IResult> BulkCreate(
+        Guid dayId, BulkCreateTimeSlotsRequest request, ITenantProvider tenantProvider, IAppDbContext db)
+    {
+        if (tenantProvider.TenantId is not { } tenantId) return Results.Unauthorized();
+
+        var entities = request.Items.Select(i => i.ToEntity(tenantId, dayId)).ToList();
+        db.TimeSlots.AddRange(entities);
+        await db.SaveChangesAsync();
+
+        return Results.Created($"/api/v1/teaching-days/{dayId}/time-slots", entities.Select(s => s.ToResponse()).ToList());
     }
 }

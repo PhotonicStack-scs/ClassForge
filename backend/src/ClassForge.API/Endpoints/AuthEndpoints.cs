@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using ClassForge.API.Filters;
 using ClassForge.Application.DTOs.Auth;
+using ClassForge.Application.DTOs.Teachers;
 using ClassForge.Application.Interfaces;
 using ClassForge.Application.Mapping;
 using ClassForge.Domain.Entities;
@@ -44,6 +45,14 @@ public static class AuthEndpoints
             .WithSummary("Get current user profile")
             .WithDescription("Returns the profile of the currently authenticated user.")
             .Produces<UserProfileResponse>()
+            .Produces(StatusCodes.Status401Unauthorized);
+
+        group.MapGet("/my-teacher", MyTeacher)
+            .RequireAuthorization()
+            .WithSummary("Get the teacher record linked to the current user")
+            .WithDescription("Finds a Teacher in the current tenant whose email matches the authenticated user's email.")
+            .Produces<TeacherResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status401Unauthorized);
 
         group.MapGet("/oauth/{provider}", OAuthChallenge)
@@ -171,6 +180,22 @@ public static class AuthEndpoints
             return Results.NotFound();
 
         return Results.Ok(user.ToProfileResponse());
+    }
+
+    private static async Task<IResult> MyTeacher(HttpContext httpContext, IAppDbContext db)
+    {
+        var userIdClaim = httpContext.User.FindFirst(JwtRegisteredClaimNames.Sub)
+            ?? httpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+
+        if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            return Results.Unauthorized();
+
+        var user = await db.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == userId);
+        if (user is null) return Results.Unauthorized();
+
+        var teacher = await db.Teachers.FirstOrDefaultAsync(
+            t => t.Email != null && t.Email.ToLower() == user.Email.ToLower());
+        return teacher is null ? Results.NotFound() : Results.Ok(teacher.ToResponse());
     }
 
     private static IResult OAuthChallenge(string provider)

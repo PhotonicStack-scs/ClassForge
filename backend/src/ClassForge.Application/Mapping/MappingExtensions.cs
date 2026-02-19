@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ClassForge.Application.DTOs.Auth;
 using ClassForge.Application.DTOs.CombinedLessons;
 using ClassForge.Application.DTOs.GradeDayConfigs;
@@ -22,16 +23,30 @@ namespace ClassForge.Application.Mapping;
 
 public static class MappingExtensions
 {
+    private static readonly string[] SubjectColorPalette =
+    [
+        "#DBEAFE", "#FEE2E2", "#D1FAE5", "#FEF3C7", "#EDE9FE",
+        "#FCE7F3", "#E0F2FE", "#F0FDF4", "#FFF7ED", "#F5F3FF",
+        "#ECFDF5", "#FEF9C3", "#F0F9FF", "#FDF4FF", "#FFEDD5",
+        "#E0F7FA", "#F3E8FF", "#FFF1F2", "#ECFEFF", "#F7FEE7"
+    ];
+
     // Tenant
     public static TenantResponse ToResponse(this Tenant tenant) =>
-        new(tenant.Id, tenant.Name, tenant.CreatedAt);
+        new(tenant.Id, tenant.Name, tenant.DefaultLanguage, tenant.SetupCompleted,
+            tenant.SetupProgressJson is not null
+                ? JsonSerializer.Deserialize<Dictionary<string, bool>>(tenant.SetupProgressJson)
+                : null,
+            tenant.CreatedAt);
 
     // User
     public static UserResponse ToResponse(this User user) =>
-        new(user.Id, user.Email, user.DisplayName, user.Role.ToString(), user.ExternalProvider, user.CreatedAt);
+        new(user.Id, user.Email, user.DisplayName, user.Role.ToString(), user.ExternalProvider,
+            user.LanguagePreference, user.CreatedAt);
 
     public static UserProfileResponse ToProfileResponse(this User user) =>
-        new(user.Id, user.TenantId, user.Email, user.DisplayName, user.Role.ToString(), user.ExternalProvider);
+        new(user.Id, user.TenantId, user.Email, user.DisplayName, user.Role.ToString(),
+            user.ExternalProvider, user.LanguagePreference);
 
     // Grade
     public static GradeResponse ToResponse(this Grade grade) =>
@@ -49,14 +64,16 @@ public static class MappingExtensions
 
     // Subject
     public static SubjectResponse ToResponse(this Subject subject) =>
-        new(subject.Id, subject.Name, subject.RequiresSpecialRoom, subject.SpecialRoomId, subject.MaxPeriodsPerDay, subject.AllowDoublePeriods);
+        new(subject.Id, subject.Name, subject.RequiresSpecialRoom, subject.SpecialRoomId,
+            subject.MaxPeriodsPerDay, subject.AllowDoublePeriods, subject.Color);
 
     public static Subject ToEntity(this CreateSubjectRequest request, Guid tenantId) =>
         new()
         {
             Id = Guid.NewGuid(), TenantId = tenantId, Name = request.Name,
             RequiresSpecialRoom = request.RequiresSpecialRoom, SpecialRoomId = request.SpecialRoomId,
-            MaxPeriodsPerDay = request.MaxPeriodsPerDay, AllowDoublePeriods = request.AllowDoublePeriods
+            MaxPeriodsPerDay = request.MaxPeriodsPerDay, AllowDoublePeriods = request.AllowDoublePeriods,
+            Color = request.Color ?? SubjectColorPalette[Random.Shared.Next(SubjectColorPalette.Length)]
         };
 
     // Room
@@ -68,7 +85,7 @@ public static class MappingExtensions
 
     // GradeSubjectRequirement
     public static GradeSubjectRequirementResponse ToResponse(this GradeSubjectRequirement r) =>
-        new(r.Id, r.GradeId, r.SubjectId, r.PeriodsPerWeek, r.PreferDoublePeriods);
+        new(r.Id, r.GradeId, r.SubjectId, r.PeriodsPerWeek, r.PreferDoublePeriods, r.Subject.Name);
 
     public static GradeSubjectRequirement ToEntity(this CreateGradeSubjectRequirementRequest request, Guid tenantId, Guid gradeId) =>
         new()
@@ -94,7 +111,7 @@ public static class MappingExtensions
 
     // TeachingDay
     public static TeachingDayResponse ToResponse(this TeachingDay day) =>
-        new(day.Id, day.DayOfWeek, day.IsActive, day.SortOrder);
+        new(day.Id, day.DayOfWeek, ((DayOfWeek)day.DayOfWeek).ToString(), day.IsActive, day.SortOrder);
 
     public static TeachingDay ToEntity(this CreateTeachingDayRequest request, Guid tenantId) =>
         new() { Id = Guid.NewGuid(), TenantId = tenantId, DayOfWeek = request.DayOfWeek, IsActive = request.IsActive, SortOrder = request.SortOrder };
@@ -131,7 +148,7 @@ public static class MappingExtensions
 
     // TeacherSubjectQualification
     public static TeacherQualificationResponse ToResponse(this TeacherSubjectQualification q) =>
-        new(q.Id, q.SubjectId, q.MinGradeId, q.MaxGradeId);
+        new(q.Id, q.SubjectId, q.MinGradeId, q.MaxGradeId, q.Subject.Name, q.MinGrade.Name, q.MaxGrade.Name);
 
     public static TeacherSubjectQualification ToEntity(this CreateTeacherQualificationRequest request, Guid teacherId) =>
         new()
@@ -163,9 +180,10 @@ public static class MappingExtensions
         };
 
     // Timetable
-    public static TimetableResponse ToResponse(this Timetable timetable) =>
+    public static TimetableResponse ToResponse(this Timetable timetable, int? progressPercentage = null) =>
         new(timetable.Id, timetable.Name, timetable.Status.ToString(), timetable.GeneratedAt,
-            timetable.QualityScore, timetable.CreatedBy, timetable.ErrorMessage, timetable.CreatedAt);
+            timetable.QualityScore, timetable.CreatedBy, timetable.ErrorMessage, timetable.CreatedAt,
+            progressPercentage);
 
     // TimetableEntry
     public static TimetableEntryResponse ToResponse(this TimetableEntry entry) =>

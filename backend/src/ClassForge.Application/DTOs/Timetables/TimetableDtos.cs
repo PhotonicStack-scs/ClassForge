@@ -6,7 +6,8 @@ public record UpdateTimetableRequest(string Name);
 
 public record TimetableResponse(
     Guid Id, string Name, string Status, DateTime? GeneratedAt,
-    decimal? QualityScore, Guid CreatedBy, string? ErrorMessage, DateTime CreatedAt);
+    decimal? QualityScore, Guid CreatedBy, string? ErrorMessage, DateTime CreatedAt,
+    int? ProgressPercentage);
 
 public record TimetableEntryResponse(
     Guid Id, Guid TimeSlotId, Guid SubjectId, Guid TeacherId,

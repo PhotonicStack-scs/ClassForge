@@ -4,6 +4,7 @@ using ClassForge.Application.DTOs.Timetables;
 using ClassForge.Application.Interfaces;
 using ClassForge.Application.Mapping;
 using ClassForge.Domain.Enums;
+using ClassForge.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ClassForge.API.Endpoints;
@@ -20,6 +21,12 @@ public static class TimetableEndpoints
             .WithSummary("Run pre-flight validation")
             .WithDescription("Validates all configuration data before timetable generation.")
             .Produces<PreflightResponse>();
+
+        group.MapGet("/published", GetPublished)
+            .WithSummary("Get the currently published timetable")
+            .WithDescription("Returns the most recently published timetable, if one exists.")
+            .Produces<TimetableResponse>()
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapGet("/", GetAll)
             .WithSummary("List all timetables")
@@ -109,6 +116,15 @@ public static class TimetableEndpoints
         return Results.Ok(result);
     }
 
+    private static async Task<IResult> GetPublished(IAppDbContext db)
+    {
+        var timetable = await db.Timetables
+            .Where(t => t.Status == TimetableStatus.Published)
+            .OrderByDescending(t => t.UpdatedAt)
+            .FirstOrDefaultAsync();
+        return timetable is null ? Results.NotFound() : Results.Ok(timetable.ToResponse());
+    }
+
     private static async Task<IResult> GetAll(IAppDbContext db)
     {
         var timetables = await db.Timetables.OrderByDescending(t => t.CreatedAt).ToListAsync();
@@ -145,10 +161,12 @@ public static class TimetableEndpoints
         return Results.Accepted($"/api/v1/timetables/{timetable.Id}", timetable.ToResponse());
     }
 
-    private static async Task<IResult> GetById(Guid id, IAppDbContext db)
+    private static async Task<IResult> GetById(Guid id, IAppDbContext db, TimetableProgressTracker tracker)
     {
         var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id);
-        return timetable is null ? Results.NotFound() : Results.Ok(timetable.ToResponse());
+        if (timetable is null) return Results.NotFound();
+        var progress = timetable.Status == TimetableStatus.Generating ? tracker.Get(id) : null;
+        return Results.Ok(timetable.ToResponse(progress));
     }
 
     private static async Task<IResult> Update(Guid id, UpdateTimetableRequest request, IAppDbContext db)

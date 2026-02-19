@@ -44,6 +44,12 @@ public static class TeacherEndpoints
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
+        group.MapPost("/bulk", BulkCreate)
+            .AddEndpointFilter<ValidationFilter<BulkCreateTeachersRequest>>()
+            .WithSummary("Bulk create teachers")
+            .Produces<List<TeacherResponse>>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
         return group;
     }
 
@@ -92,5 +98,17 @@ public static class TeacherEndpoints
         await db.SaveChangesAsync();
 
         return Results.NoContent();
+    }
+
+    private static async Task<IResult> BulkCreate(
+        BulkCreateTeachersRequest request, ITenantProvider tenantProvider, IAppDbContext db)
+    {
+        if (tenantProvider.TenantId is not { } tenantId) return Results.Unauthorized();
+
+        var entities = request.Items.Select(i => i.ToEntity(tenantId)).ToList();
+        db.Teachers.AddRange(entities);
+        await db.SaveChangesAsync();
+
+        return Results.Created("/api/v1/teachers", entities.Select(t => t.ToResponse()).ToList());
     }
 }

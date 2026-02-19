@@ -6,4 +6,5 @@ public record UserResponse(
     string DisplayName,
     string Role,
     string? ExternalProvider,
+    string? LanguagePreference,
     DateTime CreatedAt);

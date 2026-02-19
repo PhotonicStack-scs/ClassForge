@@ -15,6 +15,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.PasswordHash).HasMaxLength(500);
         builder.Property(u => u.ExternalProvider).HasMaxLength(50);
         builder.Property(u => u.ExternalId).HasMaxLength(256);
+        builder.Property(u => u.LanguagePreference).HasMaxLength(10);
         builder.Property(u => u.RefreshToken).HasMaxLength(500);
         builder.Property(u => u.Role).HasConversion<string>().HasMaxLength(50);
 

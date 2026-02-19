@@ -58,6 +58,9 @@ public static class TeacherQualificationEndpoints
         if (check is not null) return check;
 
         var qualifications = await db.TeacherSubjectQualifications
+            .Include(q => q.Subject)
+            .Include(q => q.MinGrade)
+            .Include(q => q.MaxGrade)
             .Where(q => q.TeacherId == teacherId)
             .ToListAsync();
         return Results.Ok(qualifications.Select(q => q.ToResponse()));
@@ -69,6 +72,9 @@ public static class TeacherQualificationEndpoints
         if (check is not null) return check;
 
         var q = await db.TeacherSubjectQualifications
+            .Include(q => q.Subject)
+            .Include(q => q.MinGrade)
+            .Include(q => q.MaxGrade)
             .FirstOrDefaultAsync(q => q.Id == id && q.TeacherId == teacherId);
         return q is null ? Results.NotFound() : Results.Ok(q.ToResponse());
     }
@@ -83,7 +89,13 @@ public static class TeacherQualificationEndpoints
         db.TeacherSubjectQualifications.Add(entity);
         await db.SaveChangesAsync();
 
-        return Results.Created($"/api/v1/teachers/{teacherId}/qualifications/{entity.Id}", entity.ToResponse());
+        var loaded = await db.TeacherSubjectQualifications
+            .Include(q => q.Subject)
+            .Include(q => q.MinGrade)
+            .Include(q => q.MaxGrade)
+            .FirstAsync(q => q.Id == entity.Id);
+
+        return Results.Created($"/api/v1/teachers/{teacherId}/qualifications/{entity.Id}", loaded.ToResponse());
     }
 
     private static async Task<IResult> Update(
@@ -98,7 +110,13 @@ public static class TeacherQualificationEndpoints
         entity.MaxGradeId = request.MaxGradeId;
         await db.SaveChangesAsync();
 
-        return Results.Ok(entity.ToResponse());
+        var loaded = await db.TeacherSubjectQualifications
+            .Include(q => q.Subject)
+            .Include(q => q.MinGrade)
+            .Include(q => q.MaxGrade)
+            .FirstAsync(q => q.Id == id);
+
+        return Results.Ok(loaded.ToResponse());
     }
 
     private static async Task<IResult> Delete(Guid teacherId, Guid id, IAppDbContext db)

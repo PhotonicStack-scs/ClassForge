@@ -31,6 +31,12 @@ public static class GradeSubjectRequirementEndpoints
             .Produces<GradeSubjectRequirementResponse>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
+        group.MapPost("/bulk", BulkCreate)
+            .AddEndpointFilter<ValidationFilter<BulkCreateGradeSubjectRequirementsRequest>>()
+            .WithSummary("Bulk create subject requirements")
+            .Produces<List<GradeSubjectRequirementResponse>>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
         group.MapPut("/{id:guid}", Update)
             .AddEndpointFilter<ValidationFilter<UpdateGradeSubjectRequirementRequest>>()
             .WithSummary("Update a subject requirement")
@@ -49,6 +55,7 @@ public static class GradeSubjectRequirementEndpoints
     private static async Task<IResult> GetAll(Guid gradeId, IAppDbContext db)
     {
         var reqs = await db.GradeSubjectRequirements
+            .Include(r => r.Subject)
             .Where(r => r.GradeId == gradeId)
             .ToListAsync();
         return Results.Ok(reqs.Select(r => r.ToResponse()));
@@ -57,6 +64,7 @@ public static class GradeSubjectRequirementEndpoints
     private static async Task<IResult> GetById(Guid gradeId, Guid id, IAppDbContext db)
     {
         var req = await db.GradeSubjectRequirements
+            .Include(r => r.Subject)
             .FirstOrDefaultAsync(r => r.Id == id && r.GradeId == gradeId);
         return req is null ? Results.NotFound() : Results.Ok(req.ToResponse());
     }
@@ -71,13 +79,37 @@ public static class GradeSubjectRequirementEndpoints
         db.GradeSubjectRequirements.Add(entity);
         await db.SaveChangesAsync();
 
-        return Results.Created($"/api/v1/grades/{gradeId}/subject-requirements/{entity.Id}", entity.ToResponse());
+        var loaded = await db.GradeSubjectRequirements
+            .Include(r => r.Subject)
+            .FirstAsync(r => r.Id == entity.Id);
+
+        return Results.Created($"/api/v1/grades/{gradeId}/subject-requirements/{entity.Id}", loaded.ToResponse());
+    }
+
+    private static async Task<IResult> BulkCreate(
+        Guid gradeId, BulkCreateGradeSubjectRequirementsRequest request,
+        ITenantProvider tenantProvider, IAppDbContext db)
+    {
+        if (tenantProvider.TenantId is not { } tenantId) return Results.Unauthorized();
+
+        var entities = request.Items.Select(i => i.ToEntity(tenantId, gradeId)).ToList();
+        db.GradeSubjectRequirements.AddRange(entities);
+        await db.SaveChangesAsync();
+
+        var ids = entities.Select(e => e.Id).ToList();
+        var loaded = await db.GradeSubjectRequirements
+            .Include(r => r.Subject)
+            .Where(r => ids.Contains(r.Id))
+            .ToListAsync();
+
+        return Results.Created($"/api/v1/grades/{gradeId}/subject-requirements", loaded.Select(r => r.ToResponse()).ToList());
     }
 
     private static async Task<IResult> Update(
         Guid gradeId, Guid id, UpdateGradeSubjectRequirementRequest request, IAppDbContext db)
     {
         var entity = await db.GradeSubjectRequirements
+            .Include(r => r.Subject)
             .FirstOrDefaultAsync(r => r.Id == id && r.GradeId == gradeId);
         if (entity is null) return Results.NotFound();
 

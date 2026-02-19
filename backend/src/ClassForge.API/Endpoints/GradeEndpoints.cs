@@ -44,6 +44,12 @@ public static class GradeEndpoints
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
+        group.MapPost("/bulk", BulkCreate)
+            .AddEndpointFilter<ValidationFilter<BulkCreateGradesRequest>>()
+            .WithSummary("Bulk create grades")
+            .Produces<List<GradeResponse>>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
         return group;
     }
 
@@ -93,5 +99,17 @@ public static class GradeEndpoints
         await db.SaveChangesAsync();
 
         return Results.NoContent();
+    }
+
+    private static async Task<IResult> BulkCreate(
+        BulkCreateGradesRequest request, ITenantProvider tenantProvider, IAppDbContext db)
+    {
+        if (tenantProvider.TenantId is not { } tenantId) return Results.Unauthorized();
+
+        var entities = request.Items.Select(i => i.ToEntity(tenantId)).ToList();
+        db.Grades.AddRange(entities);
+        await db.SaveChangesAsync();
+
+        return Results.Created("/api/v1/grades", entities.Select(g => g.ToResponse()).ToList());
     }
 }

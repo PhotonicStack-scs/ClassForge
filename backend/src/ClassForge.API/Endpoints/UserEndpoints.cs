@@ -88,7 +88,8 @@ public static class UserEndpoints
             TenantId = tenantId,
             Email = request.Email,
             DisplayName = request.DisplayName,
-            Role = role
+            Role = role,
+            LanguagePreference = request.LanguagePreference
         };
 
         user.PasswordHash = passwordHasher.HashPassword(user, request.Password);
@@ -113,6 +114,7 @@ public static class UserEndpoints
 
         user.DisplayName = request.DisplayName;
         user.Role = role;
+        user.LanguagePreference = request.LanguagePreference;
         await db.SaveChangesAsync();
 
         return Results.Ok(user.ToResponse());

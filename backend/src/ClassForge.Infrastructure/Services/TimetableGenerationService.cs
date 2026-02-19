@@ -10,15 +10,18 @@ namespace ClassForge.Infrastructure.Services;
 public class TimetableGenerationService : BackgroundService
 {
     private readonly TimetableGenerationQueue _queue;
+    private readonly TimetableProgressTracker _tracker;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<TimetableGenerationService> _logger;
 
     public TimetableGenerationService(
         TimetableGenerationQueue queue,
+        TimetableProgressTracker tracker,
         IServiceScopeFactory scopeFactory,
         ILogger<TimetableGenerationService> logger)
     {
         _queue = queue;
+        _tracker = tracker;
         _scopeFactory = scopeFactory;
         _logger = logger;
     }
@@ -64,7 +67,8 @@ public class TimetableGenerationService : BackgroundService
             _logger.LogInformation("Starting generation for timetable {TimetableId}", request.TimetableId);
 
             var input = await inputBuilder.BuildAsync(ct);
-            var result = await generator.GenerateAsync(input, null, ct);
+            var progress = new Progress<int>(pct => _tracker.Set(request.TimetableId, pct));
+            var result = await generator.GenerateAsync(input, progress, ct);
 
             if (result.Success)
             {
@@ -115,6 +119,7 @@ public class TimetableGenerationService : BackgroundService
             }
 
             await db.SaveChangesAsync(ct);
+            _tracker.Remove(request.TimetableId);
             _logger.LogInformation("Timetable {TimetableId} generation completed. Success: {Success}", request.TimetableId, result.Success);
         }
         catch (Exception ex)
@@ -123,6 +128,7 @@ public class TimetableGenerationService : BackgroundService
             timetable.Status = TimetableStatus.Failed;
             timetable.ErrorMessage = ex.Message;
             await db.SaveChangesAsync(ct);
+            _tracker.Remove(request.TimetableId);
         }
     }
 }

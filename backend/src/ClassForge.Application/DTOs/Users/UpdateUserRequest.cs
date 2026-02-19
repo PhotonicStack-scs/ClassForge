@@ -1,3 +1,3 @@
 namespace ClassForge.Application.DTOs.Users;
 
-public record UpdateUserRequest(string DisplayName, string Role);
+public record UpdateUserRequest(string DisplayName, string Role, string? LanguagePreference);

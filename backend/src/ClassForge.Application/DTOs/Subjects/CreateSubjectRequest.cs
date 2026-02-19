@@ -5,4 +5,5 @@ public record CreateSubjectRequest(
     bool RequiresSpecialRoom,
     Guid? SpecialRoomId,
     int MaxPeriodsPerDay,
-    bool AllowDoublePeriods);
+    bool AllowDoublePeriods,
+    string? Color);

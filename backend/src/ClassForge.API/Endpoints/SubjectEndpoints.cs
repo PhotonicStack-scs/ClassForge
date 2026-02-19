@@ -43,6 +43,12 @@ public static class SubjectEndpoints
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound);
 
+        group.MapPost("/bulk", BulkCreate)
+            .AddEndpointFilter<ValidationFilter<BulkCreateSubjectsRequest>>()
+            .WithSummary("Bulk create subjects")
+            .Produces<List<SubjectResponse>>(StatusCodes.Status201Created)
+            .ProducesValidationProblem();
+
         return group;
     }
 
@@ -80,6 +86,7 @@ public static class SubjectEndpoints
         subject.SpecialRoomId = request.SpecialRoomId;
         subject.MaxPeriodsPerDay = request.MaxPeriodsPerDay;
         subject.AllowDoublePeriods = request.AllowDoublePeriods;
+        subject.Color = request.Color ?? subject.Color;
         await db.SaveChangesAsync();
 
         return Results.Ok(subject.ToResponse());
@@ -94,5 +101,17 @@ public static class SubjectEndpoints
         await db.SaveChangesAsync();
 
         return Results.NoContent();
+    }
+
+    private static async Task<IResult> BulkCreate(
+        BulkCreateSubjectsRequest request, ITenantProvider tenantProvider, IAppDbContext db)
+    {
+        if (tenantProvider.TenantId is not { } tenantId) return Results.Unauthorized();
+
+        var entities = request.Items.Select(i => i.ToEntity(tenantId)).ToList();
+        db.Subjects.AddRange(entities);
+        await db.SaveChangesAsync();
+
+        return Results.Created("/api/v1/subjects", entities.Select(s => s.ToResponse()).ToList());
     }
 }

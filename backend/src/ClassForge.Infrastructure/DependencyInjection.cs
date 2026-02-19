@@ -30,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<SchedulingInputBuilder>();
         services.AddSingleton<TimetableGenerationQueue>();
         services.AddSingleton<ITimetableGenerationQueue>(sp => sp.GetRequiredService<TimetableGenerationQueue>());
+        services.AddSingleton<TimetableProgressTracker>();
         services.AddHostedService<TimetableGenerationService>();
 
         return services;

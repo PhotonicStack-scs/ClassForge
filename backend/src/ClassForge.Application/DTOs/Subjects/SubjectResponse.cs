@@ -6,4 +6,5 @@ public record SubjectResponse(
     bool RequiresSpecialRoom,
     Guid? SpecialRoomId,
     int MaxPeriodsPerDay,
-    bool AllowDoublePeriods);
+    bool AllowDoublePeriods,
+    string Color);

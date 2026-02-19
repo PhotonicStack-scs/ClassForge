@@ -10,5 +10,6 @@ public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
         RuleFor(x => x.DisplayName).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Role).NotEmpty().Must(r => r is "OrgAdmin" or "ScheduleManager" or "Viewer")
             .WithMessage("Role must be OrgAdmin, ScheduleManager, or Viewer.");
+        RuleFor(x => x.LanguagePreference).MaximumLength(10).When(x => x.LanguagePreference is not null);
     }
 }
