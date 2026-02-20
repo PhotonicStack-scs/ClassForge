@@ -1,0 +1,3 @@
+module.exports=[92520,a=>{a.v({title:"Tidsstruktur",teachingDays:"Undervisningsdager",periods:"Timer",period:"Time",addPeriod:"Legg til time",editPeriod:"Rediger time",deletePeriod:"Slett time",startTime:"Starttid",endTime:"Sluttid",isBreak:"Er pause",copyToAllDays:"Kopier til alle dager",monday:"Mandag",tuesday:"Tirsdag",wednesday:"Onsdag",thursday:"Torsdag",friday:"Fredag",gradeDayMatrix:"Trinn-dag-matrise",maxPeriodsPerDay:"Maks timer per dag"})}];
+
+//# sourceMappingURL=messages_nb_timeStructure_json_061a23c3._.js.map

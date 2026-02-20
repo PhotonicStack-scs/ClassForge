@@ -1,0 +1,3 @@
+module.exports=[79918,a=>{a.v({title:"School setup",subtitle:"Get started with ClassForge",step0:"Template",step1:"Grades & groups",step2:"Subjects",step3:"Rooms",step4:"Time structure",step5:"Curriculum",step6:"Teachers",step7:"Review",selectTemplate:"Select a template",barneskole:"Primary school",ungdomsskole:"Lower secondary school",combined:"Combined school",videregaende:"Upper secondary school",customSetup:"Custom setup",templateDescription:"Choose a template to pre-fill common settings",reviewTitle:"Review",reviewSubtitle:"Check your settings",completeSetup:"Complete setup",progressSaved:"Your progress has been saved"})}];
+
+//# sourceMappingURL=messages_en_setup_json_0ebe6654._.js.map

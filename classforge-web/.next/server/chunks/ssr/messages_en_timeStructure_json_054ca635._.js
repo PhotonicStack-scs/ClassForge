@@ -1,0 +1,3 @@
+module.exports=[14599,a=>{a.v({title:"Time structure",teachingDays:"Teaching days",periods:"Periods",period:"Period",addPeriod:"Add period",editPeriod:"Edit period",deletePeriod:"Delete period",startTime:"Start time",endTime:"End time",isBreak:"Is break",copyToAllDays:"Copy to all days",monday:"Monday",tuesday:"Tuesday",wednesday:"Wednesday",thursday:"Thursday",friday:"Friday",gradeDayMatrix:"Grade-day matrix",maxPeriodsPerDay:"Max periods per day"})}];
+
+//# sourceMappingURL=messages_en_timeStructure_json_054ca635._.js.map

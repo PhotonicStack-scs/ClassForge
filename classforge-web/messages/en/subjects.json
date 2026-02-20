@@ -1,0 +1,13 @@
+{
+  "title": "Subjects",
+  "subject": "Subject",
+  "subjects": "Subjects",
+  "addSubject": "Add subject",
+  "editSubject": "Edit subject",
+  "deleteSubject": "Delete subject",
+  "subjectName": "Subject name",
+  "color": "Color",
+  "hoursPerWeek": "Hours per week",
+  "noSubjects": "No subjects added yet",
+  "pickColor": "Pick a color"
+}

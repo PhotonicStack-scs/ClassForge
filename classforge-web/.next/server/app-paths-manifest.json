@@ -1,0 +1,21 @@
+{
+  "/[locale]/(app)/dashboard/page": "app/[locale]/(app)/dashboard/page.js",
+  "/[locale]/(app)/grades/page": "app/[locale]/(app)/grades/page.js",
+  "/[locale]/(app)/my-schedule/page": "app/[locale]/(app)/my-schedule/page.js",
+  "/[locale]/(app)/rooms/page": "app/[locale]/(app)/rooms/page.js",
+  "/[locale]/(app)/subjects/page": "app/[locale]/(app)/subjects/page.js",
+  "/[locale]/(app)/teachers/[id]/page": "app/[locale]/(app)/teachers/[id]/page.js",
+  "/[locale]/(app)/teachers/page": "app/[locale]/(app)/teachers/page.js",
+  "/[locale]/(app)/time-structure/page": "app/[locale]/(app)/time-structure/page.js",
+  "/[locale]/(app)/timetables/[id]/page": "app/[locale]/(app)/timetables/[id]/page.js",
+  "/[locale]/(app)/timetables/[id]/report/page": "app/[locale]/(app)/timetables/[id]/report/page.js",
+  "/[locale]/(app)/timetables/page": "app/[locale]/(app)/timetables/page.js",
+  "/[locale]/(app)/users/page": "app/[locale]/(app)/users/page.js",
+  "/[locale]/(auth)/login/page": "app/[locale]/(auth)/login/page.js",
+  "/[locale]/(auth)/register/page": "app/[locale]/(auth)/register/page.js",
+  "/[locale]/setup/page": "app/[locale]/setup/page.js",
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/page": "app/page.js"
+}

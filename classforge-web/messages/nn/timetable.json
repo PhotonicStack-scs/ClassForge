@@ -1,0 +1,45 @@
+{
+  "title": "Timeplanar",
+  "timetable": "Timeplan",
+  "timetables": "Timeplanar",
+  "generate": "Generer timeplan",
+  "generateNew": "Generer ny timeplan",
+  "status": {
+    "Draft": "Utkast",
+    "Generating": "Genererer",
+    "Generated": "Generert",
+    "Published": "Publisert",
+    "Failed": "Mislukkast"
+  },
+  "viewByGroup": "Vis per gruppe",
+  "viewByTeacher": "Vis per lærar",
+  "masterView": "Mastervisning",
+  "qualityScore": "Kvalitetsscore",
+  "preflight": "Førehandssjekk",
+  "publish": "Publiser",
+  "delete": "Slett",
+  "exportPdf": "Eksporter PDF",
+  "exportExcel": "Eksporter Excel",
+  "print": "Skriv ut",
+  "noTimetables": "Ingen timeplanar enno",
+  "generationProgress": "Genererer timeplan...",
+  "editEntry": "Rediger time",
+  "subject": "Fag",
+  "teacher": "Lærar",
+  "room": "Rom",
+  "clearEntry": "Fjern time",
+  "conflictError": "Konflikt: {message}",
+  "reportTitle": "Kvalitetsrapport",
+  "issueCategories": {
+    "TeacherOverload": "Læraroverbelastning",
+    "GapInSchedule": "Hol i timeplan",
+    "SubjectDistribution": "Fagfordeling",
+    "RoomConflict": "Romkonflikt",
+    "PreferenceViolation": "Preferansebrott"
+  },
+  "severity": {
+    "Error": "Feil",
+    "Warning": "Åtvaring",
+    "Info": "Info"
+  }
+}

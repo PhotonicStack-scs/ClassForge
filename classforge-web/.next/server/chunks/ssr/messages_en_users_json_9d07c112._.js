@@ -1,0 +1,3 @@
+module.exports=[45484,a=>{a.v({title:"Users",user:"User",users:"Users",inviteUser:"Invite user",editUser:"Edit user",deleteUser:"Delete user",displayName:"Display name",email:"Email",role:"Role",roles:{OrgAdmin:"Organisation admin",ScheduleManager:"Schedule manager",Viewer:"Viewer"},authMethod:"Authentication method",noUsers:"No users found",confirmDelete:"Are you sure you want to delete this user?"})}];
+
+//# sourceMappingURL=messages_en_users_json_9d07c112._.js.map

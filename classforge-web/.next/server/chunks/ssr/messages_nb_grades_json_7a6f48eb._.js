@@ -1,0 +1,3 @@
+module.exports=[72774,a=>{a.v({title:"Trinn og grupper",grade:"Trinn",grades:"Trinn",group:"Gruppe",groups:"Grupper",addGrade:"Legg til trinn",addGroup:"Legg til gruppe",editGrade:"Rediger trinn",editGroup:"Rediger gruppe",deleteGrade:"Slett trinn",deleteGroup:"Slett gruppe",gradeName:"Trinnnavn",groupName:"Gruppenavn",noGrades:"Ingen trinn lagt til ennå",noGroups:"Ingen grupper for dette trinnet"})}];
+
+//# sourceMappingURL=messages_nb_grades_json_7a6f48eb._.js.map

@@ -1,0 +1,3 @@
+module.exports=[16954,a=>{a.v({title:"Brukarar",user:"Brukar",users:"Brukarar",inviteUser:"Inviter brukar",editUser:"Rediger brukar",deleteUser:"Slett brukar",displayName:"Visingsnamn",email:"E-post",role:"Rolle",roles:{OrgAdmin:"Organisasjonsadmin",ScheduleManager:"Timeplanleiing",Viewer:"Lesar"},authMethod:"Autentiseringsmetode",noUsers:"Ingen brukarar funne",confirmDelete:"Er du sikker på at du vil slette denne brukaren?"})}];
+
+//# sourceMappingURL=messages_nn_users_json_8f5c70fe._.js.map

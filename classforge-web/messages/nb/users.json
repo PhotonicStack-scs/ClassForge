@@ -1,0 +1,19 @@
+{
+  "title": "Brukere",
+  "user": "Bruker",
+  "users": "Brukere",
+  "inviteUser": "Inviter bruker",
+  "editUser": "Rediger bruker",
+  "deleteUser": "Slett bruker",
+  "displayName": "Visningsnavn",
+  "email": "E-post",
+  "role": "Rolle",
+  "roles": {
+    "OrgAdmin": "Organisasjonsadmin",
+    "ScheduleManager": "Timeplanleder",
+    "Viewer": "Leser"
+  },
+  "authMethod": "Autentiseringsmetode",
+  "noUsers": "Ingen brukere funnet",
+  "confirmDelete": "Er du sikker på at du vil slette denne brukeren?"
+}
