@@ -1,3 +1,0 @@
-module.exports=[60570,a=>{a.v({appName:"ClassForge",save:"Save",cancel:"Cancel",delete:"Delete",edit:"Edit",add:"Add",back:"Back",next:"Next",skip:"Skip",close:"Close",search:"Search",loading:"Loading...",error:"Something went wrong",noData:"No data",confirm:"Confirm",name:"Name",description:"Description",actions:"Actions",status:"Status",required:"Required",optional:"Optional",yes:"Yes",no:"No",insufficientPermissions:"Insufficient permissions",dashboard:"Dashboard",grades:"Grades & Groups",subjects:"Subjects",rooms:"Rooms",teachers:"Teachers",timeStructure:"Time Structure",timetables:"Timetables",users:"Users",settings:"Settings",mySchedule:"My Schedule"})}];
-
-//# sourceMappingURL=messages_en_common_json_7d51e36a._.js.map

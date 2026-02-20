@@ -1,3 +1,0 @@
-module.exports=[70692,a=>{a.v({title:"Lærarar",teacher:"Lærar",teachers:"Lærarar",addTeacher:"Legg til lærar",editTeacher:"Rediger lærar",deleteTeacher:"Slett lærar",firstName:"Fornamn",lastName:"Etternamn",email:"E-post",qualifications:"Kvalifikasjonar",availability:"Tilgjengelegheit",blockedSlots:"Blokkerte tidspunkt",maxPeriodsPerDay:"Maks timar per dag",noTeachers:"Ingen lærarar lagde til enno",complete:"Komplett",incomplete:"Ufullstendig",csvImport:"CSV-import",addQualification:"Legg til kvalifikasjon",gradeRange:"Trinnområde",blockReason:"Grunngjeving for blokkering"})}];
-
-//# sourceMappingURL=messages_nn_teachers_json_cbc33c3a._.js.map

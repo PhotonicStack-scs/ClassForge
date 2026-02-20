@@ -1,3 +1,0 @@
-module.exports=[55159,a=>{a.v({title:"Oppsett av skule",subtitle:"Kom i gang med ClassForge",step0:"Mal",step1:"Trinn og grupper",step2:"Fag",step3:"Rom",step4:"Tidsstruktur",step5:"Læreplan",step6:"Lærarar",step7:"Gjennomgang",selectTemplate:"Vel ein mal",barneskole:"Barneskule",ungdomsskole:"Ungdomsskule",combined:"Kombinert skule",videregaende:"Vidaregåande skule",customSetup:"Tilpassa oppsett",templateDescription:"Vel ein mal for å fylle ut vanlege innstillingar på førehand",reviewTitle:"Gjennomgang",reviewSubtitle:"Kontroller innstillingane dine",completeSetup:"Fullfør oppsett",progressSaved:"Framdrifta di er lagra"})}];
-
-//# sourceMappingURL=messages_nn_setup_json_3048bb3f._.js.map

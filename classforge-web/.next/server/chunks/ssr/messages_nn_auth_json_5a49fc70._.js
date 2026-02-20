@@ -1,3 +1,0 @@
-module.exports=[16475,a=>{a.v({login:"Logg inn",logout:"Logg ut",register:"Registrer",email:"E-post",password:"Passord",confirmPassword:"Stadfest passord",schoolName:"Skulenavn",adminName:"Administratornamn",loginTitle:"Logg inn på ClassForge",registerTitle:"Registrer skulen din",loginSubtitle:"Administrer timeplanane dine",registerSubtitle:"Kom i gang med ClassForge",forgotPassword:"Gløymt passord?",noAccount:"Har du ikkje konto?",hasAccount:"Har du allereie konto?",loginError:"Ugyldig e-post eller passord",registerError:"Registrering mislukkast",passwordMismatch:"Passorda stemmer ikkje overeins",tokenExpired:"Sesjonen din har gått ut"})}];
-
-//# sourceMappingURL=messages_nn_auth_json_5a49fc70._.js.map

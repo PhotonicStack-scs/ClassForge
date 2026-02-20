@@ -1,3 +1,0 @@
-module.exports=[55390,a=>{a.v({title:"Grades & groups",grade:"Grade",grades:"Grades",group:"Group",groups:"Groups",addGrade:"Add grade",addGroup:"Add group",editGrade:"Edit grade",editGroup:"Edit group",deleteGrade:"Delete grade",deleteGroup:"Delete group",gradeName:"Grade name",groupName:"Group name",noGrades:"No grades added yet",noGroups:"No groups for this grade"})}];
-
-//# sourceMappingURL=messages_en_grades_json_00ea125e._.js.map
