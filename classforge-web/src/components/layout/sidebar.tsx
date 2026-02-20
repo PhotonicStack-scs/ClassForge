@@ -50,10 +50,11 @@ export function Sidebar({ locale }: SidebarProps) {
   const t = useTranslations("common");
   const pathname = usePathname();
   const { sidebarCollapsed, toggleSidebar } = useUiStore();
-  const user = useAuthStore((s) => s.user);
+  const { user, isLoading } = useAuthStore((s) => ({ user: s.user, isLoading: s.isLoading }));
 
+  // While auth is loading or role is unknown, show all items to avoid flicker
   const filteredNav = NAV_ITEMS.filter(
-    (item) => !item.roles || !user || item.roles.includes(user.role)
+    (item) => !item.roles || isLoading || !user || item.roles.includes(user.role)
   );
 
   return (

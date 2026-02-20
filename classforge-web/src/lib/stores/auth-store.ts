@@ -78,7 +78,7 @@ export async function initAuth() {
       id: payload.sub,
       email: payload.email,
       displayName: payload.name || payload.email,
-      role: payload.role,
+      role: extractRole(payload),
       tenantId: payload.tenant_id,
       languagePreference: payload.language_preference,
     };
@@ -92,4 +92,10 @@ export async function initAuth() {
 function parseJwt(token: string) {
   const base64 = token.split(".")[1];
   return JSON.parse(atob(base64));
+}
+
+const ASPNET_ROLE_CLAIM = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
+
+function extractRole(payload: Record<string, string>): "OrgAdmin" | "ScheduleManager" | "Viewer" {
+  return (payload.role ?? payload[ASPNET_ROLE_CLAIM] ?? "Viewer") as "OrgAdmin" | "ScheduleManager" | "Viewer";
 }

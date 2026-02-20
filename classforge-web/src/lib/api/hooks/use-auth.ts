@@ -14,6 +14,13 @@ function parseJwt(token: string) {
   return JSON.parse(atob(base64));
 }
 
+// ASP.NET Core stores role under the long URI claim key when using ClaimTypes.Role
+const ASPNET_ROLE_CLAIM = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
+
+function extractRole(payload: Record<string, string>): "OrgAdmin" | "ScheduleManager" | "Viewer" {
+  return (payload.role ?? payload[ASPNET_ROLE_CLAIM] ?? "Viewer") as "OrgAdmin" | "ScheduleManager" | "Viewer";
+}
+
 export function useLogin() {
   const { login } = useAuthStore();
   const queryClient = useQueryClient();
@@ -34,7 +41,7 @@ export function useLogin() {
         id: payload.sub,
         email: payload.email,
         displayName: payload.name || payload.email,
-        role: payload.role,
+        role: extractRole(payload),
         tenantId: payload.tenant_id,
         languagePreference: payload.language_preference,
       });
@@ -64,7 +71,7 @@ export function useRegister() {
         id: payload.sub,
         email: payload.email,
         displayName: payload.name || payload.email,
-        role: payload.role,
+        role: extractRole(payload),
         tenantId: payload.tenant_id,
         languagePreference: payload.language_preference,
       });

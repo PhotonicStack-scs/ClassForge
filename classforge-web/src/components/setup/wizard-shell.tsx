@@ -11,15 +11,17 @@ import { Step6LessonConfig } from "./step-6-lesson-config";
 import { Step7Review } from "./step-7-review";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
 
 const STEPS = [
   "Template",
   "Grades",
   "Subjects",
   "Rooms",
-  "Time Structure",
+  "Time",
   "Teachers",
-  "Lesson Config",
+  "Curriculum",
   "Review",
 ];
 
@@ -34,39 +36,52 @@ export function WizardShell({ locale }: { locale: string }) {
     <Step4TimeStructure key={4} />,
     <Step5Teachers key={5} />,
     <Step6LessonConfig key={6} />,
-    <Step7Review key={7} />,
+    <Step7Review key={7} locale={locale} />,
   ];
 
-  const progress = (completedSteps.size / (STEPS.length - 1)) * 100;
+  const progress = (completedSteps.size / STEPS.length) * 100;
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 py-8 max-w-3xl">
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">School Setup</h1>
-          <Progress value={progress} className="h-2" />
-          <div className="flex justify-between mt-2">
-            {STEPS.map((step, i) => (
+          <h1 className="text-3xl font-extrabold mb-1">School Setup</h1>
+          <p className="text-muted-foreground text-sm">Complete each step to configure your school for timetable generation</p>
+          <Progress value={progress} className="h-1.5 mt-4" />
+        </div>
+
+        {/* Step tabs */}
+        <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
+          {STEPS.map((step, i) => {
+            const isDone = completedSteps.has(i as 0);
+            const isCurrent = currentStep === i;
+            return (
               <button
                 key={i}
                 onClick={() => setCurrentStep(i as 0)}
-                className={
-                  "text-xs px-1 " +
-                  (currentStep === i
-                    ? "text-primary font-semibold"
-                    : completedSteps.has(i as 0)
-                    ? "text-green-600"
-                    : "text-muted-foreground")
-                }
+                className={cn(
+                  "flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors",
+                  isCurrent
+                    ? "bg-primary text-primary-foreground"
+                    : isDone
+                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                )}
               >
+                {isDone && !isCurrent && <Check className="w-3 h-3" />}
                 {i + 1}. {step}
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
-        <div className="bg-card rounded-lg border p-6">
+
+        {/* Step content */}
+        <div className="bg-card rounded-xl border shadow-sm p-6">
           {stepComponents[currentStep]}
         </div>
+
+        {/* Navigation */}
         <div className="flex justify-between mt-4">
           <Button
             variant="outline"
@@ -76,10 +91,11 @@ export function WizardShell({ locale }: { locale: string }) {
             Previous
           </Button>
           <Button
+            variant="ghost"
             onClick={() => setCurrentStep((currentStep + 1) as 0)}
             disabled={currentStep === 7}
           >
-            Next
+            Skip
           </Button>
         </div>
       </div>
