@@ -83,3 +83,34 @@ export function usePreflight() {
     },
   });
 }
+
+type UpdateTimetableEntryRequest = components["schemas"]["UpdateTimetableEntryRequest"];
+
+export function useUpdateTimetableEntry() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      timetableId,
+      entryId,
+      body,
+    }: {
+      timetableId: string;
+      entryId: string;
+      body: UpdateTimetableEntryRequest;
+    }) => {
+      const { data, error } = await apiClient.PUT(
+        "/api/v1/timetables/{id}/entries/{entryId}",
+        {
+          params: { path: { id: timetableId, entryId } },
+          body,
+        }
+      );
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_data, { timetableId }) => {
+      qc.invalidateQueries({ queryKey: ["timetable-entries", timetableId] });
+      qc.invalidateQueries({ queryKey: ["timetable-view", timetableId] });
+    },
+  });
+}

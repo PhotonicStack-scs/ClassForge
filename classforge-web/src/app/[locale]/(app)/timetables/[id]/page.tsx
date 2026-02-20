@@ -1,44 +1,130 @@
 "use client";
 
-import { useTimetable } from "@/lib/api/hooks/use-timetables";
-import { use } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { use, useState } from "react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useTimetable, usePublishTimetable } from "@/lib/api/hooks/use-timetables";
+import { useTeachers } from "@/lib/api/hooks/use-teachers";
+import { useTimetableByGroup, useTimetableByTeacher } from "@/lib/api/hooks/use-timetable-views";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { QualityGauge } from "@/components/timetable/quality-gauge";
+import { TimetableGrid } from "@/components/timetable/timetable-grid";
+import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
+import { ArrowLeft, FileText } from "lucide-react";
 
-export default function TimetableDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+type ViewMode = "group" | "teacher";
+const DAY_NAMES = ["Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag"];
+const DEFAULT_SLOTS = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ slotNumber: n, label: `Time ${n}` }));
+const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  Draft: "secondary", Generating: "outline", Generated: "default", Published: "default", Failed: "destructive",
+};
+
+export default function TimetableDetailPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
+  const { id, locale } = use(params);
+  const t = useTranslations("timetable");
+  const [viewMode, setViewMode] = useState<ViewMode>("group");
+  const [selectedGroupId, setSelectedGroupId] = useState<string>("");
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
   const { data: timetable, isLoading } = useTimetable(id);
+  const { data: teachersData } = useTeachers();
+  const publishMutation = usePublishTimetable();
 
-  if (isLoading) return <div className="p-8">Loading...</div>;
-  if (!timetable) return <div className="p-8">Not found</div>;
+  const teachers = teachersData?.map((teacher) => ({
+    id: teacher.id ?? "",
+    label: teacher.name ?? "",
+  })) ?? [];
+
+  const { data: groupView } = useTimetableByGroup(id, viewMode === "group" && selectedGroupId ? selectedGroupId : null);
+  const { data: teacherView } = useTimetableByTeacher(id, viewMode === "teacher" && selectedTeacherId ? selectedTeacherId : null);
+  const entries = viewMode === "group" ? groupView?.entries ?? [] : teacherView?.entries ?? [];
+  const hasSelection = viewMode === "group" ? !!selectedGroupId : !!selectedTeacherId;
+
+  if (isLoading) return <div className="p-8 text-muted-foreground">Laster...</div>;
+  if (!timetable) return <div className="p-8">Timeplan ikke funnet.</div>;
 
   return (
-    <div className="container mx-auto p-8 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-2">{timetable.name}</h1>
-      <div className="flex items-center gap-4 mb-6">
-        <span className="text-muted-foreground">Status: {timetable.status}</span>
-        {timetable.qualityScore != null && (
-          <span>Quality Score: {timetable.qualityScore}</span>
-        )}
-        {timetable.progressPercentage != null && timetable.status === "Generating" && (
-          <span>Progress: {timetable.progressPercentage}%</span>
-        )}
+    <div className="space-y-6">
+      <div className="flex items-start justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href={`/${locale}/timetables`}><ArrowLeft className="w-4 h-4" /></Link>
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">{timetable.name}</h1>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge variant={STATUS_VARIANT[timetable.status ?? ""] ?? "secondary"}>
+                {t(`status.${timetable.status}` as never)}
+              </Badge>
+              {timetable.qualityScore != null && (
+                <div className="flex items-center gap-2">
+                  <QualityGauge score={timetable.qualityScore * 100} size="sm" />
+                  <span className="text-sm text-muted-foreground">{t("qualityScore")}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {(timetable.status === "Generated" || timetable.status === "Draft") && (
+            <Button onClick={async () => { try { await publishMutation.mutateAsync(id); toast.success("Timeplan publisert"); } catch { toast.error("Publisering mislyktes"); } }} disabled={publishMutation.isPending}>
+              {t("publish")}
+            </Button>
+          )}
+          <Button variant="outline" asChild>
+            <Link href={`/${locale}/timetables/${id}/report`}>
+              <FileText className="w-4 h-4 mr-2" />{t("reportTitle")}
+            </Link>
+          </Button>
+        </div>
       </div>
-      {timetable.errorMessage && (
-        <Card className="mb-4 border-destructive">
-          <CardContent className="pt-4 text-destructive">
-            {timetable.errorMessage}
-          </CardContent>
-        </Card>
+
+      {timetable.status === "Generating" && (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">{t("generationProgress")}</p>
+          <Progress value={timetable.progressPercentage ?? 0} className="h-2" />
+        </div>
       )}
-      <Card>
-        <CardHeader><CardTitle>Timetable Details</CardTitle></CardHeader>
-        <CardContent>
-          <dl className="space-y-2">
-            <div><dt className="text-sm text-muted-foreground">Generated At</dt><dd>{timetable.generatedAt ?? "N/A"}</dd></div>
-            <div><dt className="text-sm text-muted-foreground">Created By</dt><dd>{timetable.createdBy}</dd></div>
-          </dl>
-        </CardContent>
-      </Card>
+
+      {timetable.status !== "Generating" && timetable.status !== "Failed" && (
+        <div className="flex items-center gap-4 flex-wrap">
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
+            <TabsList>
+              <TabsTrigger value="group">{t("viewByGroup")}</TabsTrigger>
+              <TabsTrigger value="teacher">{t("viewByTeacher")}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          {viewMode === "group" && (
+            <Input
+              className="w-72"
+              placeholder="Gruppe-ID (lim inn fra grupper-siden)"
+              value={selectedGroupId}
+              onChange={(e) => setSelectedGroupId(e.target.value)}
+            />
+          )}
+          {viewMode === "teacher" && (
+            <Select value={selectedTeacherId} onValueChange={setSelectedTeacherId}>
+              <SelectTrigger className="w-56"><SelectValue placeholder="Velg lærer..." /></SelectTrigger>
+              <SelectContent>
+                {teachers.map((teacher) => (
+                  <SelectItem key={teacher.id} value={teacher.id}>{teacher.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+      )}
+
+      {hasSelection && <TimetableGrid entries={entries} days={DAY_NAMES} slots={DEFAULT_SLOTS} />}
+      {!hasSelection && timetable.status !== "Generating" && (
+        <div className="text-center py-16 text-muted-foreground">
+          Velg en {viewMode === "group" ? "gruppe" : "lærer"} for å vise timeplanen.
+        </div>
+      )}
     </div>
   );
 }

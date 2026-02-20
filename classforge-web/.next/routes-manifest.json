@@ -30,6 +30,14 @@
       "namedRegex": "^/(?<nxtPlocale>[^/]+?)/dashboard(?:/)?$"
     },
     {
+      "page": "/[locale]/grades",
+      "regex": "^/([^/]+?)/grades(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/grades(?:/)?$"
+    },
+    {
       "page": "/[locale]/login",
       "regex": "^/([^/]+?)/login(?:/)?$",
       "routeKeys": {
@@ -38,12 +46,103 @@
       "namedRegex": "^/(?<nxtPlocale>[^/]+?)/login(?:/)?$"
     },
     {
+      "page": "/[locale]/my-schedule",
+      "regex": "^/([^/]+?)/my\\-schedule(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/my\\-schedule(?:/)?$"
+    },
+    {
       "page": "/[locale]/register",
       "regex": "^/([^/]+?)/register(?:/)?$",
       "routeKeys": {
         "nxtPlocale": "nxtPlocale"
       },
       "namedRegex": "^/(?<nxtPlocale>[^/]+?)/register(?:/)?$"
+    },
+    {
+      "page": "/[locale]/rooms",
+      "regex": "^/([^/]+?)/rooms(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/rooms(?:/)?$"
+    },
+    {
+      "page": "/[locale]/setup",
+      "regex": "^/([^/]+?)/setup(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/setup(?:/)?$"
+    },
+    {
+      "page": "/[locale]/subjects",
+      "regex": "^/([^/]+?)/subjects(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/subjects(?:/)?$"
+    },
+    {
+      "page": "/[locale]/teachers",
+      "regex": "^/([^/]+?)/teachers(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/teachers(?:/)?$"
+    },
+    {
+      "page": "/[locale]/teachers/[id]",
+      "regex": "^/([^/]+?)/teachers/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale",
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/teachers/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/[locale]/time-structure",
+      "regex": "^/([^/]+?)/time\\-structure(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/time\\-structure(?:/)?$"
+    },
+    {
+      "page": "/[locale]/timetables",
+      "regex": "^/([^/]+?)/timetables(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/timetables(?:/)?$"
+    },
+    {
+      "page": "/[locale]/timetables/[id]",
+      "regex": "^/([^/]+?)/timetables/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale",
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/timetables/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/[locale]/timetables/[id]/report",
+      "regex": "^/([^/]+?)/timetables/([^/]+?)/report(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale",
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/timetables/(?<nxtPid>[^/]+?)/report(?:/)?$"
+    },
+    {
+      "page": "/[locale]/users",
+      "regex": "^/([^/]+?)/users(?:/)?$",
+      "routeKeys": {
+        "nxtPlocale": "nxtPlocale"
+      },
+      "namedRegex": "^/(?<nxtPlocale>[^/]+?)/users(?:/)?$"
     }
   ],
   "staticRoutes": [
