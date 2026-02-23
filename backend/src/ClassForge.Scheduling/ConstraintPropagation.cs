@@ -34,19 +34,19 @@ public static class ConstraintPropagation
             var combinedGroupIds = combined.GroupIds;
             var periodsPerWeek = requirement.PeriodsPerWeek;
             var subject = input.Subjects.First(s => s.Id == combined.SubjectId);
-            var useDouble = requirement.PreferDoublePeriods && subject.AllowDoublePeriods;
+            var useDouble = requirement.PreferDoublePeriods && requirement.AllowDoublePeriods;
             var doubleCount = useDouble ? periodsPerWeek / 2 : 0;
             var singleCount = periodsPerWeek - doubleCount * 2;
 
             for (var i = 0; i < doubleCount; i++)
             {
                 variables.Add(CreateVariable(input, combined.GradeId, combined.SubjectId,
-                    combinedGroupIds, i, true, combined.Id, qualifiedTeachers, allSlots, subject));
+                    combinedGroupIds, i, true, combined.Id, qualifiedTeachers, allSlots, subject, requirement.MaxPeriodsPerDay));
             }
             for (var i = 0; i < singleCount; i++)
             {
                 variables.Add(CreateVariable(input, combined.GradeId, combined.SubjectId,
-                    combinedGroupIds, doubleCount + i, false, combined.Id, qualifiedTeachers, allSlots, subject));
+                    combinedGroupIds, doubleCount + i, false, combined.Id, qualifiedTeachers, allSlots, subject, requirement.MaxPeriodsPerDay));
             }
         }
 
@@ -64,7 +64,7 @@ public static class ConstraintPropagation
                     continue;
 
                 var groupIds = new List<Guid> { group.Id };
-                var useDouble = requirement.PreferDoublePeriods && subject.AllowDoublePeriods;
+                var useDouble = requirement.PreferDoublePeriods && requirement.AllowDoublePeriods;
                 var doubleCount = useDouble ? requirement.PeriodsPerWeek / 2 : 0;
                 var singleCount = requirement.PeriodsPerWeek - doubleCount * 2;
 
@@ -78,12 +78,12 @@ public static class ConstraintPropagation
                 for (var i = 0; i < doubleCount; i++)
                 {
                     variables.Add(CreateVariable(input, requirement.GradeId, requirement.SubjectId,
-                        groupIds, i, true, combinedId, qualifiedTeachers, allSlots, subject));
+                        groupIds, i, true, combinedId, qualifiedTeachers, allSlots, subject, requirement.MaxPeriodsPerDay));
                 }
                 for (var i = 0; i < singleCount; i++)
                 {
                     variables.Add(CreateVariable(input, requirement.GradeId, requirement.SubjectId,
-                        groupIds, doubleCount + i, false, combinedId, qualifiedTeachers, allSlots, subject));
+                        groupIds, doubleCount + i, false, combinedId, qualifiedTeachers, allSlots, subject, requirement.MaxPeriodsPerDay));
                 }
             }
         }
@@ -97,7 +97,7 @@ public static class ConstraintPropagation
         SchedulingInput input, Guid gradeId, Guid subjectId,
         List<Guid> groupIds, int periodIndex, bool isDouble, Guid? combinedLessonId,
         Dictionary<(Guid SubjectId, Guid GradeId), List<Guid>> qualifiedTeachers,
-        List<SchedulingTimeSlot> allSlots, SchedulingSubject subject)
+        List<SchedulingTimeSlot> allSlots, SchedulingSubject subject, int maxPeriodsPerDay)
     {
         var variable = new LessonVariable
         {
@@ -109,7 +109,7 @@ public static class ConstraintPropagation
             CombinedLessonId = combinedLessonId,
             RequiresSpecialRoom = subject.RequiresSpecialRoom,
             SpecialRoomId = subject.SpecialRoomId,
-            MaxPeriodsPerDay = subject.MaxPeriodsPerDay
+            MaxPeriodsPerDay = maxPeriodsPerDay
         };
 
         // Build initial domain

@@ -64,15 +64,13 @@ public static class MappingExtensions
 
     // Subject
     public static SubjectResponse ToResponse(this Subject subject) =>
-        new(subject.Id, subject.Name, subject.RequiresSpecialRoom, subject.SpecialRoomId,
-            subject.MaxPeriodsPerDay, subject.AllowDoublePeriods, subject.Color);
+        new(subject.Id, subject.Name, subject.RequiresSpecialRoom, subject.SpecialRoomId, subject.Color);
 
     public static Subject ToEntity(this CreateSubjectRequest request, Guid tenantId) =>
         new()
         {
             Id = Guid.NewGuid(), TenantId = tenantId, Name = request.Name,
             RequiresSpecialRoom = request.RequiresSpecialRoom, SpecialRoomId = request.SpecialRoomId,
-            MaxPeriodsPerDay = request.MaxPeriodsPerDay, AllowDoublePeriods = request.AllowDoublePeriods,
             Color = request.Color ?? SubjectColorPalette[Random.Shared.Next(SubjectColorPalette.Length)]
         };
 
@@ -85,14 +83,16 @@ public static class MappingExtensions
 
     // GradeSubjectRequirement
     public static GradeSubjectRequirementResponse ToResponse(this GradeSubjectRequirement r) =>
-        new(r.Id, r.GradeId, r.SubjectId, r.PeriodsPerWeek, r.PreferDoublePeriods, r.Subject.Name);
+        new(r.Id, r.GradeId, r.SubjectId, r.PeriodsPerWeek, r.PreferDoublePeriods,
+            r.MaxPeriodsPerDay, r.AllowDoublePeriods, r.Subject.Name);
 
     public static GradeSubjectRequirement ToEntity(this CreateGradeSubjectRequirementRequest request, Guid tenantId, Guid gradeId) =>
         new()
         {
             Id = Guid.NewGuid(), TenantId = tenantId, GradeId = gradeId,
             SubjectId = request.SubjectId, PeriodsPerWeek = request.PeriodsPerWeek,
-            PreferDoublePeriods = request.PreferDoublePeriods
+            PreferDoublePeriods = request.PreferDoublePeriods,
+            MaxPeriodsPerDay = request.MaxPeriodsPerDay, AllowDoublePeriods = request.AllowDoublePeriods
         };
 
     // CombinedLessonConfig

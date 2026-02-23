@@ -2,6 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+This .NET solution is for the application REST API only. You are only allowed to modify files inside the backend folder,
+but you can read files in the /classforge-web folder if you need context on how the frontend implements the API
+
 ## Build, Run & Test
 
 ```bash
@@ -17,6 +20,12 @@ EF Core migrations (run from repo root):
 ```bash
 dotnet ef migrations add <Name> --project src/ClassForge.Infrastructure --startup-project src/ClassForge.API
 dotnet ef database update --project src/ClassForge.Infrastructure --startup-project src/ClassForge.API
+```
+
+If the API is already running, Debug builds lock the output DLLs. Use `--configuration Release` for migrations and builds in that case:
+```bash
+dotnet build ClassForge.sln --configuration Release
+dotnet ef migrations add <Name> --project src/ClassForge.Infrastructure --startup-project src/ClassForge.API --configuration Release
 ```
 
 Health check: `GET /health` | Swagger UI: `/swagger` (includes JWT Bearer authorize button)
@@ -40,7 +49,7 @@ Infrastructure  Scheduling
 - **Domain** — Entities (20), enums (`UserRole`, `TimetableStatus`, `ReportType`), interfaces (`ITenantEntity`, `IAuditableEntity`). Zero dependencies.
 - **Application** — DTOs (records), FluentValidation validators, interfaces (`IAppDbContext`, `ITenantProvider`, `ITokenService`, `ITimetableGenerator`, `IPreflightValidator`, `ITimetableEntryValidator`, `ITimetableGenerationQueue`), mapping extensions.
 - **Infrastructure** — `AppDbContext`, EF configurations (`Data/Configurations/`), services (`Services/`). DI wired via `DependencyInjection.AddInfrastructure()`. Contains: `TenantProvider`, `TokenService`, `PreflightValidator`, `TimetableEntryValidator`, `SchedulingInputBuilder`, `TimetableGenerationQueue` (Channel&lt;T&gt;), `TimetableGenerationService` (BackgroundService), `TimetableProgressTracker` (singleton, `ConcurrentDictionary<Guid, int>` for live progress).
-- **Scheduling** — Timetable generation engine. Depends only on Application (no EF/Infrastructure). Contains: `TimetableGenerator` (implements `ITimetableGenerator`), `ConstraintPropagation`, `BacktrackingSolver`, `HardConstraintChecker`, `SoftConstraintScorer`, `ReportGenerator`. Registered in `Program.cs`, not `AddInfrastructure()`.
+- **Scheduling** — Timetable generation engine. Depends only on Application (no EF/Infrastructure). Contains: `TimetableGenerator` (implements `ITimetableGenerator`), `ConstraintPropagation`, `BacktrackingSolver`, `HardConstraintChecker`, `SoftConstraintScorer`, `ReportGenerator`. Registered in `Program.cs`, not `AddInfrastructure()`. `ConstraintPropagation` reads `MaxPeriodsPerDay` and `AllowDoublePeriods` from `SchedulingRequirement` (not `SchedulingSubject`) and stores `MaxPeriodsPerDay` on `LessonVariable` for use by `HardConstraintChecker.CheckSubjectDailyLimit`.
 - **API** — `Program.cs`, 17 endpoint files (`Endpoints/`), `ValidationFilter<T>`, `GlobalExceptionHandler`.
 
 **Test projects:**
@@ -57,6 +66,8 @@ Every tenant-scoped entity implements `ITenantEntity` (has `TenantId`). Isolatio
 
 Auth endpoints (login, register, refresh) use `IgnoreQueryFilters()` since tenant context isn't established before authentication.
 
+**Critical implementation detail:** The global query filter in `AppDbContext.OnModelCreating` captures a reference to `_currentTenantId` (a property on the DbContext), not the `ITenantProvider` value at the time of model creation. This ensures EF Core re-evaluates the tenant ID per DbContext instance. Using `Expression.Constant(_tenantProvider)` instead would cause stale cached filter values across DI scopes — do not change this pattern.
+
 ## Async Timetable Generation
 
 Timetable creation is asynchronous: `POST /api/v1/timetables` creates a record with status `Generating`, enqueues a `TimetableGenerationRequest` onto a `Channel<T>`, and returns 202. The `TimetableGenerationService` (BackgroundService) reads from the channel, creates a DI scope, sets the tenant ID on `TenantProvider`, builds a `SchedulingInput` snapshot, runs `ITimetableGenerator.GenerateAsync` with a `Progress<int>` callback that writes to `TimetableProgressTracker`, and persists entries + reports. Progress is cleaned up from the tracker after completion. Clients poll `GET /{id}` until status changes to `Draft` or `Failed`; the `ProgressPercentage` field on the response is served from `TimetableProgressTracker` while generating.
@@ -71,7 +82,7 @@ Timetable creation is asynchronous: `POST /api/v1/timetables` creates a record w
 - **EF Configurations**: One `IEntityTypeConfiguration<T>` per entity in `Infrastructure/Data/Configurations/`. Unique indexes typically on `TenantId + Name`. Enum properties use `.HasConversion<string>()`.
 - **Authorization policies**: `"OrgAdmin"` and `"ScheduleManagerOrAbove"` (OrgAdmin + ScheduleManager).
 - **Entity patterns**: All entities use `Guid` primary keys. Navigation properties assigned `= null!`. Collections initialized with `= []`. `TimeOnly` used for time slots. Tenant-scoped entities implement `ITenantEntity`. Auditable entities implement `IAuditableEntity`. Child-of-tenant entities (e.g., `TeacherSubjectQualification`) may only implement `IAuditableEntity` — their tenancy is enforced via their parent's query filter. `Tenant` is the root entity (implements `IAuditableEntity` only, not `ITenantEntity`).
-- **Notable entity fields**: `Subject.Color` (hex string, default `"#DBEAFE"`) for UI rendering. `Tenant.DefaultLanguage` (default `"nb"`), `Tenant.SetupCompleted` (bool), `Tenant.SetupProgressJson` (nullable JSON string). `User.LanguagePreference` (nullable, overrides tenant default).
+- **Notable entity fields**: `Subject.Color` (hex string, default `"#DBEAFE"`) for UI rendering. `Tenant.DefaultLanguage` (default `"nb"`), `Tenant.SetupCompleted` (bool), `Tenant.SetupProgressJson` (nullable JSON string). `User.LanguagePreference` (nullable, overrides tenant default). `GradeSubjectRequirement.MaxPeriodsPerDay` (default 2) and `GradeSubjectRequirement.AllowDoublePeriods` (default false) — per-grade scheduling constraints; these live on the requirement, not on `Subject`.
 - **Sub-resource endpoints**: Verify parent existence via `AnyAsync` before proceeding. Filter by both parent ID and item ID.
 
 ## Database

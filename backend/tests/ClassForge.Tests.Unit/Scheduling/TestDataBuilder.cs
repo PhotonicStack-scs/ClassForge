@@ -17,7 +17,7 @@ public static class TestDataBuilder
                 new SchedulingGroup(Guid.NewGuid(), g.Id, $"Group {(char)('A' + i)}", i))).ToList();
 
         var subjects = Enumerable.Range(1, subjectCount).Select(i =>
-            new SchedulingSubject(Guid.NewGuid(), $"Subject {i}", false, null, 2, false)).ToList();
+            new SchedulingSubject(Guid.NewGuid(), $"Subject {i}", false, null)).ToList();
 
         var rooms = new List<SchedulingRoom>();
 
@@ -40,7 +40,7 @@ public static class TestDataBuilder
 
         var requirements = grades.SelectMany(g =>
             subjects.Select(s =>
-                new SchedulingRequirement(Guid.NewGuid(), g.Id, s.Id, periodsPerWeek, false))).ToList();
+                new SchedulingRequirement(Guid.NewGuid(), g.Id, s.Id, periodsPerWeek, false, 2, false))).ToList();
 
         var gradeDayConfigs = grades.SelectMany(g =>
             days.Select(d =>

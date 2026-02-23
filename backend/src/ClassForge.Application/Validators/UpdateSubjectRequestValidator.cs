@@ -8,7 +8,6 @@ public class UpdateSubjectRequestValidator : AbstractValidator<UpdateSubjectRequ
     public UpdateSubjectRequestValidator()
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.MaxPeriodsPerDay).GreaterThan(0);
         RuleFor(x => x.SpecialRoomId).NotNull().When(x => x.RequiresSpecialRoom)
             .WithMessage("SpecialRoomId is required when RequiresSpecialRoom is true.");
         RuleFor(x => x.Color).Matches(@"^#[0-9A-Fa-f]{6}$").When(x => x.Color is not null)

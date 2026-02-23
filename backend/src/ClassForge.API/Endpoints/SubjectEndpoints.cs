@@ -27,7 +27,7 @@ public static class SubjectEndpoints
         group.MapPost("/", Create)
             .AddEndpointFilter<ValidationFilter<CreateSubjectRequest>>()
             .WithSummary("Create a subject")
-            .WithDescription("Creates a new subject. Optionally link it to a special room and configure scheduling constraints like max periods per day and double-period allowance.")
+            .WithDescription("Creates a new subject. Optionally link it to a special room. Scheduling constraints (max periods per day, double-period allowance) are configured per grade on the subject requirements.")
             .Produces<SubjectResponse>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
@@ -84,8 +84,6 @@ public static class SubjectEndpoints
         subject.Name = request.Name;
         subject.RequiresSpecialRoom = request.RequiresSpecialRoom;
         subject.SpecialRoomId = request.SpecialRoomId;
-        subject.MaxPeriodsPerDay = request.MaxPeriodsPerDay;
-        subject.AllowDoublePeriods = request.AllowDoublePeriods;
         subject.Color = request.Color ?? subject.Color;
         await db.SaveChangesAsync();
 

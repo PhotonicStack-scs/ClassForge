@@ -9,5 +9,6 @@ public class CreateGradeSubjectRequirementRequestValidator : AbstractValidator<C
     {
         RuleFor(x => x.SubjectId).NotEmpty();
         RuleFor(x => x.PeriodsPerWeek).GreaterThan(0);
+        RuleFor(x => x.MaxPeriodsPerDay).GreaterThan(0);
     }
 }

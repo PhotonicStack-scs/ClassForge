@@ -60,7 +60,7 @@ The API starts at `https://localhost:5001` (or `http://localhost:5000`). Verify 
 
 Browse to `/swagger` for interactive API documentation with typed request/response schemas for all endpoints.
 
-In Development mode, a demo school is automatically seeded with 5 grades, 15 groups, 15 subjects, 30 teachers, and a full weekly time structure.
+In Development mode, a demo school is automatically seeded with 5 grades, 15 groups, 15 subjects, 30 teachers, a full weekly time structure, and per-grade subject requirements (including `MaxPeriodsPerDay` and `AllowDoublePeriods` per requirement).
 
 ## Configuration
 
@@ -124,10 +124,10 @@ All endpoints are under `/api/v1/`. Authentication uses JWT Bearer tokens.
 | CRUD | `/api/v1/grades` | Manage grades |
 | POST | `/api/v1/grades/bulk` | Bulk create grades |
 | CRUD | `/api/v1/grades/{gradeId}/groups` | Manage groups within a grade |
-| CRUD | `/api/v1/subjects` | Manage subjects |
+| CRUD | `/api/v1/subjects` | Manage subjects (name, special room) |
 | POST | `/api/v1/subjects/bulk` | Bulk create subjects |
 | CRUD | `/api/v1/rooms` | Manage rooms |
-| CRUD | `/api/v1/grades/{gradeId}/subject-requirements` | Manage curriculum requirements per grade |
+| CRUD | `/api/v1/grades/{gradeId}/subject-requirements` | Manage curriculum requirements per grade (periods/week, double-period preference, max periods/day, allow doubles) |
 | POST | `/api/v1/grades/{gradeId}/subject-requirements/bulk` | Bulk create subject requirements |
 | CRUD | `/api/v1/grades/{gradeId}/combined-lessons` | Manage combined lesson configurations |
 
@@ -187,7 +187,7 @@ The timetable generator uses a **Constraint Satisfaction Problem (CSP)** approac
    - Special rooms assigned when required
    - Grade day config limits respected
    - Double periods use consecutive non-break slots
-   - Subject daily period limits respected
+   - Subject daily period limits respected (per-grade, configured on each `GradeSubjectRequirement`)
 
 4. **Soft Constraints (weighted scoring):**
    - Same teacher per subject per group (1000)

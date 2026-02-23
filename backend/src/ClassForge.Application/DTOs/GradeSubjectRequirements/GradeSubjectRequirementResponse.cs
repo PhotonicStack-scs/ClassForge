@@ -6,4 +6,6 @@ public record GradeSubjectRequirementResponse(
     Guid SubjectId,
     int PeriodsPerWeek,
     bool PreferDoublePeriods,
+    int MaxPeriodsPerDay,
+    bool AllowDoublePeriods,
     string SubjectName);
