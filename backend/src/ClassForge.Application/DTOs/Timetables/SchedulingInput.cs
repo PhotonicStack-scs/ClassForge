@@ -17,8 +17,7 @@ public record SchedulingGrade(Guid Id, string Name, int SortOrder);
 public record SchedulingGroup(Guid Id, Guid GradeId, string Name, int SortOrder);
 
 public record SchedulingSubject(
-    Guid Id, string Name, bool RequiresSpecialRoom, Guid? SpecialRoomId,
-    int MaxPeriodsPerDay, bool AllowDoublePeriods);
+    Guid Id, string Name, bool RequiresSpecialRoom, Guid? SpecialRoomId);
 
 public record SchedulingRoom(Guid Id, string Name, int Capacity);
 
@@ -36,7 +35,7 @@ public record SchedulingTeachingDay(Guid Id, int DayOfWeek, int SortOrder, List<
 
 public record SchedulingTimeSlot(Guid Id, Guid TeachingDayId, int SlotNumber, bool IsBreak);
 
-public record SchedulingRequirement(Guid Id, Guid GradeId, Guid SubjectId, int PeriodsPerWeek, bool PreferDoublePeriods);
+public record SchedulingRequirement(Guid Id, Guid GradeId, Guid SubjectId, int PeriodsPerWeek, bool PreferDoublePeriods, int MaxPeriodsPerDay, bool AllowDoublePeriods);
 
 public record SchedulingCombinedLesson(
     Guid Id, Guid GradeId, Guid SubjectId, bool IsMandatory,

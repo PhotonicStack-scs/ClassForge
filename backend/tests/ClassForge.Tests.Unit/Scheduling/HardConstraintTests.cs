@@ -96,7 +96,7 @@ public class HardConstraintTests
 
         var input = TestDataBuilder.CreateMinimalInput() with
         {
-            Subjects = [new SchedulingSubject(subjectId, "PE", true, correctRoomId, 2, false)]
+            Subjects = [new SchedulingSubject(subjectId, "PE", true, correctRoomId)]
         };
 
         HardConstraintChecker.CheckSpecialRoom(input, subjectId, wrongRoomId).Should().BeFalse();
@@ -127,12 +127,7 @@ public class HardConstraintTests
         var dayId = Guid.NewGuid();
         state.GroupSubjectDailyCount[(groupId, subjectId, dayId)] = 2;
 
-        var input = TestDataBuilder.CreateMinimalInput() with
-        {
-            Subjects = [new SchedulingSubject(subjectId, "Math", false, null, 2, false)]
-        };
-
-        HardConstraintChecker.CheckSubjectDailyLimit(state, input, [groupId], subjectId, dayId)
+        HardConstraintChecker.CheckSubjectDailyLimit(state, 2, [groupId], subjectId, dayId)
             .Should().BeFalse();
     }
 }

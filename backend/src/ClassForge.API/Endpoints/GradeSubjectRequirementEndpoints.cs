@@ -115,6 +115,8 @@ public static class GradeSubjectRequirementEndpoints
 
         entity.PeriodsPerWeek = request.PeriodsPerWeek;
         entity.PreferDoublePeriods = request.PreferDoublePeriods;
+        entity.MaxPeriodsPerDay = request.MaxPeriodsPerDay;
+        entity.AllowDoublePeriods = request.AllowDoublePeriods;
         await db.SaveChangesAsync();
 
         return Results.Ok(entity.ToResponse());

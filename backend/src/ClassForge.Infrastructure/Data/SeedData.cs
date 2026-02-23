@@ -50,29 +50,28 @@ public static class SeedData
         // Subjects
         var subjectDefs = new[]
         {
-            ("Math", false, (Guid?)null, 2, true),
-            ("Norwegian", false, null, 2, true),
-            ("English", false, null, 2, true),
-            ("Science", false, null, 2, false),
-            ("Social Studies", false, null, 2, false),
-            ("PE", false, null, 2, true),
-            ("Music", false, null, 1, false),
-            ("Art", false, null, 2, false),
-            ("Food & Health", false, null, 2, false),
-            ("KRLE", false, null, 2, false),
-            ("Natural Science", false, null, 2, false),
-            ("Spanish", false, null, 2, false),
-            ("Technology & Design", false, null, 2, false),
-            ("Programming", false, null, 1, false),
-            ("Math Extra", false, null, 1, false)
+            ("Math", false, (Guid?)null),
+            ("Norwegian", false, null),
+            ("English", false, null),
+            ("Science", false, null),
+            ("Social Studies", false, null),
+            ("PE", false, null),
+            ("Music", false, null),
+            ("Art", false, null),
+            ("Food & Health", false, null),
+            ("KRLE", false, null),
+            ("Natural Science", false, null),
+            ("Spanish", false, null),
+            ("Technology & Design", false, null),
+            ("Programming", false, null),
+            ("Math Extra", false, null)
         };
 
         var subjects = subjectDefs.Select(s => new Subject
         {
             Id = Guid.NewGuid(), TenantId = tenant.Id,
             Name = s.Item1, RequiresSpecialRoom = s.Item2,
-            SpecialRoomId = s.Item3, MaxPeriodsPerDay = s.Item4,
-            AllowDoublePeriods = s.Item5
+            SpecialRoomId = s.Item3
         }).ToList();
         db.Subjects.AddRange(subjects);
 
@@ -152,23 +151,24 @@ public static class SeedData
         var spanish = subjects.First(s => s.Name == "Spanish");
 
         // GradeSubjectRequirements (realistic period counts)
-        var coreSubjects = new (Subject subj, int periods, bool preferDouble)[]
+        var coreSubjects = new (Subject subj, int periods, bool preferDouble, int maxPPD, bool allowDouble)[]
         {
-            (math, 5, true), (norwegian, 5, true), (english, 3, false),
-            (science, 2, false), (socialStudies, 2, false), (pe, 3, true),
-            (music, 1, false), (art, 2, false), (foodHealth, 2, false),
-            (krle, 2, false), (natSci, 2, false), (spanish, 2, false)
+            (math, 5, true, 2, true), (norwegian, 5, true, 2, true), (english, 3, false, 2, true),
+            (science, 2, false, 2, false), (socialStudies, 2, false, 2, false), (pe, 3, true, 2, true),
+            (music, 1, false, 1, false), (art, 2, false, 2, false), (foodHealth, 2, false, 2, false),
+            (krle, 2, false, 2, false), (natSci, 2, false, 2, false), (spanish, 2, false, 2, false)
         };
 
         foreach (var grade in grades)
         {
-            foreach (var (subj, periods, preferDouble) in coreSubjects)
+            foreach (var (subj, periods, preferDouble, maxPPD, allowDouble) in coreSubjects)
             {
                 db.GradeSubjectRequirements.Add(new GradeSubjectRequirement
                 {
                     Id = Guid.NewGuid(), TenantId = tenant.Id,
                     GradeId = grade.Id, SubjectId = subj.Id,
-                    PeriodsPerWeek = periods, PreferDoublePeriods = preferDouble
+                    PeriodsPerWeek = periods, PreferDoublePeriods = preferDouble,
+                    MaxPeriodsPerDay = maxPPD, AllowDoublePeriods = allowDouble
                 });
             }
         }

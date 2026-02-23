@@ -95,16 +95,13 @@ public static class HardConstraintChecker
 
     /// <summary>HC-10: Subject MaxPeriodsPerDay respected.</summary>
     public static bool CheckSubjectDailyLimit(
-        SchedulingState state, SchedulingInput input,
+        SchedulingState state, int maxPeriodsPerDay,
         List<Guid> groupIds, Guid subjectId, Guid teachingDayId, int additionalSlots = 1)
     {
-        var subject = input.Subjects.FirstOrDefault(s => s.Id == subjectId);
-        if (subject is null) return false;
-
         foreach (var groupId in groupIds)
         {
             var currentCount = state.GroupSubjectDailyCount.GetValueOrDefault((groupId, subjectId, teachingDayId));
-            if (currentCount + additionalSlots > subject.MaxPeriodsPerDay)
+            if (currentCount + additionalSlots > maxPeriodsPerDay)
                 return false;
         }
         return true;
@@ -125,7 +122,7 @@ public static class HardConstraintChecker
         if (!CheckTeacherDailyLimit(state, input, candidate.TeacherId, slot.TeachingDayId, slotsNeeded)) return false;
         if (!CheckSpecialRoom(input, variable.SubjectId, candidate.RoomId)) return false;
         if (!CheckGradeDayLimit(input, variable.GradeId, slot.TeachingDayId, slot.SlotNumber)) return false;
-        if (!CheckSubjectDailyLimit(state, input, variable.GroupIds, variable.SubjectId, slot.TeachingDayId, slotsNeeded)) return false;
+        if (!CheckSubjectDailyLimit(state, variable.MaxPeriodsPerDay, variable.GroupIds, variable.SubjectId, slot.TeachingDayId, slotsNeeded)) return false;
 
         if (variable.IsDoublePeriod)
         {

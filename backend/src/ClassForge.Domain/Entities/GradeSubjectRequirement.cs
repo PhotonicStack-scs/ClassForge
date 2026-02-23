@@ -10,6 +10,8 @@ public class GradeSubjectRequirement : ITenantEntity, IAuditableEntity
     public Guid SubjectId { get; set; }
     public int PeriodsPerWeek { get; set; }
     public bool PreferDoublePeriods { get; set; }
+    public int MaxPeriodsPerDay { get; set; } = 2;
+    public bool AllowDoublePeriods { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 

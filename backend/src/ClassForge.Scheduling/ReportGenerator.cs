@@ -111,9 +111,9 @@ public static class ReportGenerator
         var requirements = input.Requirements.Where(r => r.PreferDoublePeriods).ToList();
         foreach (var req in requirements)
         {
-            var subject = input.Subjects.First(s => s.Id == req.SubjectId);
-            if (!subject.AllowDoublePeriods) continue;
+            if (!req.AllowDoublePeriods) continue;
 
+            var subject = input.Subjects.First(s => s.Id == req.SubjectId);
             var hasDouble = state.Variables.Any(v =>
                 v.IsAssigned && v.SubjectId == req.SubjectId && v.GradeId == req.GradeId && v.IsDoublePeriod);
 

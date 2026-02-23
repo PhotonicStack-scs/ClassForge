@@ -9,8 +9,6 @@ public class Subject : ITenantEntity, IAuditableEntity
     public string Name { get; set; } = string.Empty;
     public bool RequiresSpecialRoom { get; set; }
     public Guid? SpecialRoomId { get; set; }
-    public int MaxPeriodsPerDay { get; set; } = 2;
-    public bool AllowDoublePeriods { get; set; }
     public string Color { get; set; } = "#DBEAFE";
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

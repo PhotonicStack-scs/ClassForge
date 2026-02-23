@@ -119,22 +119,26 @@ public class TimetableEntryValidator : ITimetableEntryValidator
                 issues.Add($"Entry {entry.Id}: Double period requires a consecutive non-break slot but none exists.");
         }
 
-        // HC-10: Subject daily limit
-        if (subject is not null)
+        // HC-10: Subject daily limit (per grade requirement)
+        foreach (var groupId in groupIds)
         {
-            foreach (var groupId in groupIds)
-            {
-                var subjectDayCount = otherEntries.Count(e =>
-                {
-                    if (e.SubjectId != entry.SubjectId) return false;
-                    if (!e.Groups.Any(g => g.GroupId == groupId)) return false;
-                    var otherSlot = _db.TimeSlots.FirstOrDefault(s => s.Id == e.TimeSlotId);
-                    return otherSlot?.TeachingDayId == timeSlot.TeachingDayId;
-                }) + 1;
+            var group = await _db.Groups.FindAsync([groupId], cancellationToken);
+            if (group is null) continue;
 
-                if (subjectDayCount > subject.MaxPeriodsPerDay)
-                    issues.Add($"Entry {entry.Id}: Subject '{subject.Name}' exceeds daily limit of {subject.MaxPeriodsPerDay} for group {groupId}.");
-            }
+            var requirement = await _db.GradeSubjectRequirements
+                .FirstOrDefaultAsync(r => r.GradeId == group.GradeId && r.SubjectId == entry.SubjectId, cancellationToken);
+            if (requirement is null) continue;
+
+            var subjectDayCount = otherEntries.Count(e =>
+            {
+                if (e.SubjectId != entry.SubjectId) return false;
+                if (!e.Groups.Any(g => g.GroupId == groupId)) return false;
+                var otherSlot = _db.TimeSlots.FirstOrDefault(s => s.Id == e.TimeSlotId);
+                return otherSlot?.TeachingDayId == timeSlot.TeachingDayId;
+            }) + 1;
+
+            if (subjectDayCount > requirement.MaxPeriodsPerDay)
+                issues.Add($"Entry {entry.Id}: Subject '{subject?.Name}' exceeds daily limit of {requirement.MaxPeriodsPerDay} for group {groupId}.");
         }
 
         return issues;

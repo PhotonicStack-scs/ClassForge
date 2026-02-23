@@ -44,7 +44,7 @@ public class SchedulingInputBuilder
         return new SchedulingInput(
             grades.Select(g => new SchedulingGrade(g.Id, g.Name, g.SortOrder)).ToList(),
             groups.Select(g => new SchedulingGroup(g.Id, g.GradeId, g.Name, g.SortOrder)).ToList(),
-            subjects.Select(s => new SchedulingSubject(s.Id, s.Name, s.RequiresSpecialRoom, s.SpecialRoomId, s.MaxPeriodsPerDay, s.AllowDoublePeriods)).ToList(),
+            subjects.Select(s => new SchedulingSubject(s.Id, s.Name, s.RequiresSpecialRoom, s.SpecialRoomId)).ToList(),
             rooms.Select(r => new SchedulingRoom(r.Id, r.Name, r.Capacity)).ToList(),
             teachers.Select(t => new SchedulingTeacher(
                 t.Id, t.Name,
@@ -56,7 +56,7 @@ public class SchedulingInputBuilder
                 d.Id, d.DayOfWeek, d.SortOrder,
                 d.TimeSlots.Select(s => new SchedulingTimeSlot(s.Id, s.TeachingDayId, s.SlotNumber, s.IsBreak)).ToList()
             )).ToList(),
-            requirements.Select(r => new SchedulingRequirement(r.Id, r.GradeId, r.SubjectId, r.PeriodsPerWeek, r.PreferDoublePeriods)).ToList(),
+            requirements.Select(r => new SchedulingRequirement(r.Id, r.GradeId, r.SubjectId, r.PeriodsPerWeek, r.PreferDoublePeriods, r.MaxPeriodsPerDay, r.AllowDoublePeriods)).ToList(),
             combinedLessons.Select(c => new SchedulingCombinedLesson(
                 c.Id, c.GradeId, c.SubjectId, c.IsMandatory, c.MaxGroupsPerLesson,
                 c.Groups.Select(g => g.GroupId).ToList()
