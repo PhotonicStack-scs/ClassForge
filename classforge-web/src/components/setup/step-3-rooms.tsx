@@ -88,7 +88,7 @@ export function Step3Rooms() {
       )}
 
       <div className="pt-2 space-y-1">
-        <Button onClick={() => { markStepCompleted(3); setCurrentStep(4); }} disabled={rooms.length === 0}>
+        <Button onClick={() => { markStepCompleted(2); setCurrentStep(3); }} disabled={rooms.length === 0}>
           Continue{rooms.length > 0 && <Badge variant="secondary" className="ml-2">{rooms.length} room{rooms.length !== 1 ? "s" : ""}</Badge>}
         </Button>
         {rooms.length === 0 && (
