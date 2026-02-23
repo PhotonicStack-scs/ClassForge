@@ -1,25 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQueryClient, useQueries } from "@tanstack/react-query";
 import {
   useTeachingDays,
   useCreateTeachingDay,
   useUpdateTeachingDay,
-  useTimeSlots,
-  useCreateTimeSlot,
-  useDeleteTimeSlot,
 } from "@/lib/api/hooks/use-teaching-days";
 import { apiClient } from "@/lib/api/client";
 import {
   PeriodTemplateBuilder,
   type PeriodDef,
 } from "@/components/time-structure/period-template-builder";
+import { WeeklyCalendarGrid } from "@/components/time-structure/weekly-calendar-grid";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -28,7 +24,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronDown, ChevronRight, X, Plus } from "lucide-react";
+import { RotateCcw, TriangleAlert } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { components } from "@/lib/api/schema";
 
@@ -43,116 +40,26 @@ const WEEKDAYS = [
   { dow: 5, label: "Fri" },
 ];
 
-function DaySlotEditor({ dayId }: { dayId: string }) {
-  const { data: slots = [], isLoading } = useTimeSlots(dayId);
-  const createSlot = useCreateTimeSlot(dayId);
-  const deleteSlot = useDeleteTimeSlot(dayId);
-  const [newStart, setNewStart] = useState("08:00");
-  const [newEnd, setNewEnd] = useState("08:45");
+const WEEKEND = [
+  { dow: 6, label: "Sat" },
+  { dow: 7, label: "Sun" },
+];
 
-  if (isLoading) {
-    return <p className="text-sm text-muted-foreground py-2">Loading slots…</p>;
-  }
-
-  async function handleAdd() {
-    try {
-      await createSlot.mutateAsync({
-        slotNumber: slots.length + 1,
-        startTime: newStart,
-        endTime: newEnd,
-        isBreak: false,
-      });
-    } catch {
-      toast.error("Failed to add slot");
+function deriveTemplate(slotsByDay: Map<string, TimeSlotResponse[]>): PeriodDef[] {
+  const seen = new Map<number, PeriodDef>();
+  for (const slots of slotsByDay.values()) {
+    for (const s of slots) {
+      if (!seen.has(s.slotNumber ?? 0)) {
+        seen.set(s.slotNumber ?? 0, {
+          slotNumber: s.slotNumber ?? 0,
+          startTime: s.startTime ?? "",
+          endTime: s.endTime ?? "",
+          isBreak: s.isBreak ?? false,
+        });
+      }
     }
   }
-
-  async function handleDelete(id: string) {
-    try {
-      await deleteSlot.mutateAsync(id);
-    } catch {
-      toast.error("Failed to delete slot");
-    }
-  }
-
-  return (
-    <div className="space-y-2">
-      {slots.map((slot) => (
-        <div key={slot.id!} className="flex items-center gap-3 text-sm">
-          <span className="w-20 text-muted-foreground shrink-0">
-            Period {slot.slotNumber}
-          </span>
-          <span>
-            {slot.startTime} – {slot.endTime}
-          </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 ml-auto"
-            onClick={() => handleDelete(slot.id!)}
-            disabled={deleteSlot.isPending}
-          >
-            <X className="w-3 h-3" />
-          </Button>
-        </div>
-      ))}
-      <div className="flex gap-2 pt-2 border-t">
-        <Input
-          type="time"
-          value={newStart}
-          onChange={(e) => setNewStart(e.target.value)}
-          className="h-8 text-sm w-32"
-        />
-        <span className="self-center text-muted-foreground">–</span>
-        <Input
-          type="time"
-          value={newEnd}
-          onChange={(e) => setNewEnd(e.target.value)}
-          className="h-8 text-sm w-32"
-        />
-        <Button
-          size="sm"
-          className="h-8"
-          onClick={handleAdd}
-          disabled={createSlot.isPending}
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Add slot
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function PerDaySection({ day }: { day: TeachingDayResponse }) {
-  const [expanded, setExpanded] = useState(false);
-  const { data: slots = [] } = useTimeSlots(day.id!);
-
-  return (
-    <div className="border rounded-lg overflow-hidden">
-      <button
-        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-        onClick={() => setExpanded((v) => !v)}
-      >
-        <div className="flex items-center gap-2">
-          {expanded ? (
-            <ChevronDown className="w-4 h-4 text-muted-foreground" />
-          ) : (
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          )}
-          <span className="font-medium">{day.name ?? ""}</span>
-          <Badge variant="secondary" className="text-xs">
-            {slots.length} period{slots.length !== 1 ? "s" : ""}
-          </Badge>
-        </div>
-      </button>
-      {expanded && (
-        <div className="px-4 pb-4 border-t">
-          <DaySlotEditor dayId={day.id!} />
-        </div>
-      )}
-    </div>
-  );
+  return Array.from(seen.values()).sort((a, b) => a.slotNumber - b.slotNumber);
 }
 
 export default function TimeStructurePage() {
@@ -162,10 +69,50 @@ export default function TimeStructurePage() {
   const updateDay = useUpdateTeachingDay();
 
   const [periods, setPeriods] = useState<PeriodDef[]>([]);
+  const [templateDirty, setTemplateDirty] = useState(false);
   const [applying, setApplying] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [toggling, setToggling] = useState<Set<string>>(new Set());
 
   const activeDays = days.filter((d) => d.isActive);
+
+  // Fetch slots for all active days in parallel
+  const slotQueries = useQueries({
+    queries: activeDays.map((day) => ({
+      queryKey: ["teaching-days", day.id!, "time-slots"],
+      queryFn: async () => {
+        const { data, error } = await apiClient.GET(
+          "/api/v1/teaching-days/{dayId}/time-slots",
+          { params: { path: { dayId: day.id! } } }
+        );
+        if (error) throw error;
+        return (data ?? []) as TimeSlotResponse[];
+      },
+      enabled: !!day.id,
+    })),
+  });
+
+  const slotsByDay = new Map<string, TimeSlotResponse[]>(
+    activeDays.map((day, i) => [day.id!, slotQueries[i]?.data ?? []])
+  );
+
+  const allSlotsLoaded = slotQueries.every((q) => !q.isLoading);
+
+  // Derive template from existing API data once on first load — does not mark dirty
+  useEffect(() => {
+    if (!allSlotsLoaded || periods.length > 0) return;
+    const derived = deriveTemplate(slotsByDay);
+    if (derived.length > 0) {
+      setPeriods(derived);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allSlotsLoaded]);
+
+  // Called when the user edits the template — marks it as having unsaved changes
+  function handlePeriodsChange(newPeriods: PeriodDef[]) {
+    setPeriods(newPeriods);
+    setTemplateDirty(true);
+  }
 
   async function toggleDay(dow: number) {
     const existing = days.find((d) => d.dayOfWeek === dow);
@@ -194,13 +141,11 @@ export default function TimeStructurePage() {
 
     for (const day of activeDays) {
       try {
-        // Fetch current slots fresh
         const { data: existing } = await apiClient.GET(
           "/api/v1/teaching-days/{dayId}/time-slots",
           { params: { path: { dayId: day.id! } } }
         );
 
-        // Delete all existing slots in parallel
         await Promise.all(
           (existing ?? []).map((slot: TimeSlotResponse) =>
             apiClient.DELETE("/api/v1/teaching-days/{dayId}/time-slots/{id}", {
@@ -209,7 +154,6 @@ export default function TimeStructurePage() {
           )
         );
 
-        // Bulk create from template
         const { error } = await apiClient.POST(
           "/api/v1/teaching-days/{dayId}/time-slots/bulk",
           {
@@ -219,7 +163,7 @@ export default function TimeStructurePage() {
                 slotNumber: p.slotNumber,
                 startTime: p.startTime,
                 endTime: p.endTime,
-                isBreak: false,
+                isBreak: p.isBreak,
               })),
             },
           }
@@ -238,14 +182,52 @@ export default function TimeStructurePage() {
     if (errors > 0) {
       toast.error(`Failed to apply template to ${errors} day(s)`);
     } else {
+      setTemplateDirty(false);
       toast.success(`Template applied to ${activeDays.length} day(s)`);
+    }
+  }
+
+  async function handleCellToggle(dayId: string, slot: PeriodDef, currentlyEnabled: boolean) {
+    const key = `${dayId}:${slot.slotNumber}`;
+    setToggling((prev) => new Set(prev).add(key));
+    try {
+      if (currentlyEnabled) {
+        const existing = slotsByDay.get(dayId)?.find((s) => s.slotNumber === slot.slotNumber);
+        if (existing?.id) {
+          await apiClient.DELETE("/api/v1/teaching-days/{dayId}/time-slots/{id}", {
+            params: { path: { dayId, id: existing.id } },
+          });
+        }
+      } else {
+        await apiClient.POST("/api/v1/teaching-days/{dayId}/time-slots", {
+          params: { path: { dayId } },
+          body: {
+            slotNumber: slot.slotNumber,
+            startTime: slot.startTime,
+            endTime: slot.endTime,
+            isBreak: slot.isBreak,
+          },
+        });
+      }
+      await qc.invalidateQueries({ queryKey: ["teaching-days", dayId, "time-slots"] });
+    } catch {
+      toast.error("Failed to update slot");
+    } finally {
+      setToggling((prev) => {
+        const next = new Set(prev);
+        next.delete(key);
+        return next;
+      });
     }
   }
 
   if (isLoading) return <div className="p-8">Loading…</div>;
 
+  const templatePeriodCount = periods.filter((p) => !p.isBreak).length;
+  const templateBreakCount = periods.filter((p) => p.isBreak).length;
+
   return (
-    <div className="container mx-auto p-8 max-w-3xl space-y-8">
+    <div className="container mx-auto p-8 max-w-4xl space-y-8">
       <h1 className="text-2xl font-bold">Time Structure</h1>
 
       {/* Teaching Days */}
@@ -254,7 +236,7 @@ export default function TimeStructurePage() {
           <CardTitle>Teaching Days</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             {WEEKDAYS.map(({ dow, label }) => {
               const day = days.find((d) => d.dayOfWeek === dow);
               const isActive = day?.isActive ?? false;
@@ -266,15 +248,32 @@ export default function TimeStructurePage() {
                     onCheckedChange={() => toggleDay(dow)}
                     disabled={createDay.isPending || updateDay.isPending}
                   />
-                  <Label
-                    htmlFor={`day-${dow}`}
-                    className="cursor-pointer text-sm font-medium"
-                  >
+                  <Label htmlFor={`day-${dow}`} className="cursor-pointer text-sm font-medium">
                     {label}
                   </Label>
                 </div>
               );
             })}
+            <div className="flex items-center gap-3 pl-4 border-l">
+              <span className="text-xs text-muted-foreground">Weekend</span>
+              {WEEKEND.map(({ dow, label }) => {
+                const day = days.find((d) => d.dayOfWeek === dow);
+                const isActive = day?.isActive ?? false;
+                return (
+                  <div key={dow} className="flex items-center gap-2">
+                    <Switch
+                      id={`day-${dow}`}
+                      checked={isActive}
+                      onCheckedChange={() => toggleDay(dow)}
+                      disabled={createDay.isPending || updateDay.isPending}
+                    />
+                    <Label htmlFor={`day-${dow}`} className="cursor-pointer text-sm font-medium">
+                      {label}
+                    </Label>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -286,59 +285,99 @@ export default function TimeStructurePage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Define a period schedule and apply it to all active teaching days at once.
+            Define the canonical periods and breaks for your school day. Use{" "}
+            <strong>Apply to all days</strong> in the weekly schedule below to push
+            these times to every active teaching day at once.
           </p>
-          <PeriodTemplateBuilder periods={periods} onChange={setPeriods} />
-          <Button
-            onClick={() => {
-              if (periods.length === 0) {
-                toast.error("Add at least one period to the template first");
-                return;
-              }
-              setShowConfirm(true);
-            }}
-            disabled={applying || activeDays.length === 0 || periods.length === 0}
-          >
-            {applying ? "Applying…" : "Apply to all active days"}
-          </Button>
-          {activeDays.length === 0 && (
-            <p className="text-xs text-muted-foreground">
-              Enable at least one teaching day above first.
-            </p>
-          )}
+          <PeriodTemplateBuilder periods={periods} onChange={handlePeriodsChange} />
         </CardContent>
       </Card>
 
-      {/* Per-Day Schedule */}
-      {activeDays.length > 0 && (
+      {/* Weekly Schedule */}
+      {activeDays.length > 0 && periods.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Per-Day Schedule</h2>
-          <p className="text-sm text-muted-foreground">
-            Expand a day to view or edit its slots individually.
-          </p>
-          {activeDays.map((day) => (
-            <PerDaySection key={day.id!} day={day} />
-          ))}
+          {/* Section header with Apply button */}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">Weekly Schedule</h2>
+              <p className="text-sm text-muted-foreground">
+                Toggle individual cells to enable or disable a slot for a specific day.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                "shrink-0 mt-0.5",
+                templateDirty && "border-amber-400 text-amber-700 hover:bg-amber-50 hover:text-amber-800"
+              )}
+              onClick={() => {
+                if (templatePeriodCount === 0) {
+                  toast.error("Add at least one period to the template first");
+                  return;
+                }
+                setShowConfirm(true);
+              }}
+              disabled={applying}
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              {applying ? "Applying…" : "Apply to all days"}
+            </Button>
+          </div>
+
+          {/* Dirty state callout */}
+          {templateDirty && (
+            <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+              <TriangleAlert className="w-4 h-4 mt-0.5 shrink-0" />
+              <span>
+                The template has unsaved changes. Click{" "}
+                <strong>Apply to all days</strong> to reset the entire schedule to
+                the new template, or keep toggling individual cells — new cells will
+                use the updated times.
+              </span>
+            </div>
+          )}
+
+          <WeeklyCalendarGrid
+            template={periods}
+            activeDays={activeDays}
+            slotsByDay={slotsByDay}
+            onCellToggle={handleCellToggle}
+            toggling={toggling}
+          />
         </div>
+      )}
+
+      {/* Prompt when no days/template yet */}
+      {activeDays.length === 0 && periods.length > 0 && (
+        <p className="text-sm text-muted-foreground">
+          Enable at least one teaching day above to see the weekly schedule.
+        </p>
       )}
 
       {/* Confirm Dialog */}
       <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Apply template to all active days?</DialogTitle>
+            <DialogTitle>Reset all active days to template?</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            This will replace all existing time slots for{" "}
-            <strong>{activeDays.length} active day(s)</strong> with the{" "}
-            <strong>{periods.length} period(s)</strong> defined in your template.
-            Existing slots will be permanently deleted.
+            This will <strong>replace all existing time slots</strong> for{" "}
+            <strong>{activeDays.length} active day(s)</strong> with{" "}
+            <strong>{templatePeriodCount} period{templatePeriodCount !== 1 ? "s" : ""}</strong>
+            {templateBreakCount > 0 && (
+              <>
+                {" "}and{" "}
+                <strong>{templateBreakCount} break{templateBreakCount !== 1 ? "s" : ""}</strong>
+              </>
+            )}
+            . Any per-day customisations will be lost.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirm(false)}>
               Cancel
             </Button>
-            <Button onClick={applyTemplate}>Apply</Button>
+            <Button onClick={applyTemplate}>Apply to all days</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

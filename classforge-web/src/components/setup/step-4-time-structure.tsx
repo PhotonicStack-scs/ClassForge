@@ -29,6 +29,11 @@ const WEEKDAYS = [
   { dow: 5, label: "Friday" },
 ];
 
+const WEEKEND = [
+  { dow: 6, label: "Saturday" },
+  { dow: 7, label: "Sunday" },
+];
+
 export function Step4TimeStructure() {
   const { markStepCompleted, setCurrentStep } = useWizardStore();
   const { data: days = [], isLoading } = useTeachingDays();
@@ -65,7 +70,7 @@ export function Step4TimeStructure() {
       toast.error("Enable at least one teaching day first");
       return;
     }
-    if (periods.length === 0) {
+    if (periods.filter((p) => !p.isBreak).length === 0) {
       toast.error("Add at least one period to the template first");
       return;
     }
@@ -141,7 +146,7 @@ export function Step4TimeStructure() {
           {/* Day toggles */}
           <div className="space-y-1">
             <p className="text-sm font-medium">Teaching Days</p>
-            <div className="flex flex-wrap gap-4 py-2">
+            <div className="flex flex-wrap items-center gap-4 py-2">
               {WEEKDAYS.map(({ dow, label }) => {
                 const day = days.find((d) => d.dayOfWeek === dow);
                 const isActive = day?.isActive ?? false;
@@ -162,6 +167,29 @@ export function Step4TimeStructure() {
                   </div>
                 );
               })}
+              <div className="flex items-center gap-3 pl-4 border-l">
+                <span className="text-xs text-muted-foreground">Weekend</span>
+                {WEEKEND.map(({ dow, label }) => {
+                  const day = days.find((d) => d.dayOfWeek === dow);
+                  const isActive = day?.isActive ?? false;
+                  return (
+                    <div key={dow} className="flex items-center gap-2">
+                      <Switch
+                        id={`wizard-day-${dow}`}
+                        checked={isActive}
+                        onCheckedChange={() => toggleDay(dow)}
+                        disabled={createDay.isPending || updateDay.isPending}
+                      />
+                      <Label
+                        htmlFor={`wizard-day-${dow}`}
+                        className="text-sm cursor-pointer"
+                      >
+                        {label}
+                      </Label>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -176,7 +204,7 @@ export function Step4TimeStructure() {
       <div className="pt-2 space-y-1">
         <Button
           onClick={handleApplyAndContinue}
-          disabled={applying || activeDays.length === 0 || periods.length === 0}
+          disabled={applying || activeDays.length === 0 || periods.filter((p) => !p.isBreak).length === 0}
         >
           {applying
             ? "Applying…"
@@ -187,7 +215,7 @@ export function Step4TimeStructure() {
             Enable at least one teaching day to continue.
           </p>
         )}
-        {activeDays.length > 0 && periods.length === 0 && (
+        {activeDays.length > 0 && periods.filter((p) => !p.isBreak).length === 0 && (
           <p className="text-xs text-muted-foreground">
             Add at least one period to the template to continue.
           </p>
