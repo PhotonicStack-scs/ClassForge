@@ -6,16 +6,20 @@ import {
   useTeachingDays,
   useCreateTeachingDay,
   useUpdateTeachingDay,
-  useTimeSlots,
-  useCreateTimeSlot,
 } from "@/lib/api/hooks/use-teaching-days";
+import { apiClient } from "@/lib/api/client";
+import {
+  PeriodTemplateBuilder,
+  type PeriodDef,
+} from "@/components/time-structure/period-template-builder";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import { toast } from "sonner";
+import type { components } from "@/lib/api/schema";
+
+type TimeSlotResponse = components["schemas"]["TimeSlotResponse"];
 
 const WEEKDAYS = [
   { dow: 1, label: "Monday" },
@@ -25,56 +29,16 @@ const WEEKDAYS = [
   { dow: 5, label: "Friday" },
 ];
 
-function TimeSlotList({ dayId }: { dayId: string }) {
-  const { data: slots = [] } = useTimeSlots(dayId);
-  const createSlot = useCreateTimeSlot(dayId);
-  const [start, setStart] = useState("08:00");
-  const [end, setEnd] = useState("08:45");
-
-  async function handleAdd(e: React.FormEvent) {
-    e.preventDefault();
-    try {
-      await createSlot.mutateAsync({
-        slotNumber: slots.length + 1,
-        startTime: start,
-        endTime: end,
-        isBreak: false,
-      });
-    } catch {
-      toast.error("Failed to add time slot");
-    }
-  }
-
-  return (
-    <div className="mt-2 ml-4 space-y-2 border-l-2 border-muted pl-4">
-      {slots.length > 0 && (
-        <div className="space-y-1">
-          {slots.map((s) => (
-            <div key={s.id} className="text-xs text-muted-foreground">
-              Period {s.slotNumber}: {s.startTime} – {s.endTime}
-              {s.isBreak && <Badge variant="outline" className="ml-1 text-xs">Break</Badge>}
-            </div>
-          ))}
-        </div>
-      )}
-      <form onSubmit={handleAdd} className="flex items-center gap-1.5">
-        <Input value={start} onChange={(e) => setStart(e.target.value)} type="time" className="w-28 h-7 text-xs" />
-        <span className="text-xs text-muted-foreground">–</span>
-        <Input value={end} onChange={(e) => setEnd(e.target.value)} type="time" className="w-28 h-7 text-xs" />
-        <Button type="submit" size="sm" className="h-7 text-xs" disabled={createSlot.isPending}>
-          <Plus className="w-3 h-3" />
-        </Button>
-      </form>
-    </div>
-  );
-}
-
 export function Step4TimeStructure() {
   const { markStepCompleted, setCurrentStep } = useWizardStore();
   const { data: days = [], isLoading } = useTeachingDays();
   const createDay = useCreateTeachingDay();
   const updateDay = useUpdateTeachingDay();
-  const [expandedDay, setExpandedDay] = useState<string | null>(null);
+
+  const [periods, setPeriods] = useState<PeriodDef[]>([]);
+  const [applying, setApplying] = useState(false);
+
+  const activeDays = days.filter((d) => d.isActive);
 
   async function toggleDay(dow: number) {
     const existing = days.find((d) => d.dayOfWeek === dow);
@@ -82,7 +46,7 @@ export function Step4TimeStructure() {
       try {
         await updateDay.mutateAsync({
           id: existing.id!,
-          body: { dayOfWeek: dow, isActive: !existing.isActive, sortOrder: existing.sortOrder ?? dow },
+          body: { isActive: !existing.isActive, sortOrder: existing.sortOrder ?? dow },
         });
       } catch {
         toast.error("Failed to update day");
@@ -96,68 +60,137 @@ export function Step4TimeStructure() {
     }
   }
 
-  const activeDays = days.filter((d) => d.isActive);
+  async function handleApplyAndContinue() {
+    if (activeDays.length === 0) {
+      toast.error("Enable at least one teaching day first");
+      return;
+    }
+    if (periods.length === 0) {
+      toast.error("Add at least one period to the template first");
+      return;
+    }
+
+    setApplying(true);
+    let errors = 0;
+
+    for (const day of activeDays) {
+      try {
+        // Fetch current slots
+        const { data: existing } = await apiClient.GET(
+          "/api/v1/teaching-days/{dayId}/time-slots",
+          { params: { path: { dayId: day.id! } } }
+        );
+
+        // Delete existing slots in parallel
+        await Promise.all(
+          (existing ?? []).map((slot: TimeSlotResponse) =>
+            apiClient.DELETE("/api/v1/teaching-days/{dayId}/time-slots/{id}", {
+              params: { path: { dayId: day.id!, id: slot.id! } },
+            })
+          )
+        );
+
+        // Bulk create from template
+        const { error } = await apiClient.POST(
+          "/api/v1/teaching-days/{dayId}/time-slots/bulk",
+          {
+            params: { path: { dayId: day.id! } },
+            body: {
+              items: periods.map((p) => ({
+                slotNumber: p.slotNumber,
+                startTime: p.startTime,
+                endTime: p.endTime,
+                isBreak: false,
+              })),
+            },
+          }
+        );
+        if (error) errors++;
+      } catch {
+        errors++;
+      }
+    }
+
+    setApplying(false);
+
+    if (errors > 0) {
+      toast.error(`Failed to apply template to ${errors} day(s)`);
+      return;
+    }
+
+    markStepCompleted(4);
+    setCurrentStep(5);
+  }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold flex items-center gap-2">
           <Clock className="w-5 h-5" />
           Time Structure
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Enable teaching days and add time slots (periods) for each day.
+          Enable teaching days and define a period schedule to apply to all of them.
         </p>
       </div>
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : (
-        <div className="space-y-3">
-          {WEEKDAYS.map(({ dow, label }) => {
-            const day = days.find((d) => d.dayOfWeek === dow);
-            const isActive = day?.isActive ?? false;
-
-            return (
-              <div key={dow} className="space-y-1">
-                <div className="flex items-center justify-between py-2 px-3 rounded-md bg-muted/50">
-                  <div className="flex items-center gap-3">
+        <>
+          {/* Day toggles */}
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Teaching Days</p>
+            <div className="flex flex-wrap gap-4 py-2">
+              {WEEKDAYS.map(({ dow, label }) => {
+                const day = days.find((d) => d.dayOfWeek === dow);
+                const isActive = day?.isActive ?? false;
+                return (
+                  <div key={dow} className="flex items-center gap-2">
                     <Switch
-                      id={`day-${dow}`}
+                      id={`wizard-day-${dow}`}
                       checked={isActive}
                       onCheckedChange={() => toggleDay(dow)}
                       disabled={createDay.isPending || updateDay.isPending}
                     />
-                    <Label htmlFor={`day-${dow}`} className="text-sm font-medium cursor-pointer">
+                    <Label
+                      htmlFor={`wizard-day-${dow}`}
+                      className="text-sm cursor-pointer"
+                    >
                       {label}
                     </Label>
                   </div>
-                  {isActive && day && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={() => setExpandedDay(expandedDay === day.id ? null : day.id!)}
-                    >
-                      {expandedDay === day.id ? "Hide slots" : "Add time slots"}
-                    </Button>
-                  )}
-                </div>
-                {isActive && day && expandedDay === day.id && (
-                  <TimeSlotList dayId={day.id!} />
-                )}
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Period template */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Period Schedule</p>
+            <PeriodTemplateBuilder periods={periods} onChange={setPeriods} />
+          </div>
+        </>
       )}
 
       <div className="pt-2 space-y-1">
-        <Button onClick={() => { markStepCompleted(4); setCurrentStep(5); }} disabled={activeDays.length === 0}>
-          Continue{activeDays.length > 0 && <Badge variant="secondary" className="ml-2">{activeDays.length} day{activeDays.length !== 1 ? "s" : ""}</Badge>}
+        <Button
+          onClick={handleApplyAndContinue}
+          disabled={applying || activeDays.length === 0 || periods.length === 0}
+        >
+          {applying
+            ? "Applying…"
+            : "Apply to all active days & continue →"}
         </Button>
         {activeDays.length === 0 && (
-          <p className="text-xs text-muted-foreground">Enable at least one teaching day to continue</p>
+          <p className="text-xs text-muted-foreground">
+            Enable at least one teaching day to continue.
+          </p>
+        )}
+        {activeDays.length > 0 && periods.length === 0 && (
+          <p className="text-xs text-muted-foreground">
+            Add at least one period to the template to continue.
+          </p>
         )}
       </div>
     </div>

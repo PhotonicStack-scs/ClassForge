@@ -8,7 +8,11 @@ import type { components } from "@/lib/api/schema";
 type TeachingDayResponse = components["schemas"]["TeachingDayResponse"];
 type TimeSlotResponse = components["schemas"]["TimeSlotResponse"];
 type CreateTeachingDayRequest = components["schemas"]["CreateTeachingDayRequest"];
+type UpdateTeachingDayRequest = components["schemas"]["UpdateTeachingDayRequest"];
 type CreateTimeSlotRequest = components["schemas"]["CreateTimeSlotRequest"];
+type BulkCreateTimeSlotsRequest = components["schemas"]["BulkCreateTimeSlotsRequest"];
+
+export type { TeachingDayResponse, TimeSlotResponse };
 
 export function useTeachingDays() {
   return useQuery({
@@ -36,12 +40,25 @@ export function useCreateTeachingDay() {
 export function useUpdateTeachingDay() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, body }: { id: string; body: CreateTeachingDayRequest }) => {
+    mutationFn: async ({ id, body }: { id: string; body: UpdateTeachingDayRequest }) => {
       const { data, error } = await apiClient.PUT("/api/v1/teaching-days/{id}", {
         params: { path: { id } }, body,
       });
       if (error) throw error;
       return data!;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["teaching-days"] }),
+  });
+}
+
+export function useDeleteTeachingDay() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await apiClient.DELETE("/api/v1/teaching-days/{id}", {
+        params: { path: { id } },
+      });
+      if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["teaching-days"] }),
   });
@@ -68,6 +85,35 @@ export function useCreateTimeSlot(dayId: string) {
     mutationFn: async (body: CreateTimeSlotRequest) => {
       const { data, error } = await apiClient.POST(
         "/api/v1/teaching-days/{dayId}/time-slots",
+        { params: { path: { dayId } }, body }
+      );
+      if (error) throw error;
+      return data!;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["teaching-days", dayId, "time-slots"] }),
+  });
+}
+
+export function useDeleteTimeSlot(dayId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await apiClient.DELETE(
+        "/api/v1/teaching-days/{dayId}/time-slots/{id}",
+        { params: { path: { dayId, id } } }
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["teaching-days", dayId, "time-slots"] }),
+  });
+}
+
+export function useBulkCreateTimeSlots(dayId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: BulkCreateTimeSlotsRequest) => {
+      const { data, error } = await apiClient.POST(
+        "/api/v1/teaching-days/{dayId}/time-slots/bulk",
         { params: { path: { dayId } }, body }
       );
       if (error) throw error;
