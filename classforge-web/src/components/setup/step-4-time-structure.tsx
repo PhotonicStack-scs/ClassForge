@@ -31,7 +31,7 @@ const WEEKDAYS = [
 
 const WEEKEND = [
   { dow: 6, label: "Saturday" },
-  { dow: 7, label: "Sunday" },
+  { dow: 0, label: "Sunday" },
 ];
 
 export function Step4TimeStructure() {
@@ -58,7 +58,7 @@ export function Step4TimeStructure() {
       }
     } else {
       try {
-        await createDay.mutateAsync({ dayOfWeek: dow, isActive: true, sortOrder: dow });
+        await createDay.mutateAsync({ dayOfWeek: dow, isActive: true, sortOrder: dow === 0 ? 7 : dow });
       } catch {
         toast.error("Failed to enable day");
       }

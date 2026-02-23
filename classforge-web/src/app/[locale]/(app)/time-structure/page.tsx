@@ -42,7 +42,7 @@ const WEEKDAYS = [
 
 const WEEKEND = [
   { dow: 6, label: "Sat" },
-  { dow: 7, label: "Sun" },
+  { dow: 0, label: "Sun" },
 ];
 
 function deriveTemplate(slotsByDay: Map<string, TimeSlotResponse[]>): PeriodDef[] {
@@ -127,7 +127,7 @@ export default function TimeStructurePage() {
       }
     } else {
       try {
-        await createDay.mutateAsync({ dayOfWeek: dow, isActive: true, sortOrder: dow });
+        await createDay.mutateAsync({ dayOfWeek: dow, isActive: true, sortOrder: dow === 0 ? 7 : dow });
       } catch {
         toast.error("Failed to enable day");
       }
