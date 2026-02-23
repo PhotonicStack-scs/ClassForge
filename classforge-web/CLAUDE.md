@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # ClassForge Web — Developer Guide
 
 ## Overview
@@ -23,6 +27,8 @@ npm run build    # Production build (must pass 0 TS errors)
 npm run lint     # ESLint
 ```
 
+No test framework is configured for the frontend.
+
 **Required env:** `NEXT_PUBLIC_API_URL=http://localhost:5208/` (already in `.env.local`)
 
 ## Project Structure
@@ -45,6 +51,7 @@ src/
     auth/           LoginForm, RegisterForm
     providers/      QueryProvider, AuthInitializer, ForbiddenToastListener
     setup/          WizardShell + step-0..step-7 components
+    time-structure/ PeriodTemplateBuilder, WeeklyCalendarGrid
     timetable/      TimetableGrid, TimetableCell, QualityGauge, CellEditPopover
     report/         ReportSummary, ReportItemList
     export/         excel-export.ts, print-layout.tsx
@@ -90,6 +97,22 @@ export function useGrades() {
 ```
 Schema types are often `string | null | undefined` — always use `?? ""` or `?? []`.
 
+### Parallel fetching with useQueries
+When a page needs slots/details for a dynamic list of resources (e.g. time slots for each active teaching day), use `useQueries` — calling a single hook inside a loop violates Rules of Hooks:
+
+```ts
+import { useQueries } from "@tanstack/react-query";
+
+const results = useQueries({
+  queries: items.map((item) => ({
+    queryKey: ["resource", item.id, "sub"],
+    queryFn: async () => { /* ... */ },
+    enabled: !!item.id,
+  })),
+});
+const dataByItem = new Map(items.map((item, i) => [item.id!, results[i]?.data ?? []]));
+```
+
 ### Auth flow
 1. Login → JWT parsed → Zustand auth store updated → `cf_has_session=1` cookie set
 2. `proxy.ts` checks the cookie for protected routes, redirects to `/[locale]/login` if missing
@@ -114,12 +137,13 @@ All components land in `src/components/ui/`.
 
 | Issue | Detail |
 |-------|--------|
-| `proxy.ts` not `middleware.ts` | Next.js 16 renamed the middleware file convention |
+| `proxy.ts` not `middleware.ts` | next-intl requires the middleware file to be named `proxy.ts` in this project — `middleware.ts` is not used |
 | `TeacherResponse.name` | API has `name` (not `firstName`/`lastName`) |
 | `GradeResponse` has no `groups` | Fetch groups separately via `useGroups(gradeId)` |
 | `schema.ts` is auto-generated | Re-generate with: `npx openapi-typescript requirements/swagger.json -o src/lib/api/schema.ts` |
 | Access token in memory | Refresh token in localStorage; access token never persisted |
 | Timetable polling | `refetchInterval: 2000` when `status === "Generating"` |
+| Time display formatting | Use `Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" })` to display times — never interpolate raw `HH:mm` strings, as this ignores the user's 12/24h system preference |
 
 ## Brand Colors
 
@@ -132,9 +156,3 @@ All components land in `src/components/ui/`.
 | Zircon | `#F8FBFF` | Page background |
 
 20 subject palette colors available as `--subject-01` … `--subject-20` CSS vars and `SUBJECT_COLORS[]` in `src/lib/utils/color.ts`.
-
-## Milestones (all complete)
-
-M1 Scaffolding · M2 Design System · M3 Auth · M4 Setup Wizard · M5 Academic CRUD ·
-M6 Time Structure · M7 Teachers · M8 Generation · M9 Views · M10 Editing ·
-M11 Report · M12 Export · M13 Users · M14 My Schedule · M15 Polish
