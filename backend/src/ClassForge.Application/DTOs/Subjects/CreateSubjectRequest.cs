@@ -1,0 +1,7 @@
+namespace ClassForge.Application.DTOs.Subjects;
+
+public record CreateSubjectRequest(
+    string Name,
+    bool RequiresSpecialRoom,
+    Guid? SpecialRoomId,
+    string? Color);

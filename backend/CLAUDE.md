@@ -1,0 +1,105 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+This .NET solution is for the application REST API only. You are only allowed to modify files inside the backend folder,
+but you can read files in the /classforge-web folder if you need context on how the frontend implements the API
+
+## Build, Run & Test
+
+```bash
+dotnet build ClassForge.sln               # Build entire solution (7 projects)
+dotnet run --project src/ClassForge.API    # Run the API (requires PostgreSQL)
+dotnet test                                # Run all tests
+dotnet test tests/ClassForge.Tests.Unit    # Unit tests only (no Docker needed)
+dotnet test tests/ClassForge.Tests.Integration  # Integration tests (requires Docker)
+dotnet test --filter "FullyQualifiedName~HardConstraintTests.HC1"  # Single test by name
+```
+
+EF Core migrations (run from repo root):
+```bash
+dotnet ef migrations add <Name> --project src/ClassForge.Infrastructure --startup-project src/ClassForge.API
+dotnet ef database update --project src/ClassForge.Infrastructure --startup-project src/ClassForge.API
+```
+
+If the API is already running, Debug builds lock the output DLLs. Use `--configuration Release` for migrations and builds in that case:
+```bash
+dotnet build ClassForge.sln --configuration Release
+dotnet ef migrations add <Name> --project src/ClassForge.Infrastructure --startup-project src/ClassForge.API --configuration Release
+```
+
+Health check: `GET /health` | Swagger UI: `/swagger` (includes JWT Bearer authorize button)
+
+In Development mode, `SeedData.SeedDemoSchoolAsync` auto-seeds a demo school on startup.
+
+## Architecture
+
+Clean Architecture with five source projects. Dependency flow:
+
+```
+Domain (no deps)
+  ^
+Application (Domain + EF Core for DbSet<T>)
+  ^            ^
+Infrastructure  Scheduling
+  ^       ^       ^
+  +--- API -------+
+```
+
+- **Domain** — Entities (20), enums (`UserRole`, `TimetableStatus`, `ReportType`), interfaces (`ITenantEntity`, `IAuditableEntity`). Zero dependencies.
+- **Application** — DTOs (records), FluentValidation validators, interfaces (`IAppDbContext`, `ITenantProvider`, `ITokenService`, `ITimetableGenerator`, `IPreflightValidator`, `ITimetableEntryValidator`, `ITimetableGenerationQueue`), mapping extensions.
+- **Infrastructure** — `AppDbContext`, EF configurations (`Data/Configurations/`), services (`Services/`). DI wired via `DependencyInjection.AddInfrastructure()`. Contains: `TenantProvider`, `TokenService`, `PreflightValidator`, `TimetableEntryValidator`, `SchedulingInputBuilder`, `TimetableGenerationQueue` (Channel&lt;T&gt;), `TimetableGenerationService` (BackgroundService), `TimetableProgressTracker` (singleton, `ConcurrentDictionary<Guid, int>` for live progress).
+- **Scheduling** — Timetable generation engine. Depends only on Application (no EF/Infrastructure). Contains: `TimetableGenerator` (implements `ITimetableGenerator`), `ConstraintPropagation`, `BacktrackingSolver`, `HardConstraintChecker`, `SoftConstraintScorer`, `ReportGenerator`. Registered in `Program.cs`, not `AddInfrastructure()`. `ConstraintPropagation` reads `MaxPeriodsPerDay` and `AllowDoublePeriods` from `SchedulingRequirement` (not `SchedulingSubject`) and stores `MaxPeriodsPerDay` on `LessonVariable` for use by `HardConstraintChecker.CheckSubjectDailyLimit`.
+- **API** — `Program.cs`, 17 endpoint files (`Endpoints/`), `ValidationFilter<T>`, `GlobalExceptionHandler`.
+
+**Test projects:**
+- **Tests.Unit** — xUnit v3, FluentAssertions, NSubstitute. Tests scheduling constraints, solver, and propagation. `TestDataBuilder` creates minimal `SchedulingInput` fixtures.
+- **Tests.Integration** — xUnit v3, Testcontainers PostgreSQL, Mvc.Testing. `CustomWebApplicationFactory` replaces DbContext with Testcontainers and removes the `TimetableGenerationService` hosted service.
+
+## Multi-Tenancy
+
+Every tenant-scoped entity implements `ITenantEntity` (has `TenantId`). Isolation is enforced by:
+
+1. **Global query filter** — `AppDbContext.OnModelCreating` dynamically applies `e.TenantId == tenantProvider.TenantId` to all `ITenantEntity` types via expression trees.
+2. **TenantInterceptor** — `SaveChangesInterceptor` that auto-stamps `TenantId` on new entities.
+3. **TenantProvider** — Reads `tenant_id` claim from JWT via `IHttpContextAccessor`. Also supports `SetTenantId(Guid)` override for background services that lack HTTP context.
+
+Auth endpoints (login, register, refresh) use `IgnoreQueryFilters()` since tenant context isn't established before authentication.
+
+**Critical implementation detail:** The global query filter in `AppDbContext.OnModelCreating` captures a reference to `_currentTenantId` (a property on the DbContext), not the `ITenantProvider` value at the time of model creation. This ensures EF Core re-evaluates the tenant ID per DbContext instance. Using `Expression.Constant(_tenantProvider)` instead would cause stale cached filter values across DI scopes — do not change this pattern.
+
+## Async Timetable Generation
+
+Timetable creation is asynchronous: `POST /api/v1/timetables` creates a record with status `Generating`, enqueues a `TimetableGenerationRequest` onto a `Channel<T>`, and returns 202. The `TimetableGenerationService` (BackgroundService) reads from the channel, creates a DI scope, sets the tenant ID on `TenantProvider`, builds a `SchedulingInput` snapshot, runs `ITimetableGenerator.GenerateAsync` with a `Progress<int>` callback that writes to `TimetableProgressTracker`, and persists entries + reports. Progress is cleaned up from the tracker after completion. Clients poll `GET /{id}` until status changes to `Draft` or `Failed`; the `ProgressPercentage` field on the response is served from `TimetableProgressTracker` while generating.
+
+## Conventions
+
+- **Endpoints**: Static classes with `MapXxxEndpoints()` extension method on `IEndpointRouteBuilder`. Each returns a `RouteGroupBuilder`. New endpoints must be registered in `Program.cs` via `app.MapXxxEndpoints()`.
+- **DTOs**: Records in `Application/DTOs/{Feature}/`. Named `CreateXxxRequest`, `UpdateXxxRequest`, `XxxResponse`.
+- **Mapping**: Static extension methods in `Application/Mapping/MappingExtensions.cs` — `ToResponse()` and `ToEntity()`. No AutoMapper.
+- **Validation**: FluentValidation with `ValidationFilter<T>` endpoint filter. Validators in `Application/Validators/` are auto-registered via `AddValidatorsFromAssemblyContaining`.
+- **Swagger**: Every endpoint has `.WithSummary()`, `.Produces<T>()`, and where applicable `.WithDescription()`, `.ProducesValidationProblem()`, `.ProducesProblem(StatusCodes.Status404NotFound)`. Maintain these when adding or modifying endpoints.
+- **EF Configurations**: One `IEntityTypeConfiguration<T>` per entity in `Infrastructure/Data/Configurations/`. Unique indexes typically on `TenantId + Name`. Enum properties use `.HasConversion<string>()`.
+- **Authorization policies**: `"OrgAdmin"` and `"ScheduleManagerOrAbove"` (OrgAdmin + ScheduleManager).
+- **Entity patterns**: All entities use `Guid` primary keys. Navigation properties assigned `= null!`. Collections initialized with `= []`. `TimeOnly` used for time slots. Tenant-scoped entities implement `ITenantEntity`. Auditable entities implement `IAuditableEntity`. Child-of-tenant entities (e.g., `TeacherSubjectQualification`) may only implement `IAuditableEntity` — their tenancy is enforced via their parent's query filter. `Tenant` is the root entity (implements `IAuditableEntity` only, not `ITenantEntity`).
+- **Notable entity fields**: `Subject.Color` (hex string, default `"#DBEAFE"`) for UI rendering. `Tenant.DefaultLanguage` (default `"nb"`), `Tenant.SetupCompleted` (bool), `Tenant.SetupProgressJson` (nullable JSON string). `User.LanguagePreference` (nullable, overrides tenant default). `GradeSubjectRequirement.MaxPeriodsPerDay` (default 2) and `GradeSubjectRequirement.AllowDoublePeriods` (default false) — per-grade scheduling constraints; these live on the requirement, not on `Subject`.
+- **Sub-resource endpoints**: Verify parent existence via `AnyAsync` before proceeding. Filter by both parent ID and item ID.
+
+## Database
+
+PostgreSQL via Npgsql. Connection string in `appsettings.json` under `ConnectionStrings:DefaultConnection`. `AppDbContext` auto-sets `CreatedAt`/`UpdatedAt` on `IAuditableEntity` types during `SaveChangesAsync`. New `DbSet` properties must be added to both `IAppDbContext` (Application) and `AppDbContext` (Infrastructure).
+
+## API Routes
+
+All under `/api/v1/`. Auth routes are anonymous. Most resource routes require `ScheduleManagerOrAbove`. User management requires `OrgAdmin`. Sub-resources are nested (e.g., `/grades/{gradeId}/groups`, `/teachers/{teacherId}/qualifications`).
+
+Notable non-obvious routes:
+- `GET /auth/my-teacher` — resolves the `Teacher` record linked to the current user's email
+- `GET /school/stats` — aggregated dashboard counts (grades, groups, teachers, subjects, rooms, timetables, published timetable ID)
+- `PUT /school/setup-progress` — updates `Tenant.SetupCompleted` and `SetupProgressJson` (onboarding wizard state)
+- `GET /timetables/published` — returns the single `Published` status timetable (uses `IgnoreQueryFilters` for tenant, returns 404 if none)
+- Bulk create endpoints: `POST /grades/bulk`, `POST /subjects/bulk`, `POST /teachers/bulk`, `POST /teaching-days/{dayId}/time-slots/bulk`, `POST /grades/{gradeId}/subject-requirements/bulk`
+
+## Tech Stack
+
+.NET 10 (SDK 10.0.101), PostgreSQL, EF Core, Serilog, FluentValidation, JWT Bearer auth, Swashbuckle (Swagger), xUnit v3, FluentAssertions, NSubstitute, Testcontainers. `Directory.Build.props` sets `<Nullable>enable</Nullable>`, `<ImplicitUsings>enable</ImplicitUsings>`, and `<LangVersion>latest</LangVersion>` for all projects.

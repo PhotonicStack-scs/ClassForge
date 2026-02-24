@@ -1,0 +1,23 @@
+{
+  "title": "Oppsett av skule",
+  "subtitle": "Kom i gang med ClassForge",
+  "step0": "Mal",
+  "step1": "Trinn og grupper",
+  "step2": "Rom",
+  "step3": "Fag",
+  "step4": "Tidsstruktur",
+  "step5": "Læreplan",
+  "step6": "Lærarar",
+  "step7": "Gjennomgang",
+  "selectTemplate": "Vel ein mal",
+  "barneskole": "Barneskule",
+  "ungdomsskole": "Ungdomsskule",
+  "combined": "Kombinert skule",
+  "videregaende": "Vidaregåande skule",
+  "customSetup": "Tilpassa oppsett",
+  "templateDescription": "Vel ein mal for å fylle ut vanlege innstillingar på førehand",
+  "reviewTitle": "Gjennomgang",
+  "reviewSubtitle": "Kontroller innstillingane dine",
+  "completeSetup": "Fullfør oppsett",
+  "progressSaved": "Framdrifta di er lagra"
+}
