@@ -46,6 +46,18 @@ export function useUpdateSubject() {
   });
 }
 
+export function useBulkCreateSubjects() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: components["schemas"]["BulkCreateSubjectsRequest"]) => {
+      const { data, error } = await apiClient.POST("/api/v1/subjects/bulk", { body });
+      if (error) throw error;
+      return data!;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["subjects"] }),
+  });
+}
+
 export function useDeleteSubject() {
   const qc = useQueryClient();
   return useMutation({

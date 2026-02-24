@@ -61,6 +61,18 @@ export function useDeleteGrade() {
   });
 }
 
+export function useBulkCreateGrades() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: components["schemas"]["BulkCreateGradesRequest"]) => {
+      const { data, error } = await apiClient.POST("/api/v1/grades/bulk", { body });
+      if (error) throw error;
+      return data!;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["grades"] }),
+  });
+}
+
 export function useGroups(gradeId: string) {
   return useQuery({
     queryKey: ["grades", gradeId, "groups"],
