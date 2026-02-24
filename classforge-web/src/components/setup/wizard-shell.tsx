@@ -17,8 +17,8 @@ import { Check } from "lucide-react";
 const STEPS = [
   "Template",
   "Grades",
-  "Subjects",
   "Rooms",
+  "Subjects",
   "Time",
   "Teachers",
   "Curriculum",
@@ -31,8 +31,8 @@ export function WizardShell({ locale }: { locale: string }) {
   const stepComponents = [
     <Step0Template key={0} />,
     <Step1Grades key={1} />,
-    <Step2Subjects key={2} />,
-    <Step3Rooms key={3} />,
+    <Step3Rooms key={2} />,
+    <Step2Subjects key={3} />,
     <Step4TimeStructure key={4} />,
     <Step5Teachers key={5} />,
     <Step6LessonConfig key={6} />,

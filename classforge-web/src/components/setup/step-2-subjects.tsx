@@ -1,40 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWizardStore } from "@/lib/stores/wizard-store";
 import { useSubjects, useCreateSubject, useDeleteSubject } from "@/lib/api/hooks/use-subjects";
+import { useRooms } from "@/lib/api/hooks/use-rooms";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, Plus, BookOpen } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-
-const SUBJECT_COLORS = [
-  "#4CAF50","#2196F3","#FF5722","#9C27B0","#FF9800",
-  "#00BCD4","#F44336","#3F51B5","#8BC34A","#FFC107",
-  "#009688","#E91E63","#673AB7","#CDDC39","#795548",
-  "#607D8B","#FF4081","#00E676","#40C4FF","#FFD740",
-];
+import { SUBJECT_COLORS, getNextUnusedColor } from "@/lib/utils/color";
+import { SubjectColorPicker } from "@/components/ui/subject-color-picker";
 
 export function Step2Subjects() {
   const { markStepCompleted, setCurrentStep } = useWizardStore();
   const { data: subjects = [], isLoading } = useSubjects();
+  const { data: rooms = [] } = useRooms();
   const createSubject = useCreateSubject();
   const deleteSubject = useDeleteSubject();
 
   const [name, setName] = useState("");
-  const [color, setColor] = useState(SUBJECT_COLORS[0]);
+  const [color, setColor] = useState<string>(SUBJECT_COLORS[0]);
+  const [requiresSpecialRoom, setRequiresSpecialRoom] = useState(false);
+  const [specialRoomId, setSpecialRoomId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setColor(getNextUnusedColor(subjects.map((s) => s.color ?? "")));
+  }, [subjects]);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
     try {
-      await createSubject.mutateAsync({ name: name.trim(), color, maxPeriodsPerDay: 2, allowDoublePeriods: false, requiresSpecialRoom: false });
+      await createSubject.mutateAsync({
+        name: name.trim(),
+        color,
+        requiresSpecialRoom,
+        specialRoomId: requiresSpecialRoom ? specialRoomId : null,
+      });
       setName("");
-      // advance color for next subject
-      const nextIdx = (SUBJECT_COLORS.indexOf(color) + 1) % SUBJECT_COLORS.length;
-      setColor(SUBJECT_COLORS[nextIdx]);
+      setRequiresSpecialRoom(false);
+      setSpecialRoomId(null);
     } catch {
       toast.error("Failed to add subject");
     }
@@ -53,35 +61,45 @@ export function Step2Subjects() {
       </div>
 
       <form onSubmit={handleAdd} className="space-y-3">
-        <div className="flex gap-2">
-          <Input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Subject name (e.g. Mathematics)"
-            className="max-w-xs"
+        <div className="flex gap-2 items-start">
+          <div className="flex-1 max-w-xs space-y-2">
+            <div className="flex gap-2">
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Subject name (e.g. Mathematics)"
+                className="flex-1"
+              />
+              <SubjectColorPicker value={color} onChange={setColor} />
+            </div>
+            <div className="flex items-center gap-2">
+          <Checkbox
+            id="wizard-specialRoom"
+            checked={requiresSpecialRoom}
+            onCheckedChange={(v) => {
+              setRequiresSpecialRoom(!!v);
+              if (!v) setSpecialRoomId(null);
+            }}
           />
+          <label htmlFor="wizard-specialRoom" className="text-sm shrink-0">Requires special room</label>
+          {requiresSpecialRoom && (
+            <Select value={specialRoomId ?? ""} onValueChange={(v) => setSpecialRoomId(v || null)}>
+              <SelectTrigger className="flex-1 h-8 text-xs">
+                <SelectValue placeholder="Select a room" />
+              </SelectTrigger>
+              <SelectContent>
+                {rooms.map((r) => (
+                  <SelectItem key={r.id} value={r.id!}>{r.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+            </div>
+          </div>
           <Button type="submit" size="sm" disabled={createSubject.isPending || !name.trim()}>
             <Plus className="w-4 h-4 mr-1" />
             Add
           </Button>
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground mb-1.5">Pick a color</p>
-          <div className="flex flex-wrap gap-1.5">
-            {SUBJECT_COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setColor(c)}
-                className={cn(
-                  "w-6 h-6 rounded-full border-2 transition-transform",
-                  color === c ? "border-foreground scale-110" : "border-transparent"
-                )}
-                style={{ backgroundColor: c }}
-                aria-label={c}
-              />
-            ))}
-          </div>
         </div>
       </form>
 
@@ -111,7 +129,7 @@ export function Step2Subjects() {
       )}
 
       <div className="pt-2 space-y-1">
-        <Button onClick={() => { markStepCompleted(2); setCurrentStep(3); }} disabled={subjects.length === 0}>
+        <Button onClick={() => { markStepCompleted(3); setCurrentStep(4); }} disabled={subjects.length === 0}>
           Continue{subjects.length > 0 && <Badge variant="secondary" className="ml-2">{subjects.length} subject{subjects.length !== 1 ? "s" : ""}</Badge>}
         </Button>
         {subjects.length === 0 && (

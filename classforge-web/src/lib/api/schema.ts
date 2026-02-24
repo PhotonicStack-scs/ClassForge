@@ -1861,7 +1861,7 @@ export interface paths {
         put?: never;
         /**
          * Create a subject
-         * @description Creates a new subject. Optionally link it to a special room and configure scheduling constraints like max periods per day and double-period allowance.
+         * @description Creates a new subject. Optionally link it to a special room. Scheduling constraints (max periods per day, double-period allowance) are configured per grade on the subject requirements.
          */
         post: {
             parameters: {
@@ -4350,6 +4350,9 @@ export interface components {
             /** Format: int32 */
             periodsPerWeek?: number;
             preferDoublePeriods?: boolean;
+            /** Format: int32 */
+            maxPeriodsPerDay?: number;
+            allowDoublePeriods?: boolean;
         };
         CreateGroupRequest: {
             name?: string | null;
@@ -4366,9 +4369,6 @@ export interface components {
             requiresSpecialRoom?: boolean;
             /** Format: uuid */
             specialRoomId?: string | null;
-            /** Format: int32 */
-            maxPeriodsPerDay?: number;
-            allowDoublePeriods?: boolean;
             color?: string | null;
         };
         CreateTeacherDayConfigRequest: {
@@ -4461,6 +4461,9 @@ export interface components {
             /** Format: int32 */
             periodsPerWeek?: number;
             preferDoublePeriods?: boolean;
+            /** Format: int32 */
+            maxPeriodsPerDay?: number;
+            allowDoublePeriods?: boolean;
             subjectName?: string | null;
         };
         GroupResponse: {
@@ -4539,9 +4542,6 @@ export interface components {
             requiresSpecialRoom?: boolean;
             /** Format: uuid */
             specialRoomId?: string | null;
-            /** Format: int32 */
-            maxPeriodsPerDay?: number;
-            allowDoublePeriods?: boolean;
             color?: string | null;
         };
         TeacherDayConfigResponse: {
@@ -4693,6 +4693,9 @@ export interface components {
             /** Format: int32 */
             periodsPerWeek?: number;
             preferDoublePeriods?: boolean;
+            /** Format: int32 */
+            maxPeriodsPerDay?: number;
+            allowDoublePeriods?: boolean;
         };
         UpdateGroupRequest: {
             name?: string | null;
@@ -4715,9 +4718,6 @@ export interface components {
             requiresSpecialRoom?: boolean;
             /** Format: uuid */
             specialRoomId?: string | null;
-            /** Format: int32 */
-            maxPeriodsPerDay?: number;
-            allowDoublePeriods?: boolean;
             color?: string | null;
         };
         UpdateTeacherDayConfigRequest: {
