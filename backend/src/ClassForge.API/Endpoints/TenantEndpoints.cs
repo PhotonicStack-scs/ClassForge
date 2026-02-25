@@ -110,8 +110,8 @@ public static class TenantEndpoints
             .FirstOrDefaultAsync();
 
         return Results.Ok(new DashboardStatsResponse(
-            await db.Grades.CountAsync(),
-            await db.Groups.CountAsync(),
+            await db.Years.CountAsync(),
+            await db.Classes.CountAsync(),
             await db.Teachers.CountAsync(),
             await db.Subjects.CountAsync(),
             await db.Rooms.CountAsync(),

@@ -21,10 +21,10 @@ public static class ReportGenerator
 
     private static void CheckTeacherSplits(SchedulingState state, SchedulingInput input, List<GeneratedReport> reports)
     {
-        // Group assignments by (groupIds key, subjectId) and count distinct teachers
+        // Group assignments by (classIds key, subjectId) and count distinct teachers
         var groupings = state.Variables
             .Where(v => v.IsAssigned)
-            .GroupBy(v => (GroupKey: string.Join(",", v.GroupIds.Order()), v.SubjectId));
+            .GroupBy(v => (ClassKey: string.Join(",", v.ClassIds.Order()), v.SubjectId));
 
         foreach (var group in groupings)
         {
@@ -34,7 +34,7 @@ public static class ReportGenerator
                 var subject = input.Subjects.FirstOrDefault(s => s.Id == group.Key.SubjectId);
                 reports.Add(new GeneratedReport(
                     "Warning", "TeacherSplit",
-                    $"Subject '{subject?.Name}' is taught by {distinctTeachers} different teachers for the same group.",
+                    $"Subject '{subject?.Name}' is taught by {distinctTeachers} different teachers for the same class.",
                     "Subject", group.Key.SubjectId));
             }
         }
@@ -44,12 +44,12 @@ public static class ReportGenerator
     {
         foreach (var teacher in input.Teachers)
         {
-            foreach (var day in input.TeachingDays)
+            foreach (var day in input.SchoolDays)
             {
                 var slotsUsed = state.Variables
                     .Where(v => v.IsAssigned && v.CurrentAssignment!.TeacherId == teacher.Id)
-                    .Select(v => input.TeachingDays.SelectMany(d => d.TimeSlots).First(s => s.Id == v.CurrentAssignment!.TimeSlotId))
-                    .Where(s => s.TeachingDayId == day.Id)
+                    .Select(v => input.SchoolDays.SelectMany(d => d.TimeSlots).First(s => s.Id == v.CurrentAssignment!.TimeSlotId))
+                    .Where(s => s.SchoolDayId == day.Id)
                     .Select(s => s.SlotNumber)
                     .Distinct()
                     .OrderBy(n => n)
@@ -77,16 +77,16 @@ public static class ReportGenerator
 
     private static void CheckSubjectClustering(SchedulingState state, SchedulingInput input, List<GeneratedReport> reports)
     {
-        // Check if any group has the same subject on too many days or too clustered
+        // Check if any class has the same subject on too many days or too clustered
         var groupings = state.Variables
             .Where(v => v.IsAssigned)
-            .SelectMany(v => v.GroupIds.Select(gid => new { GroupId = gid, v.SubjectId, v.CurrentAssignment }))
-            .GroupBy(x => (x.GroupId, x.SubjectId));
+            .SelectMany(v => v.ClassIds.Select(cid => new { ClassId = cid, v.SubjectId, v.CurrentAssignment }))
+            .GroupBy(x => (x.ClassId, x.SubjectId));
 
         foreach (var group in groupings)
         {
             var dayIds = group
-                .Select(x => input.TeachingDays.SelectMany(d => d.TimeSlots).First(s => s.Id == x.CurrentAssignment!.TimeSlotId).TeachingDayId)
+                .Select(x => input.SchoolDays.SelectMany(d => d.TimeSlots).First(s => s.Id == x.CurrentAssignment!.TimeSlotId).SchoolDayId)
                 .ToList();
 
             var distinctDays = dayIds.Distinct().Count();
@@ -97,10 +97,10 @@ public static class ReportGenerator
             if (totalPeriods >= 3 && maxOnOneDay > totalPeriods / 2 + 1)
             {
                 var subject = input.Subjects.FirstOrDefault(s => s.Id == group.Key.SubjectId);
-                var grp = input.Groups.FirstOrDefault(g => g.Id == group.Key.GroupId);
+                var schoolClass = input.Classes.FirstOrDefault(c => c.Id == group.Key.ClassId);
                 reports.Add(new GeneratedReport(
                     "Warning", "SubjectClustering",
-                    $"Subject '{subject?.Name}' for group '{grp?.Name}' has {maxOnOneDay}/{totalPeriods} periods on a single day.",
+                    $"Subject '{subject?.Name}' for class '{schoolClass?.Name}' has {maxOnOneDay}/{totalPeriods} periods on a single day.",
                     "Subject", group.Key.SubjectId));
             }
         }
@@ -115,14 +115,14 @@ public static class ReportGenerator
 
             var subject = input.Subjects.First(s => s.Id == req.SubjectId);
             var hasDouble = state.Variables.Any(v =>
-                v.IsAssigned && v.SubjectId == req.SubjectId && v.GradeId == req.GradeId && v.IsDoublePeriod);
+                v.IsAssigned && v.SubjectId == req.SubjectId && v.YearId == req.YearId && v.IsDoublePeriod);
 
             if (!hasDouble)
             {
                 reports.Add(new GeneratedReport(
                     "Info", "DoublePeriodNotUsed",
-                    $"Subject '{subject.Name}' in grade prefers double periods but none were scheduled.",
-                    "GradeSubjectRequirement", req.Id));
+                    $"Subject '{subject.Name}' in year prefers double periods but none were scheduled.",
+                    "YearCurriculum", req.Id));
             }
         }
     }
@@ -150,8 +150,8 @@ public static class ReportGenerator
         {
             reports.Add(new GeneratedReport(
                 "Error", "InfeasibleConstraint",
-                $"Could not schedule period {variable.PeriodIndex + 1} for subject {variable.SubjectId} (groups: {string.Join(", ", variable.GroupIds)}).",
-                "GradeSubjectRequirement", null));
+                $"Could not schedule period {variable.PeriodIndex + 1} for subject {variable.SubjectId} (classes: {string.Join(", ", variable.ClassIds)}).",
+                "YearCurriculum", null));
         }
     }
 }

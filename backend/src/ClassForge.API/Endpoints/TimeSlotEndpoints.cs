@@ -10,13 +10,13 @@ public static class TimeSlotEndpoints
 {
     public static RouteGroupBuilder MapTimeSlotEndpoints(this IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup("/api/v1/teaching-days/{dayId:guid}/time-slots")
+        var group = routes.MapGroup("/api/v1/school-days/{dayId:guid}/time-slots")
             .WithTags("Time Slots")
             .RequireAuthorization("ScheduleManagerOrAbove");
 
         group.MapGet("/", GetAll)
-            .WithSummary("List time slots for a teaching day")
-            .WithDescription("Returns all time slots for the specified teaching day, ordered by slot number. Includes both lesson slots and breaks.")
+            .WithSummary("List time slots for a school day")
+            .WithDescription("Returns all time slots for the specified school day, ordered by slot number. Includes both lesson slots and breaks.")
             .Produces<List<TimeSlotResponse>>();
 
         group.MapGet("/{id:guid}", GetById)
@@ -27,7 +27,7 @@ public static class TimeSlotEndpoints
         group.MapPost("/", Create)
             .AddEndpointFilter<ValidationFilter<CreateTimeSlotRequest>>()
             .WithSummary("Create a time slot")
-            .WithDescription("Creates a new time slot within a teaching day. Specify start/end times (HH:mm) and whether this slot is a break.")
+            .WithDescription("Creates a new time slot within a school day. Specify start/end times (HH:mm) and whether this slot is a break.")
             .Produces<TimeSlotResponse>(StatusCodes.Status201Created)
             .ProducesValidationProblem();
 
@@ -55,7 +55,7 @@ public static class TimeSlotEndpoints
     private static async Task<IResult> GetAll(Guid dayId, IAppDbContext db)
     {
         var slots = await db.TimeSlots
-            .Where(s => s.TeachingDayId == dayId)
+            .Where(s => s.SchoolDayId == dayId)
             .OrderBy(s => s.SlotNumber)
             .ToListAsync();
         return Results.Ok(slots.Select(s => s.ToResponse()));
@@ -64,7 +64,7 @@ public static class TimeSlotEndpoints
     private static async Task<IResult> GetById(Guid dayId, Guid id, IAppDbContext db)
     {
         var slot = await db.TimeSlots
-            .FirstOrDefaultAsync(s => s.Id == id && s.TeachingDayId == dayId);
+            .FirstOrDefaultAsync(s => s.Id == id && s.SchoolDayId == dayId);
         return slot is null ? Results.NotFound() : Results.Ok(slot.ToResponse());
     }
 
@@ -77,13 +77,13 @@ public static class TimeSlotEndpoints
         db.TimeSlots.Add(entity);
         await db.SaveChangesAsync();
 
-        return Results.Created($"/api/v1/teaching-days/{dayId}/time-slots/{entity.Id}", entity.ToResponse());
+        return Results.Created($"/api/v1/school-days/{dayId}/time-slots/{entity.Id}", entity.ToResponse());
     }
 
     private static async Task<IResult> Update(Guid dayId, Guid id, UpdateTimeSlotRequest request, IAppDbContext db)
     {
         var slot = await db.TimeSlots
-            .FirstOrDefaultAsync(s => s.Id == id && s.TeachingDayId == dayId);
+            .FirstOrDefaultAsync(s => s.Id == id && s.SchoolDayId == dayId);
         if (slot is null) return Results.NotFound();
 
         slot.SlotNumber = request.SlotNumber;
@@ -98,7 +98,7 @@ public static class TimeSlotEndpoints
     private static async Task<IResult> Delete(Guid dayId, Guid id, IAppDbContext db)
     {
         var slot = await db.TimeSlots
-            .FirstOrDefaultAsync(s => s.Id == id && s.TeachingDayId == dayId);
+            .FirstOrDefaultAsync(s => s.Id == id && s.SchoolDayId == dayId);
         if (slot is null) return Results.NotFound();
 
         db.TimeSlots.Remove(slot);
@@ -116,6 +116,6 @@ public static class TimeSlotEndpoints
         db.TimeSlots.AddRange(entities);
         await db.SaveChangesAsync();
 
-        return Results.Created($"/api/v1/teaching-days/{dayId}/time-slots", entities.Select(s => s.ToResponse()).ToList());
+        return Results.Created($"/api/v1/school-days/{dayId}/time-slots", entities.Select(s => s.ToResponse()).ToList());
     }
 }

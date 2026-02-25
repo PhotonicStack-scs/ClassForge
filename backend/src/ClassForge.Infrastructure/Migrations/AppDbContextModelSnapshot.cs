@@ -22,7 +22,7 @@ namespace ClassForge.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ClassForge.Domain.Entities.CombinedLessonConfig", b =>
+            modelBuilder.Entity("ClassForge.Domain.Entities.Class", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -30,174 +30,6 @@ namespace ClassForge.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("GradeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsMandatory")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("MaxGroupsPerLesson")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("SubjectId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GradeId");
-
-                    b.HasIndex("SubjectId");
-
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("CombinedLessonConfigs");
-                });
-
-            modelBuilder.Entity("ClassForge.Domain.Entities.CombinedLessonGroup", b =>
-                {
-                    b.Property<Guid>("CombinedLessonConfigId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("GroupId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("CombinedLessonConfigId", "GroupId");
-
-                    b.HasIndex("GroupId");
-
-                    b.ToTable("CombinedLessonGroups");
-                });
-
-            modelBuilder.Entity("ClassForge.Domain.Entities.Grade", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TenantId", "Name")
-                        .IsUnique();
-
-                    b.ToTable("Grades");
-                });
-
-            modelBuilder.Entity("ClassForge.Domain.Entities.GradeDayConfig", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("GradeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("MaxPeriods")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("TeachingDayId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GradeId");
-
-                    b.HasIndex("TeachingDayId");
-
-                    b.HasIndex("TenantId", "GradeId", "TeachingDayId")
-                        .IsUnique();
-
-                    b.ToTable("GradeDayConfigs");
-                });
-
-            modelBuilder.Entity("ClassForge.Domain.Entities.GradeSubjectRequirement", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("AllowDoublePeriods")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("GradeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("MaxPeriodsPerDay")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("PeriodsPerWeek")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("PreferDoublePeriods")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid>("SubjectId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GradeId");
-
-                    b.HasIndex("SubjectId");
-
-                    b.HasIndex("TenantId", "GradeId", "SubjectId")
-                        .IsUnique();
-
-                    b.ToTable("GradeSubjectRequirements");
-                });
-
-            modelBuilder.Entity("ClassForge.Domain.Entities.Group", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("GradeId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -213,14 +45,70 @@ namespace ClassForge.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("YearId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("GradeId");
+                    b.HasIndex("YearId");
 
-                    b.HasIndex("TenantId", "GradeId", "Name")
+                    b.HasIndex("TenantId", "YearId", "Name")
                         .IsUnique();
 
-                    b.ToTable("Groups");
+                    b.ToTable("Classes");
+                });
+
+            modelBuilder.Entity("ClassForge.Domain.Entities.CombinedLessonClass", b =>
+                {
+                    b.Property<Guid>("CombinedLessonConfigId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClassId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("CombinedLessonConfigId", "ClassId");
+
+                    b.HasIndex("ClassId");
+
+                    b.ToTable("CombinedLessonClasses");
+                });
+
+            modelBuilder.Entity("ClassForge.Domain.Entities.CombinedLessonConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsMandatory")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MaxClassesPerLesson")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("YearId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubjectId");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("YearId");
+
+                    b.ToTable("CombinedLessonConfigs");
                 });
 
             modelBuilder.Entity("ClassForge.Domain.Entities.Room", b =>
@@ -252,6 +140,38 @@ namespace ClassForge.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Rooms");
+                });
+
+            modelBuilder.Entity("ClassForge.Domain.Entities.SchoolDay", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "DayOfWeek")
+                        .IsUnique();
+
+                    b.ToTable("SchoolDays");
                 });
 
             modelBuilder.Entity("ClassForge.Domain.Entities.Subject", b =>
@@ -340,10 +260,10 @@ namespace ClassForge.Infrastructure.Migrations
                     b.Property<int>("MaxPeriods")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("TeacherId")
+                    b.Property<Guid>("SchoolDayId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("TeachingDayId")
+                    b.Property<Guid>("TeacherId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -351,9 +271,9 @@ namespace ClassForge.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TeachingDayId");
+                    b.HasIndex("SchoolDayId");
 
-                    b.HasIndex("TeacherId", "TeachingDayId")
+                    b.HasIndex("TeacherId", "SchoolDayId")
                         .IsUnique();
 
                     b.ToTable("TeacherDayConfigs");
@@ -400,10 +320,10 @@ namespace ClassForge.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("MaxGradeId")
+                    b.Property<Guid>("MaxYearId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("MinGradeId")
+                    b.Property<Guid>("MinYearId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("SubjectId")
@@ -417,9 +337,9 @@ namespace ClassForge.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MaxGradeId");
+                    b.HasIndex("MaxYearId");
 
-                    b.HasIndex("MinGradeId");
+                    b.HasIndex("MinYearId");
 
                     b.HasIndex("SubjectId");
 
@@ -427,38 +347,6 @@ namespace ClassForge.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("TeacherSubjectQualifications");
-                });
-
-            modelBuilder.Entity("ClassForge.Domain.Entities.TeachingDay", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("DayOfWeek")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TenantId", "DayOfWeek")
-                        .IsUnique();
-
-                    b.ToTable("TeachingDays");
                 });
 
             modelBuilder.Entity("ClassForge.Domain.Entities.Tenant", b =>
@@ -513,14 +401,14 @@ namespace ClassForge.Infrastructure.Migrations
                     b.Property<bool>("IsBreak")
                         .HasColumnType("boolean");
 
+                    b.Property<Guid>("SchoolDayId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("SlotNumber")
                         .HasColumnType("integer");
 
                     b.Property<TimeOnly>("StartTime")
                         .HasColumnType("time without time zone");
-
-                    b.Property<Guid>("TeachingDayId")
-                        .HasColumnType("uuid");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
@@ -532,7 +420,7 @@ namespace ClassForge.Infrastructure.Migrations
 
                     b.HasIndex("TenantId");
 
-                    b.HasIndex("TeachingDayId", "SlotNumber")
+                    b.HasIndex("SchoolDayId", "SlotNumber")
                         .IsUnique();
 
                     b.ToTable("TimeSlots");
@@ -592,7 +480,7 @@ namespace ClassForge.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CombinedLessonGroupId")
+                    b.Property<Guid?>("CombinedLessonClassId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -634,19 +522,19 @@ namespace ClassForge.Infrastructure.Migrations
                     b.ToTable("TimetableEntries");
                 });
 
-            modelBuilder.Entity("ClassForge.Domain.Entities.TimetableEntryGroup", b =>
+            modelBuilder.Entity("ClassForge.Domain.Entities.TimetableEntryClass", b =>
                 {
                     b.Property<Guid>("TimetableEntryId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("GroupId")
+                    b.Property<Guid>("ClassId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("TimetableEntryId", "GroupId");
+                    b.HasKey("TimetableEntryId", "ClassId");
 
-                    b.HasIndex("GroupId");
+                    b.HasIndex("ClassId");
 
-                    b.ToTable("TimetableEntryGroups");
+                    b.ToTable("TimetableEntryClasses");
                 });
 
             modelBuilder.Entity("ClassForge.Domain.Entities.TimetableReport", b =>
@@ -754,98 +642,158 @@ namespace ClassForge.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("ClassForge.Domain.Entities.CombinedLessonConfig", b =>
+            modelBuilder.Entity("ClassForge.Domain.Entities.Year", b =>
                 {
-                    b.HasOne("ClassForge.Domain.Entities.Grade", "Grade")
-                        .WithMany()
-                        .HasForeignKey("GradeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
-                    b.HasOne("ClassForge.Domain.Entities.Subject", "Subject")
-                        .WithMany()
-                        .HasForeignKey("SubjectId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("Years");
+                });
+
+            modelBuilder.Entity("ClassForge.Domain.Entities.YearCurriculum", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("AllowDoublePeriods")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MaxPeriodsPerDay")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PeriodsPerWeek")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("PreferDoublePeriods")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("YearId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubjectId");
+
+                    b.HasIndex("YearId");
+
+                    b.HasIndex("TenantId", "YearId", "SubjectId")
+                        .IsUnique();
+
+                    b.ToTable("YearCurricula");
+                });
+
+            modelBuilder.Entity("ClassForge.Domain.Entities.YearDayConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MaxPeriods")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("SchoolDayId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("YearId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SchoolDayId");
+
+                    b.HasIndex("YearId");
+
+                    b.HasIndex("TenantId", "YearId", "SchoolDayId")
+                        .IsUnique();
+
+                    b.ToTable("YearDayConfigs");
+                });
+
+            modelBuilder.Entity("ClassForge.Domain.Entities.Class", b =>
+                {
                     b.HasOne("ClassForge.Domain.Entities.Tenant", "Tenant")
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Grade");
-
-                    b.Navigation("Subject");
+                    b.HasOne("ClassForge.Domain.Entities.Year", "Year")
+                        .WithMany("Classes")
+                        .HasForeignKey("YearId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("Tenant");
+
+                    b.Navigation("Year");
                 });
 
-            modelBuilder.Entity("ClassForge.Domain.Entities.CombinedLessonGroup", b =>
+            modelBuilder.Entity("ClassForge.Domain.Entities.CombinedLessonClass", b =>
                 {
+                    b.HasOne("ClassForge.Domain.Entities.Class", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("ClassForge.Domain.Entities.CombinedLessonConfig", "CombinedLessonConfig")
-                        .WithMany("Groups")
+                        .WithMany("Classes")
                         .HasForeignKey("CombinedLessonConfigId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ClassForge.Domain.Entities.Group", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                    b.Navigation("Class");
 
                     b.Navigation("CombinedLessonConfig");
-
-                    b.Navigation("Group");
                 });
 
-            modelBuilder.Entity("ClassForge.Domain.Entities.Grade", b =>
+            modelBuilder.Entity("ClassForge.Domain.Entities.CombinedLessonConfig", b =>
                 {
-                    b.HasOne("ClassForge.Domain.Entities.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("ClassForge.Domain.Entities.GradeDayConfig", b =>
-                {
-                    b.HasOne("ClassForge.Domain.Entities.Grade", "Grade")
-                        .WithMany("DayConfigs")
-                        .HasForeignKey("GradeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ClassForge.Domain.Entities.TeachingDay", "TeachingDay")
-                        .WithMany()
-                        .HasForeignKey("TeachingDayId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ClassForge.Domain.Entities.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Grade");
-
-                    b.Navigation("TeachingDay");
-
-                    b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("ClassForge.Domain.Entities.GradeSubjectRequirement", b =>
-                {
-                    b.HasOne("ClassForge.Domain.Entities.Grade", "Grade")
-                        .WithMany("SubjectRequirements")
-                        .HasForeignKey("GradeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("ClassForge.Domain.Entities.Subject", "Subject")
                         .WithMany()
                         .HasForeignKey("SubjectId")
@@ -858,33 +806,31 @@ namespace ClassForge.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Grade");
+                    b.HasOne("ClassForge.Domain.Entities.Year", "Year")
+                        .WithMany()
+                        .HasForeignKey("YearId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("Subject");
 
                     b.Navigation("Tenant");
+
+                    b.Navigation("Year");
                 });
 
-            modelBuilder.Entity("ClassForge.Domain.Entities.Group", b =>
+            modelBuilder.Entity("ClassForge.Domain.Entities.Room", b =>
                 {
-                    b.HasOne("ClassForge.Domain.Entities.Grade", "Grade")
-                        .WithMany("Groups")
-                        .HasForeignKey("GradeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("ClassForge.Domain.Entities.Tenant", "Tenant")
                         .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Grade");
-
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("ClassForge.Domain.Entities.Room", b =>
+            modelBuilder.Entity("ClassForge.Domain.Entities.SchoolDay", b =>
                 {
                     b.HasOne("ClassForge.Domain.Entities.Tenant", "Tenant")
                         .WithMany()
@@ -926,21 +872,21 @@ namespace ClassForge.Infrastructure.Migrations
 
             modelBuilder.Entity("ClassForge.Domain.Entities.TeacherDayConfig", b =>
                 {
+                    b.HasOne("ClassForge.Domain.Entities.SchoolDay", "SchoolDay")
+                        .WithMany()
+                        .HasForeignKey("SchoolDayId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("ClassForge.Domain.Entities.Teacher", "Teacher")
                         .WithMany("DayConfigs")
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ClassForge.Domain.Entities.TeachingDay", "TeachingDay")
-                        .WithMany()
-                        .HasForeignKey("TeachingDayId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                    b.Navigation("SchoolDay");
 
                     b.Navigation("Teacher");
-
-                    b.Navigation("TeachingDay");
                 });
 
             modelBuilder.Entity("ClassForge.Domain.Entities.TeacherSlotBlock", b =>
@@ -964,15 +910,15 @@ namespace ClassForge.Infrastructure.Migrations
 
             modelBuilder.Entity("ClassForge.Domain.Entities.TeacherSubjectQualification", b =>
                 {
-                    b.HasOne("ClassForge.Domain.Entities.Grade", "MaxGrade")
+                    b.HasOne("ClassForge.Domain.Entities.Year", "MaxYear")
                         .WithMany()
-                        .HasForeignKey("MaxGradeId")
+                        .HasForeignKey("MaxYearId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ClassForge.Domain.Entities.Grade", "MinGrade")
+                    b.HasOne("ClassForge.Domain.Entities.Year", "MinYear")
                         .WithMany()
-                        .HasForeignKey("MinGradeId")
+                        .HasForeignKey("MinYearId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -988,31 +934,20 @@ namespace ClassForge.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("MaxGrade");
+                    b.Navigation("MaxYear");
 
-                    b.Navigation("MinGrade");
+                    b.Navigation("MinYear");
 
                     b.Navigation("Subject");
 
                     b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("ClassForge.Domain.Entities.TeachingDay", b =>
-                {
-                    b.HasOne("ClassForge.Domain.Entities.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
-                });
-
             modelBuilder.Entity("ClassForge.Domain.Entities.TimeSlot", b =>
                 {
-                    b.HasOne("ClassForge.Domain.Entities.TeachingDay", "TeachingDay")
+                    b.HasOne("ClassForge.Domain.Entities.SchoolDay", "SchoolDay")
                         .WithMany("TimeSlots")
-                        .HasForeignKey("TeachingDayId")
+                        .HasForeignKey("SchoolDayId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -1022,7 +957,7 @@ namespace ClassForge.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("TeachingDay");
+                    b.Navigation("SchoolDay");
 
                     b.Navigation("Tenant");
                 });
@@ -1088,21 +1023,21 @@ namespace ClassForge.Infrastructure.Migrations
                     b.Navigation("Timetable");
                 });
 
-            modelBuilder.Entity("ClassForge.Domain.Entities.TimetableEntryGroup", b =>
+            modelBuilder.Entity("ClassForge.Domain.Entities.TimetableEntryClass", b =>
                 {
-                    b.HasOne("ClassForge.Domain.Entities.Group", "Group")
+                    b.HasOne("ClassForge.Domain.Entities.Class", "Class")
                         .WithMany()
-                        .HasForeignKey("GroupId")
+                        .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("ClassForge.Domain.Entities.TimetableEntry", "TimetableEntry")
-                        .WithMany("Groups")
+                        .WithMany("Classes")
                         .HasForeignKey("TimetableEntryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Group");
+                    b.Navigation("Class");
 
                     b.Navigation("TimetableEntry");
                 });
@@ -1129,18 +1064,79 @@ namespace ClassForge.Infrastructure.Migrations
                     b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("ClassForge.Domain.Entities.CombinedLessonConfig", b =>
+            modelBuilder.Entity("ClassForge.Domain.Entities.Year", b =>
                 {
-                    b.Navigation("Groups");
+                    b.HasOne("ClassForge.Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
                 });
 
-            modelBuilder.Entity("ClassForge.Domain.Entities.Grade", b =>
+            modelBuilder.Entity("ClassForge.Domain.Entities.YearCurriculum", b =>
                 {
-                    b.Navigation("DayConfigs");
+                    b.HasOne("ClassForge.Domain.Entities.Subject", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
-                    b.Navigation("Groups");
+                    b.HasOne("ClassForge.Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("SubjectRequirements");
+                    b.HasOne("ClassForge.Domain.Entities.Year", "Year")
+                        .WithMany("Curricula")
+                        .HasForeignKey("YearId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Subject");
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("Year");
+                });
+
+            modelBuilder.Entity("ClassForge.Domain.Entities.YearDayConfig", b =>
+                {
+                    b.HasOne("ClassForge.Domain.Entities.SchoolDay", "SchoolDay")
+                        .WithMany()
+                        .HasForeignKey("SchoolDayId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("ClassForge.Domain.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ClassForge.Domain.Entities.Year", "Year")
+                        .WithMany("DayConfigs")
+                        .HasForeignKey("YearId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("SchoolDay");
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("Year");
+                });
+
+            modelBuilder.Entity("ClassForge.Domain.Entities.CombinedLessonConfig", b =>
+                {
+                    b.Navigation("Classes");
+                });
+
+            modelBuilder.Entity("ClassForge.Domain.Entities.SchoolDay", b =>
+                {
+                    b.Navigation("TimeSlots");
                 });
 
             modelBuilder.Entity("ClassForge.Domain.Entities.Teacher", b =>
@@ -1152,11 +1148,6 @@ namespace ClassForge.Infrastructure.Migrations
                     b.Navigation("Qualifications");
                 });
 
-            modelBuilder.Entity("ClassForge.Domain.Entities.TeachingDay", b =>
-                {
-                    b.Navigation("TimeSlots");
-                });
-
             modelBuilder.Entity("ClassForge.Domain.Entities.Timetable", b =>
                 {
                     b.Navigation("Entries");
@@ -1166,7 +1157,16 @@ namespace ClassForge.Infrastructure.Migrations
 
             modelBuilder.Entity("ClassForge.Domain.Entities.TimetableEntry", b =>
                 {
-                    b.Navigation("Groups");
+                    b.Navigation("Classes");
+                });
+
+            modelBuilder.Entity("ClassForge.Domain.Entities.Year", b =>
+                {
+                    b.Navigation("Classes");
+
+                    b.Navigation("Curricula");
+
+                    b.Navigation("DayConfigs");
                 });
 #pragma warning restore 612, 618
         }

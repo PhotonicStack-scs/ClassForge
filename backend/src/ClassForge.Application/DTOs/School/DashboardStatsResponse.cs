@@ -1,8 +1,8 @@
 namespace ClassForge.Application.DTOs.School;
 
 public record DashboardStatsResponse(
-    int GradeCount,
-    int GroupCount,
+    int YearCount,
+    int ClassCount,
     int TeacherCount,
     int SubjectCount,
     int RoomCount,

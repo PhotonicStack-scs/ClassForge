@@ -12,8 +12,8 @@ public record GeneratedEntry(
     Guid TeacherId,
     Guid? RoomId,
     bool IsDoublePeriod,
-    Guid? CombinedLessonGroupId,
-    List<Guid> GroupIds);
+    Guid? CombinedLessonClassId,
+    List<Guid> ClassIds);
 
 public record GeneratedReport(
     string Type,

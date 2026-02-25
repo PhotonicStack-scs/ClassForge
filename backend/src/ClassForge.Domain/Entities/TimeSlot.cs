@@ -6,7 +6,7 @@ public class TimeSlot : ITenantEntity, IAuditableEntity
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }
-    public Guid TeachingDayId { get; set; }
+    public Guid SchoolDayId { get; set; }
     public int SlotNumber { get; set; }
     public TimeOnly StartTime { get; set; }
     public TimeOnly EndTime { get; set; }
@@ -15,5 +15,5 @@ public class TimeSlot : ITenantEntity, IAuditableEntity
     public DateTime? UpdatedAt { get; set; }
 
     public Tenant Tenant { get; set; } = null!;
-    public TeachingDay TeachingDay { get; set; } = null!;
+    public SchoolDay SchoolDay { get; set; } = null!;
 }

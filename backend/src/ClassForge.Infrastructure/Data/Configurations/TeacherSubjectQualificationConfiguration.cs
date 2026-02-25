@@ -12,7 +12,7 @@ public class TeacherSubjectQualificationConfiguration : IEntityTypeConfiguration
         builder.HasIndex(q => new { q.TeacherId, q.SubjectId }).IsUnique();
         builder.HasOne(q => q.Teacher).WithMany(t => t.Qualifications).HasForeignKey(q => q.TeacherId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne(q => q.Subject).WithMany().HasForeignKey(q => q.SubjectId).OnDelete(DeleteBehavior.NoAction);
-        builder.HasOne(q => q.MinGrade).WithMany().HasForeignKey(q => q.MinGradeId).OnDelete(DeleteBehavior.NoAction);
-        builder.HasOne(q => q.MaxGrade).WithMany().HasForeignKey(q => q.MaxGradeId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasOne(q => q.MinYear).WithMany().HasForeignKey(q => q.MinYearId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasOne(q => q.MaxYear).WithMany().HasForeignKey(q => q.MaxYearId).OnDelete(DeleteBehavior.NoAction);
     }
 }

@@ -10,7 +10,7 @@ public class UpdateTimetableEntryRequestValidator : AbstractValidator<UpdateTime
         RuleFor(x => x.TimeSlotId).NotEmpty();
         RuleFor(x => x.SubjectId).NotEmpty();
         RuleFor(x => x.TeacherId).NotEmpty();
-        RuleFor(x => x.GroupIds).NotEmpty();
-        RuleForEach(x => x.GroupIds).NotEmpty();
+        RuleFor(x => x.ClassIds).NotEmpty();
+        RuleForEach(x => x.ClassIds).NotEmpty();
     }
 }

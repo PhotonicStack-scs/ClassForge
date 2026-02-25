@@ -59,8 +59,8 @@ public static class TeacherQualificationEndpoints
 
         var qualifications = await db.TeacherSubjectQualifications
             .Include(q => q.Subject)
-            .Include(q => q.MinGrade)
-            .Include(q => q.MaxGrade)
+            .Include(q => q.MinYear)
+            .Include(q => q.MaxYear)
             .Where(q => q.TeacherId == teacherId)
             .ToListAsync();
         return Results.Ok(qualifications.Select(q => q.ToResponse()));
@@ -73,8 +73,8 @@ public static class TeacherQualificationEndpoints
 
         var q = await db.TeacherSubjectQualifications
             .Include(q => q.Subject)
-            .Include(q => q.MinGrade)
-            .Include(q => q.MaxGrade)
+            .Include(q => q.MinYear)
+            .Include(q => q.MaxYear)
             .FirstOrDefaultAsync(q => q.Id == id && q.TeacherId == teacherId);
         return q is null ? Results.NotFound() : Results.Ok(q.ToResponse());
     }
@@ -91,8 +91,8 @@ public static class TeacherQualificationEndpoints
 
         var loaded = await db.TeacherSubjectQualifications
             .Include(q => q.Subject)
-            .Include(q => q.MinGrade)
-            .Include(q => q.MaxGrade)
+            .Include(q => q.MinYear)
+            .Include(q => q.MaxYear)
             .FirstAsync(q => q.Id == entity.Id);
 
         return Results.Created($"/api/v1/teachers/{teacherId}/qualifications/{entity.Id}", loaded.ToResponse());
@@ -106,14 +106,14 @@ public static class TeacherQualificationEndpoints
         if (entity is null) return Results.NotFound();
 
         entity.SubjectId = request.SubjectId;
-        entity.MinGradeId = request.MinGradeId;
-        entity.MaxGradeId = request.MaxGradeId;
+        entity.MinYearId = request.MinYearId;
+        entity.MaxYearId = request.MaxYearId;
         await db.SaveChangesAsync();
 
         var loaded = await db.TeacherSubjectQualifications
             .Include(q => q.Subject)
-            .Include(q => q.MinGrade)
-            .Include(q => q.MaxGrade)
+            .Include(q => q.MinYear)
+            .Include(q => q.MaxYear)
             .FirstAsync(q => q.Id == id);
 
         return Results.Ok(loaded.ToResponse());

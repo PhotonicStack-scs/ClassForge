@@ -7,7 +7,7 @@ public class CreateTeacherDayConfigRequestValidator : AbstractValidator<CreateTe
 {
     public CreateTeacherDayConfigRequestValidator()
     {
-        RuleFor(x => x.TeachingDayId).NotEmpty();
+        RuleFor(x => x.SchoolDayId).NotEmpty();
         RuleFor(x => x.MaxPeriods).GreaterThanOrEqualTo(0);
     }
 }

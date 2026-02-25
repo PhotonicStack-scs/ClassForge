@@ -8,7 +8,7 @@ public class CreateTeacherQualificationRequestValidator : AbstractValidator<Crea
     public CreateTeacherQualificationRequestValidator()
     {
         RuleFor(x => x.SubjectId).NotEmpty();
-        RuleFor(x => x.MinGradeId).NotEmpty();
-        RuleFor(x => x.MaxGradeId).NotEmpty();
+        RuleFor(x => x.MinYearId).NotEmpty();
+        RuleFor(x => x.MaxYearId).NotEmpty();
     }
 }

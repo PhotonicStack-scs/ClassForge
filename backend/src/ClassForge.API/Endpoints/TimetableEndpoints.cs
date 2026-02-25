@@ -60,7 +60,7 @@ public static class TimetableEndpoints
 
         group.MapGet("/{id:guid}/entries", GetEntries)
             .WithSummary("Get timetable entries")
-            .WithDescription("Returns entries, optionally filtered by groupId, teacherId, or teachingDayId query parameters.")
+            .WithDescription("Returns entries, optionally filtered by classId, teacherId, or schoolDayId query parameters.")
             .Produces<List<TimetableEntryResponse>>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
@@ -82,8 +82,8 @@ public static class TimetableEndpoints
             .Produces<List<string>>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
-        group.MapGet("/{id:guid}/by-group/{groupId:guid}", GetByGroup)
-            .WithSummary("Get weekly view for a group")
+        group.MapGet("/{id:guid}/by-class/{classId:guid}", GetByClass)
+            .WithSummary("Get weekly view for a class")
             .Produces<TimetableViewResponse>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
@@ -193,25 +193,25 @@ public static class TimetableEndpoints
 
     private static async Task<IResult> GetEntries(
         Guid id, IAppDbContext db,
-        Guid? groupId = null, Guid? teacherId = null, Guid? teachingDayId = null)
+        Guid? classId = null, Guid? teacherId = null, Guid? schoolDayId = null)
     {
         var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id);
         if (timetable is null) return Results.NotFound();
 
         var query = db.TimetableEntries
-            .Include(e => e.Groups)
+            .Include(e => e.Classes)
             .Where(e => e.TimetableId == id);
 
-        if (groupId.HasValue)
-            query = query.Where(e => e.Groups.Any(g => g.GroupId == groupId.Value));
+        if (classId.HasValue)
+            query = query.Where(e => e.Classes.Any(c => c.ClassId == classId.Value));
 
         if (teacherId.HasValue)
             query = query.Where(e => e.TeacherId == teacherId.Value);
 
-        if (teachingDayId.HasValue)
+        if (schoolDayId.HasValue)
         {
             var slotIds = await db.TimeSlots
-                .Where(s => s.TeachingDayId == teachingDayId.Value)
+                .Where(s => s.SchoolDayId == schoolDayId.Value)
                 .Select(s => s.Id)
                 .ToListAsync();
             query = query.Where(e => slotIds.Contains(e.TimeSlotId));
@@ -256,7 +256,7 @@ public static class TimetableEndpoints
         if (timetable is null) return Results.NotFound();
 
         var entries = await db.TimetableEntries
-            .Include(e => e.Groups)
+            .Include(e => e.Classes)
             .Where(e => e.TimetableId == id)
             .ToListAsync(ct);
 
@@ -270,16 +270,16 @@ public static class TimetableEndpoints
         return Results.Ok(allIssues);
     }
 
-    private static async Task<IResult> GetByGroup(Guid id, Guid groupId, IAppDbContext db)
+    private static async Task<IResult> GetByClass(Guid id, Guid classId, IAppDbContext db)
     {
         var timetable = await db.Timetables.FirstOrDefaultAsync(t => t.Id == id);
         if (timetable is null) return Results.NotFound();
 
-        var group = await db.Groups.FirstOrDefaultAsync(g => g.Id == groupId);
-        if (group is null) return Results.NotFound();
+        var @class = await db.Classes.FirstOrDefaultAsync(c => c.Id == classId);
+        if (@class is null) return Results.NotFound();
 
-        var entries = await BuildViewEntries(db, id, e => e.Groups.Any(g => g.GroupId == groupId));
-        return Results.Ok(new TimetableViewResponse(id, "Group", group.Name, entries));
+        var entries = await BuildViewEntries(db, id, e => e.Classes.Any(c => c.ClassId == classId));
+        return Results.Ok(new TimetableViewResponse(id, "Class", @class.Name, entries));
     }
 
     private static async Task<IResult> GetByTeacher(Guid id, Guid teacherId, IAppDbContext db)
@@ -311,24 +311,24 @@ public static class TimetableEndpoints
         System.Linq.Expressions.Expression<Func<Domain.Entities.TimetableEntry, bool>> filter)
     {
         var entries = await db.TimetableEntries
-            .Include(e => e.TimeSlot).ThenInclude(s => s.TeachingDay)
+            .Include(e => e.TimeSlot).ThenInclude(s => s.SchoolDay)
             .Include(e => e.Subject)
             .Include(e => e.Teacher)
             .Include(e => e.Room)
-            .Include(e => e.Groups).ThenInclude(g => g.Group)
+            .Include(e => e.Classes).ThenInclude(c => c.Class)
             .Where(e => e.TimetableId == timetableId)
             .Where(filter)
             .ToListAsync();
 
         return entries.Select(e => new TimetableViewEntry(
             e.Id,
-            e.TimeSlot.TeachingDay.DayOfWeek,
+            e.TimeSlot.SchoolDay.DayOfWeek,
             e.TimeSlot.SlotNumber,
             e.Subject.Name,
             e.Teacher.Name,
             e.Room?.Name,
             e.IsDoublePeriod,
-            e.Groups.Select(g => g.Group.Name).ToList()
+            e.Classes.Select(c => c.Class.Name).ToList()
         )).ToList();
     }
 
@@ -348,7 +348,7 @@ public static class TimetableEndpoints
                 statusCode: StatusCodes.Status400BadRequest);
 
         var entry = await db.TimetableEntries
-            .Include(e => e.Groups)
+            .Include(e => e.Classes)
             .FirstOrDefaultAsync(e => e.Id == entryId && e.TimetableId == id, ct);
         if (entry is null) return Results.NotFound();
 
@@ -359,12 +359,12 @@ public static class TimetableEndpoints
         entry.RoomId = request.RoomId;
         entry.IsDoublePeriod = request.IsDoublePeriod;
 
-        // Replace groups
-        db.TimetableEntryGroups.RemoveRange(entry.Groups);
-        entry.Groups = request.GroupIds.Select(gid => new Domain.Entities.TimetableEntryGroup
+        // Replace classes
+        db.TimetableEntryClasses.RemoveRange(entry.Classes);
+        entry.Classes = request.ClassIds.Select(cid => new Domain.Entities.TimetableEntryClass
         {
             TimetableEntryId = entry.Id,
-            GroupId = gid
+            ClassId = cid
         }).ToList();
 
         // Validate

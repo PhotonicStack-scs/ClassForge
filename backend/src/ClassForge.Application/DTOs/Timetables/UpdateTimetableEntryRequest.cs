@@ -6,4 +6,4 @@ public record UpdateTimetableEntryRequest(
     Guid TeacherId,
     Guid? RoomId,
     bool IsDoublePeriod,
-    List<Guid> GroupIds);
+    List<Guid> ClassIds);

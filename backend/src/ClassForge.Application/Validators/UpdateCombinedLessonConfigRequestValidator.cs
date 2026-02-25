@@ -7,7 +7,7 @@ public class UpdateCombinedLessonConfigRequestValidator : AbstractValidator<Upda
 {
     public UpdateCombinedLessonConfigRequestValidator()
     {
-        RuleFor(x => x.MaxGroupsPerLesson).GreaterThan(1);
-        RuleFor(x => x.GroupIds).NotEmpty().WithMessage("At least one group must be specified.");
+        RuleFor(x => x.MaxClassesPerLesson).GreaterThan(1);
+        RuleFor(x => x.ClassIds).NotEmpty().WithMessage("At least one class must be specified.");
     }
 }

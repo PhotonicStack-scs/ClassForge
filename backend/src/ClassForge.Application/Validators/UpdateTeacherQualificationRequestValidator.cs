@@ -8,7 +8,7 @@ public class UpdateTeacherQualificationRequestValidator : AbstractValidator<Upda
     public UpdateTeacherQualificationRequestValidator()
     {
         RuleFor(x => x.SubjectId).NotEmpty();
-        RuleFor(x => x.MinGradeId).NotEmpty();
-        RuleFor(x => x.MaxGradeId).NotEmpty();
+        RuleFor(x => x.MinYearId).NotEmpty();
+        RuleFor(x => x.MaxYearId).NotEmpty();
     }
 }

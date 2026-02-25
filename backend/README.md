@@ -1,6 +1,6 @@
 # ClassForge
 
-A multi-tenant SaaS backend that automatically generates weekly class timetables for schools. Schools define their structure (grades, groups, rooms), teachers (availability, qualifications), and curriculum requirements, then ClassForge uses a constraint-satisfaction algorithm to produce optimized weekly schedules.
+A multi-tenant SaaS backend that automatically generates weekly class timetables for schools. Schools define their structure (years, classes, rooms), teachers (availability, qualifications), and curriculum requirements, then ClassForge uses a constraint-satisfaction algorithm to produce optimized weekly schedules.
 
 ## Tech Stack
 
@@ -60,7 +60,7 @@ The API starts at `https://localhost:5001` (or `http://localhost:5000`). Verify 
 
 Browse to `/swagger` for interactive API documentation with typed request/response schemas for all endpoints.
 
-In Development mode, a demo school is automatically seeded with 5 grades, 15 groups, 15 subjects, 30 teachers, a full weekly time structure, and per-grade subject requirements (including `MaxPeriodsPerDay` and `AllowDoublePeriods` per requirement).
+In Development mode, a demo school is automatically seeded with 5 years, 15 classes, 15 subjects, 30 teachers, a full weekly time structure, and per-year curriculum requirements (including `MaxPeriodsPerDay` and `AllowDoublePeriods` per curriculum entry).
 
 ## Configuration
 
@@ -121,24 +121,24 @@ All endpoints are under `/api/v1/`. Authentication uses JWT Bearer tokens.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| CRUD | `/api/v1/grades` | Manage grades |
-| POST | `/api/v1/grades/bulk` | Bulk create grades |
-| CRUD | `/api/v1/grades/{gradeId}/groups` | Manage groups within a grade |
+| CRUD | `/api/v1/years` | Manage years |
+| POST | `/api/v1/years/bulk` | Bulk create years |
+| CRUD | `/api/v1/years/{yearId}/classes` | Manage classes within a year |
 | CRUD | `/api/v1/subjects` | Manage subjects (name, special room) |
 | POST | `/api/v1/subjects/bulk` | Bulk create subjects |
 | CRUD | `/api/v1/rooms` | Manage rooms |
-| CRUD | `/api/v1/grades/{gradeId}/subject-requirements` | Manage curriculum requirements per grade (periods/week, double-period preference, max periods/day, allow doubles) |
-| POST | `/api/v1/grades/{gradeId}/subject-requirements/bulk` | Bulk create subject requirements |
-| CRUD | `/api/v1/grades/{gradeId}/combined-lessons` | Manage combined lesson configurations |
+| CRUD | `/api/v1/years/{yearId}/curriculum` | Manage curriculum requirements per year (periods/week, double-period preference, max periods/day, allow doubles) |
+| POST | `/api/v1/years/{yearId}/curriculum/bulk` | Bulk create curriculum requirements |
+| CRUD | `/api/v1/years/{yearId}/combined-lessons` | Manage combined lesson configurations |
 
 ### Time Structure
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| CRUD | `/api/v1/teaching-days` | Manage teaching days |
-| CRUD | `/api/v1/teaching-days/{dayId}/time-slots` | Manage time slots within a day |
-| POST | `/api/v1/teaching-days/{dayId}/time-slots/bulk` | Bulk create time slots |
-| CRUD | `/api/v1/grades/{gradeId}/day-config` | Manage per-grade day configuration |
+| CRUD | `/api/v1/school-days` | Manage school days |
+| CRUD | `/api/v1/school-days/{dayId}/time-slots` | Manage time slots within a day |
+| POST | `/api/v1/school-days/{dayId}/time-slots/bulk` | Bulk create time slots |
+| CRUD | `/api/v1/years/{yearId}/day-config` | Manage per-year day configuration |
 
 ### Teachers
 
@@ -161,12 +161,12 @@ All endpoints are under `/api/v1/`. Authentication uses JWT Bearer tokens.
 | GET | `/api/v1/timetables/{id}` | Get timetable with status (poll for generation progress) |
 | PUT | `/api/v1/timetables/{id}` | Update timetable name |
 | DELETE | `/api/v1/timetables/{id}` | Delete timetable with all entries |
-| GET | `/api/v1/timetables/{id}/entries` | Get entries (filter by `?groupId`, `?teacherId`, `?teachingDayId`) |
+| GET | `/api/v1/timetables/{id}/entries` | Get entries (filter by `?classId`, `?teacherId`, `?schoolDayId`) |
 | PUT | `/api/v1/timetables/{id}/entries/{entryId}` | Edit a single entry (Draft only, validates constraints) |
 | GET | `/api/v1/timetables/{id}/report` | Get quality report |
 | POST | `/api/v1/timetables/{id}/publish` | Change status Draft &rarr; Published |
 | POST | `/api/v1/timetables/{id}/validate` | Re-validate all entries against hard constraints |
-| GET | `/api/v1/timetables/{id}/by-group/{groupId}` | Weekly view for a group |
+| GET | `/api/v1/timetables/{id}/by-class/{classId}` | Weekly view for a class |
 | GET | `/api/v1/timetables/{id}/by-teacher/{teacherId}` | Weekly view for a teacher |
 | GET | `/api/v1/timetables/{id}/by-room/{roomId}` | Weekly view for a room |
 
@@ -181,16 +181,16 @@ The timetable generator uses a **Constraint Satisfaction Problem (CSP)** approac
 2. **Backtracking Search** -- Picks the variable with the smallest domain (MRV heuristic), orders values by fewest eliminations (LCV) and soft constraint score, then recursively assigns with forward checking.
 
 3. **Hard Constraints (HC-1 through HC-10):**
-   - No teacher/group/room double-booking
+   - No teacher/class/room double-booking
    - Teacher blocked slots and daily hour limits respected
    - All required periods scheduled
    - Special rooms assigned when required
-   - Grade day config limits respected
+   - Year day config limits respected
    - Double periods use consecutive non-break slots
-   - Subject daily period limits respected (per-grade, configured on each `GradeSubjectRequirement`)
+   - Subject daily period limits respected (per-year, configured on each `YearCurriculum`)
 
 4. **Soft Constraints (weighted scoring):**
-   - Same teacher per subject per group (1000)
+   - Same teacher per subject per class (1000)
    - Minimize teacher schedule gaps (100)
    - Avoid same subject twice in a day (50)
    - Even distribution across the week (20)
@@ -204,10 +204,10 @@ The timetable generator uses a **Constraint Satisfaction Problem (CSP)** approac
 Before generating, `POST /preflight` checks:
 - Subjects with no qualified teachers
 - Teachers with zero available hours
-- Grades exceeding available time slots
-- Combined lesson groups not in their grade
+- Years exceeding available time slots
+- Combined lesson classes not in their year
 - Invalid subject references
-- Active teaching days with no non-break slots
+- Active school days with no non-break slots
 - Room capacity insufficient for combined lessons
 
 ### Manual Editing
@@ -248,7 +248,7 @@ dotnet test tests/ClassForge.Tests.Integration
 dotnet test --filter "FullyQualifiedName~HardConstraintTests.HC1"
 ```
 
-**Unit tests** cover the scheduling algorithm: hard constraints, soft constraint scoring, constraint propagation/domain reduction, and backtracking solver (trivial solve, multi-group, combined lessons, infeasibility detection).
+**Unit tests** cover the scheduling algorithm: hard constraints, soft constraint scoring, constraint propagation/domain reduction, and backtracking solver (trivial solve, multi-class, combined lessons, infeasibility detection).
 
 **Integration tests** cover API endpoints with a real PostgreSQL database via Testcontainers: authentication flow, CRUD operations, tenant isolation, timetable lifecycle.
 

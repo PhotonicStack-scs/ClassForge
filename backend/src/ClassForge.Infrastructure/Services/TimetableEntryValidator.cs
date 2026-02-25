@@ -17,15 +17,15 @@ public class TimetableEntryValidator : ITimetableEntryValidator
         Guid timetableId, TimetableEntry entry, CancellationToken cancellationToken = default)
     {
         var issues = new List<string>();
-        var groupIds = entry.Groups.Select(g => g.GroupId).ToList();
+        var classIds = entry.Classes.Select(c => c.ClassId).ToList();
 
         var otherEntries = await _db.TimetableEntries
-            .Include(e => e.Groups)
+            .Include(e => e.Classes)
             .Where(e => e.TimetableId == timetableId && e.Id != entry.Id)
             .ToListAsync(cancellationToken);
 
         var timeSlot = await _db.TimeSlots
-            .Include(s => s.TeachingDay)
+            .Include(s => s.SchoolDay)
             .FirstOrDefaultAsync(s => s.Id == entry.TimeSlotId, cancellationToken);
 
         if (timeSlot is null)
@@ -40,13 +40,13 @@ public class TimetableEntryValidator : ITimetableEntryValidator
         foreach (var conflict in teacherConflicts)
             issues.Add($"Entry {entry.Id}: Teacher double-booked at slot {entry.TimeSlotId} (conflicts with entry {conflict.Id}).");
 
-        // HC-2: No group double-booking
-        foreach (var groupId in groupIds)
+        // HC-2: No class double-booking
+        foreach (var classId in classIds)
         {
-            var groupConflicts = otherEntries.Where(e =>
-                e.TimeSlotId == entry.TimeSlotId && e.Groups.Any(g => g.GroupId == groupId));
-            foreach (var conflict in groupConflicts)
-                issues.Add($"Entry {entry.Id}: Group {groupId} double-booked at slot {entry.TimeSlotId} (conflicts with entry {conflict.Id}).");
+            var classConflicts = otherEntries.Where(e =>
+                e.TimeSlotId == entry.TimeSlotId && e.Classes.Any(c => c.ClassId == classId));
+            foreach (var conflict in classConflicts)
+                issues.Add($"Entry {entry.Id}: Class {classId} double-booked at slot {entry.TimeSlotId} (conflicts with entry {conflict.Id}).");
         }
 
         // HC-3: Room conflict
@@ -69,14 +69,14 @@ public class TimetableEntryValidator : ITimetableEntryValidator
         if (teacher is not null)
         {
             var teacherDayConfig = await _db.TeacherDayConfigs
-                .FirstOrDefaultAsync(dc => dc.TeacherId == teacher.Id && dc.TeachingDayId == timeSlot.TeachingDayId, cancellationToken);
+                .FirstOrDefaultAsync(dc => dc.TeacherId == teacher.Id && dc.SchoolDayId == timeSlot.SchoolDayId, cancellationToken);
 
             if (teacherDayConfig is not null)
             {
                 var teacherDayCount = otherEntries.Count(e =>
                 {
                     var otherSlot = _db.TimeSlots.FirstOrDefault(s => s.Id == e.TimeSlotId);
-                    return e.TeacherId == entry.TeacherId && otherSlot?.TeachingDayId == timeSlot.TeachingDayId;
+                    return e.TeacherId == entry.TeacherId && otherSlot?.SchoolDayId == timeSlot.SchoolDayId;
                 }) + 1;
 
                 if (teacherDayCount > teacherDayConfig.MaxPeriods)
@@ -89,21 +89,21 @@ public class TimetableEntryValidator : ITimetableEntryValidator
         if (subject is not null && subject.RequiresSpecialRoom && entry.RoomId != subject.SpecialRoomId)
             issues.Add($"Entry {entry.Id}: Subject '{subject.Name}' requires special room {subject.SpecialRoomId} but assigned to {entry.RoomId}.");
 
-        // HC-8: Grade day config limit
-        foreach (var groupId in groupIds)
+        // HC-8: Year day config limit
+        foreach (var classId in classIds)
         {
-            var group = await _db.Groups.FindAsync([groupId], cancellationToken);
-            if (group is null) continue;
+            var schoolClass = await _db.Classes.FindAsync([classId], cancellationToken);
+            if (schoolClass is null) continue;
 
-            var gradeDayConfig = await _db.GradeDayConfigs
-                .FirstOrDefaultAsync(c => c.GradeId == group.GradeId && c.TeachingDayId == timeSlot.TeachingDayId, cancellationToken);
+            var yearDayConfig = await _db.YearDayConfigs
+                .FirstOrDefaultAsync(c => c.YearId == schoolClass.YearId && c.SchoolDayId == timeSlot.SchoolDayId, cancellationToken);
 
-            if (gradeDayConfig is not null)
+            if (yearDayConfig is not null)
             {
                 var nonBreakPosition = await _db.TimeSlots
-                    .CountAsync(s => s.TeachingDayId == timeSlot.TeachingDayId && !s.IsBreak && s.SlotNumber <= timeSlot.SlotNumber, cancellationToken);
-                if (nonBreakPosition > gradeDayConfig.MaxPeriods)
-                    issues.Add($"Entry {entry.Id}: Slot exceeds grade day config limit of {gradeDayConfig.MaxPeriods} for group '{group.Name}'.");
+                    .CountAsync(s => s.SchoolDayId == timeSlot.SchoolDayId && !s.IsBreak && s.SlotNumber <= timeSlot.SlotNumber, cancellationToken);
+                if (nonBreakPosition > yearDayConfig.MaxPeriods)
+                    issues.Add($"Entry {entry.Id}: Slot exceeds year day config limit of {yearDayConfig.MaxPeriods} for class '{schoolClass.Name}'.");
             }
         }
 
@@ -111,7 +111,7 @@ public class TimetableEntryValidator : ITimetableEntryValidator
         if (entry.IsDoublePeriod)
         {
             var nextSlot = await _db.TimeSlots
-                .Where(s => s.TeachingDayId == timeSlot.TeachingDayId && !s.IsBreak && s.SlotNumber > timeSlot.SlotNumber)
+                .Where(s => s.SchoolDayId == timeSlot.SchoolDayId && !s.IsBreak && s.SlotNumber > timeSlot.SlotNumber)
                 .OrderBy(s => s.SlotNumber)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -119,26 +119,26 @@ public class TimetableEntryValidator : ITimetableEntryValidator
                 issues.Add($"Entry {entry.Id}: Double period requires a consecutive non-break slot but none exists.");
         }
 
-        // HC-10: Subject daily limit (per grade requirement)
-        foreach (var groupId in groupIds)
+        // HC-10: Subject daily limit (per year curriculum)
+        foreach (var classId in classIds)
         {
-            var group = await _db.Groups.FindAsync([groupId], cancellationToken);
-            if (group is null) continue;
+            var schoolClass = await _db.Classes.FindAsync([classId], cancellationToken);
+            if (schoolClass is null) continue;
 
-            var requirement = await _db.GradeSubjectRequirements
-                .FirstOrDefaultAsync(r => r.GradeId == group.GradeId && r.SubjectId == entry.SubjectId, cancellationToken);
-            if (requirement is null) continue;
+            var curriculum = await _db.YearCurricula
+                .FirstOrDefaultAsync(r => r.YearId == schoolClass.YearId && r.SubjectId == entry.SubjectId, cancellationToken);
+            if (curriculum is null) continue;
 
             var subjectDayCount = otherEntries.Count(e =>
             {
                 if (e.SubjectId != entry.SubjectId) return false;
-                if (!e.Groups.Any(g => g.GroupId == groupId)) return false;
+                if (!e.Classes.Any(c => c.ClassId == classId)) return false;
                 var otherSlot = _db.TimeSlots.FirstOrDefault(s => s.Id == e.TimeSlotId);
-                return otherSlot?.TeachingDayId == timeSlot.TeachingDayId;
+                return otherSlot?.SchoolDayId == timeSlot.SchoolDayId;
             }) + 1;
 
-            if (subjectDayCount > requirement.MaxPeriodsPerDay)
-                issues.Add($"Entry {entry.Id}: Subject '{subject?.Name}' exceeds daily limit of {requirement.MaxPeriodsPerDay} for group {groupId}.");
+            if (subjectDayCount > curriculum.MaxPeriodsPerDay)
+                issues.Add($"Entry {entry.Id}: Subject '{subject?.Name}' exceeds daily limit of {curriculum.MaxPeriodsPerDay} for class {classId}.");
         }
 
         return issues;

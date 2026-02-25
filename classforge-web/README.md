@@ -9,8 +9,8 @@ Built with Next.js 16, TypeScript, Tailwind CSS, and shadcn/ui. Designed to depl
 ## Features
 
 - **Multi-tenant** — each school is an isolated tenant
-- **Setup wizard** — 8-step onboarding with pre-built templates (barneskole, ungdomsskole, etc.)
-- **Academic structure** — manage grades, groups, subjects (with color coding), and rooms
+- **Setup wizard** — 8-step onboarding; selecting a built-in template (barneskole, ungdomsskole, combined, videregående) automatically seeds grades and subjects via bulk API calls so those steps can be skipped
+- **Academic structure** — full CRUD for grades, groups, subjects (with color coding), and rooms; grades, subjects, and rooms all support inline editing
 - **Time structure** — enable teaching days (Mon–Sun), build a period/break template, and fine-tune per-day slots via a weekly calendar grid
 - **Teacher management** — qualifications, availability grids, blocked time slots
 - **Timetable generation** — async generation with real-time progress polling

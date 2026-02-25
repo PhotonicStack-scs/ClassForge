@@ -25,27 +25,27 @@ public static class SeedData
         admin.PasswordHash = hasher.HashPassword(admin, "Admin123!");
         db.Users.Add(admin);
 
-        // Grades (6-10)
-        var grades = Enumerable.Range(6, 5).Select(i => new Grade
+        // Years (6-10)
+        var years = Enumerable.Range(6, 5).Select(i => new Year
         {
-            Id = Guid.NewGuid(), TenantId = tenant.Id, Name = $"Grade {i}", SortOrder = i
+            Id = Guid.NewGuid(), TenantId = tenant.Id, Name = $"Year {i}", SortOrder = i
         }).ToList();
-        db.Grades.AddRange(grades);
+        db.Years.AddRange(years);
 
-        // Groups (A, B, C per grade)
-        var groups = new List<Group>();
-        foreach (var grade in grades)
+        // Classes (A, B, C per year)
+        var classes = new List<Class>();
+        foreach (var year in years)
         {
             foreach (var (name, idx) in new[] { ("A", 0), ("B", 1), ("C", 2) })
             {
-                groups.Add(new Group
+                classes.Add(new Class
                 {
                     Id = Guid.NewGuid(), TenantId = tenant.Id,
-                    GradeId = grade.Id, Name = name, SortOrder = idx
+                    YearId = year.Id, Name = name, SortOrder = idx
                 });
             }
         }
-        db.Groups.AddRange(groups);
+        db.Classes.AddRange(classes);
 
         // Subjects
         var subjectDefs = new[]
@@ -86,13 +86,13 @@ public static class SeedData
         };
         db.Rooms.AddRange(rooms);
 
-        // Teaching days (Mon-Fri)
-        var days = Enumerable.Range(1, 5).Select(d => new TeachingDay
+        // School days (Mon-Fri)
+        var days = Enumerable.Range(1, 5).Select(d => new SchoolDay
         {
             Id = Guid.NewGuid(), TenantId = tenant.Id,
             DayOfWeek = d, IsActive = true, SortOrder = d
         }).ToList();
-        db.TeachingDays.AddRange(days);
+        db.SchoolDays.AddRange(days);
 
         // Time slots: 7 non-break + 2 breaks per day
         var slotDefs = new[]
@@ -115,23 +115,23 @@ public static class SeedData
                 db.TimeSlots.Add(new TimeSlot
                 {
                     Id = Guid.NewGuid(), TenantId = tenant.Id,
-                    TeachingDayId = day.Id, SlotNumber = num,
+                    SchoolDayId = day.Id, SlotNumber = num,
                     StartTime = TimeOnly.Parse(start), EndTime = TimeOnly.Parse(end),
                     IsBreak = isBreak
                 });
             }
         }
 
-        // GradeDayConfigs: 6 periods for grades 6-7, 7 for grades 8-10
-        foreach (var grade in grades)
+        // YearDayConfigs: 6 periods for years 6-7, 7 for years 8-10
+        foreach (var year in years)
         {
-            var maxPeriods = grade.SortOrder <= 7 ? 6 : 7;
+            var maxPeriods = year.SortOrder <= 7 ? 6 : 7;
             foreach (var day in days)
             {
-                db.GradeDayConfigs.Add(new GradeDayConfig
+                db.YearDayConfigs.Add(new YearDayConfig
                 {
                     Id = Guid.NewGuid(), TenantId = tenant.Id,
-                    GradeId = grade.Id, TeachingDayId = day.Id, MaxPeriods = maxPeriods
+                    YearId = year.Id, SchoolDayId = day.Id, MaxPeriods = maxPeriods
                 });
             }
         }
@@ -150,7 +150,7 @@ public static class SeedData
         var natSci = subjects.First(s => s.Name == "Natural Science");
         var spanish = subjects.First(s => s.Name == "Spanish");
 
-        // GradeSubjectRequirements (realistic period counts)
+        // YearCurricula (realistic period counts)
         var coreSubjects = new (Subject subj, int periods, bool preferDouble, int maxPPD, bool allowDouble)[]
         {
             (math, 5, true, 2, true), (norwegian, 5, true, 2, true), (english, 3, false, 2, true),
@@ -159,30 +159,30 @@ public static class SeedData
             (krle, 2, false, 2, false), (natSci, 2, false, 2, false), (spanish, 2, false, 2, false)
         };
 
-        foreach (var grade in grades)
+        foreach (var year in years)
         {
             foreach (var (subj, periods, preferDouble, maxPPD, allowDouble) in coreSubjects)
             {
-                db.GradeSubjectRequirements.Add(new GradeSubjectRequirement
+                db.YearCurricula.Add(new YearCurriculum
                 {
                     Id = Guid.NewGuid(), TenantId = tenant.Id,
-                    GradeId = grade.Id, SubjectId = subj.Id,
+                    YearId = year.Id, SubjectId = subj.Id,
                     PeriodsPerWeek = periods, PreferDoublePeriods = preferDouble,
                     MaxPeriodsPerDay = maxPPD, AllowDoublePeriods = allowDouble
                 });
             }
         }
 
-        // Combined lessons: PE mandatory combined (2 groups at a time)
-        foreach (var grade in grades)
+        // Combined lessons: PE mandatory combined (2 classes at a time)
+        foreach (var year in years)
         {
-            var gradeGroups = groups.Where(g => g.GradeId == grade.Id).ToList();
+            var yearClasses = classes.Where(c => c.YearId == year.Id).ToList();
             var peConfig = new CombinedLessonConfig
             {
                 Id = Guid.NewGuid(), TenantId = tenant.Id,
-                GradeId = grade.Id, SubjectId = pe.Id,
-                IsMandatory = true, MaxGroupsPerLesson = 2,
-                Groups = gradeGroups.Take(2).Select(g => new CombinedLessonGroup { GroupId = g.Id }).ToList()
+                YearId = year.Id, SubjectId = pe.Id,
+                IsMandatory = true, MaxClassesPerLesson = 2,
+                Classes = yearClasses.Take(2).Select(c => new CombinedLessonClass { ClassId = c.Id }).ToList()
             };
             db.CombinedLessonConfigs.Add(peConfig);
 
@@ -190,9 +190,9 @@ public static class SeedData
             var musicConfig = new CombinedLessonConfig
             {
                 Id = Guid.NewGuid(), TenantId = tenant.Id,
-                GradeId = grade.Id, SubjectId = music.Id,
-                IsMandatory = false, MaxGroupsPerLesson = 2,
-                Groups = gradeGroups.Take(2).Select(g => new CombinedLessonGroup { GroupId = g.Id }).ToList()
+                YearId = year.Id, SubjectId = music.Id,
+                IsMandatory = false, MaxClassesPerLesson = 2,
+                Classes = yearClasses.Take(2).Select(c => new CombinedLessonClass { ClassId = c.Id }).ToList()
             };
             db.CombinedLessonConfigs.Add(musicConfig);
         }
@@ -215,14 +215,14 @@ public static class SeedData
         }).ToList();
         db.Teachers.AddRange(teachers);
 
-        // Assign qualifications spanning appropriate grades
-        // Math teachers (6): cover all grades
+        // Assign qualifications spanning appropriate years
+        // Math teachers (6): cover all years
         for (var i = 0; i < 6; i++)
         {
             db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
             {
                 Id = Guid.NewGuid(), TeacherId = teachers[i].Id,
-                SubjectId = math.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+                SubjectId = math.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
             });
         }
 
@@ -232,7 +232,7 @@ public static class SeedData
             db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
             {
                 Id = Guid.NewGuid(), TeacherId = teachers[6 + i].Id,
-                SubjectId = norwegian.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+                SubjectId = norwegian.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
             });
         }
 
@@ -242,7 +242,7 @@ public static class SeedData
             db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
             {
                 Id = Guid.NewGuid(), TeacherId = teachers[12 + i].Id,
-                SubjectId = english.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+                SubjectId = english.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
             });
         }
 
@@ -252,12 +252,12 @@ public static class SeedData
             db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
             {
                 Id = Guid.NewGuid(), TeacherId = teachers[16 + i].Id,
-                SubjectId = science.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+                SubjectId = science.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
             });
             db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
             {
                 Id = Guid.NewGuid(), TeacherId = teachers[16 + i].Id,
-                SubjectId = natSci.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+                SubjectId = natSci.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
             });
         }
 
@@ -267,12 +267,12 @@ public static class SeedData
             db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
             {
                 Id = Guid.NewGuid(), TeacherId = teachers[20 + i].Id,
-                SubjectId = socialStudies.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+                SubjectId = socialStudies.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
             });
             db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
             {
                 Id = Guid.NewGuid(), TeacherId = teachers[20 + i].Id,
-                SubjectId = krle.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+                SubjectId = krle.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
             });
         }
 
@@ -282,7 +282,7 @@ public static class SeedData
             db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
             {
                 Id = Guid.NewGuid(), TeacherId = teachers[24 + i].Id,
-                SubjectId = pe.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+                SubjectId = pe.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
             });
         }
 
@@ -290,32 +290,32 @@ public static class SeedData
         db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
         {
             Id = Guid.NewGuid(), TeacherId = teachers[27].Id,
-            SubjectId = music.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+            SubjectId = music.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
         });
         db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
         {
             Id = Guid.NewGuid(), TeacherId = teachers[27].Id,
-            SubjectId = art.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+            SubjectId = art.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
         });
         db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
         {
             Id = Guid.NewGuid(), TeacherId = teachers[28].Id,
-            SubjectId = foodHealth.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+            SubjectId = foodHealth.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
         });
         db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
         {
             Id = Guid.NewGuid(), TeacherId = teachers[28].Id,
-            SubjectId = art.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+            SubjectId = art.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
         });
         db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
         {
             Id = Guid.NewGuid(), TeacherId = teachers[29].Id,
-            SubjectId = spanish.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+            SubjectId = spanish.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
         });
         db.TeacherSubjectQualifications.Add(new TeacherSubjectQualification
         {
             Id = Guid.NewGuid(), TeacherId = teachers[29].Id,
-            SubjectId = music.Id, MinGradeId = grades.First().Id, MaxGradeId = grades.Last().Id
+            SubjectId = music.Id, MinYearId = years.First().Id, MaxYearId = years.Last().Id
         });
 
         // Teacher day configs: all teachers available Mon-Fri, 7 periods max
@@ -326,7 +326,7 @@ public static class SeedData
                 db.TeacherDayConfigs.Add(new TeacherDayConfig
                 {
                     Id = Guid.NewGuid(), TeacherId = teacher.Id,
-                    TeachingDayId = day.Id, MaxPeriods = 7
+                    SchoolDayId = day.Id, MaxPeriods = 7
                 });
             }
         }

@@ -133,17 +133,37 @@ Translation files: `messages/{nb,nn,en}/{namespace}.json`
 Install new components: `npx shadcn@latest add <component>`
 All components land in `src/components/ui/`.
 
+### List item rows
+Two row styles are used consistently across CRUD list pages:
+
+**Basic row** (grades, rooms):
+```tsx
+<div className="flex items-center justify-between px-4 py-3 rounded-xl border bg-card shadow-sm">
+```
+
+**Color-stripe row** (subjects):
+```tsx
+<div className="flex items-stretch rounded-xl border bg-card shadow-sm overflow-hidden">
+  <div className="w-3 shrink-0" style={{ backgroundColor: color }} />
+  <div className="flex flex-1 items-center justify-between px-4 py-3">
+```
+
+### Inline edit pattern
+Grades, subjects, and rooms use the same inline editing approach: a local `editingId` state drives a conditional render — display row vs edit row. Edit rows use `h-8 text-sm` inputs, a green `<Check>` ghost button (`text-green-600 hover:text-green-700 hover:bg-green-50`), and a muted `<X>` ghost button. The pencil trigger uses `variant="outline"` with muted text, matching the destructive delete button's border style.
+
 ## Important Gotchas
 
 | Issue | Detail |
 |-------|--------|
 | `proxy.ts` not `middleware.ts` | next-intl requires the middleware file to be named `proxy.ts` in this project — `middleware.ts` is not used |
+| Wizard file names ≠ positions | `step-2-subjects.tsx` renders at position 3; `step-3-rooms.tsx` at position 2. Actual order: 0 Template, 1 Grades, 2 Rooms, 3 Subjects, 4 Time, 5 Teachers, 6 Curriculum, 7 Review. Use position numbers when calling `markStepCompleted`/`setCurrentStep`. |
 | `TeacherResponse.name` | API has `name` (not `firstName`/`lastName`) |
 | `GradeResponse` has no `groups` | Fetch groups separately via `useGroups(gradeId)` |
 | `schema.ts` is auto-generated | Re-generate with: `npx openapi-typescript requirements/swagger.json -o src/lib/api/schema.ts` |
 | Access token in memory | Refresh token in localStorage; access token never persisted |
 | Timetable polling | `refetchInterval: 2000` when `status === "Generating"` |
 | Time display formatting | Use `Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" })` to display times — never interpolate raw `HH:mm` strings, as this ignores the user's 12/24h system preference |
+| Template seeding | `step-0-template.tsx` bulk-creates grades/subjects on non-custom template selection and marks wizard steps completed. Bulk hooks (`useBulkCreateGrades`, `useBulkCreateSubjects`) follow the same pattern as `useBulkCreateTimeSlots` in `use-teaching-days.ts`. |
 
 ## Brand Colors
 
