@@ -2,12 +2,94 @@
 
 import { useState } from "react";
 import { useWizardStore } from "@/lib/stores/wizard-store";
-import { useGrades, useCreateGrade, useDeleteGrade } from "@/lib/api/hooks/use-grades";
+import {
+  useGrades,
+  useCreateGrade,
+  useDeleteGrade,
+  useGroups,
+  useCreateGroup,
+  useDeleteGroup,
+} from "@/lib/api/hooks/use-grades";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Plus, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
+import type { components } from "@/lib/api/schema";
+
+type GradeResponse = components["schemas"]["GradeResponse"];
+
+function nextGroupLetter(existing: string[]): string {
+  const letters = existing
+    .map((n) => n.trim().toUpperCase())
+    .filter((n) => n.length === 1 && n >= "A" && n <= "Z");
+  if (letters.length === 0) return "A";
+  const last = letters.sort().at(-1)!;
+  return last < "Z" ? String.fromCharCode(last.charCodeAt(0) + 1) : "";
+}
+
+interface GradeItemProps {
+  grade: GradeResponse;
+  onDelete: () => void;
+}
+
+function GradeItem({ grade, onDelete }: GradeItemProps) {
+  const gradeId = grade.id!;
+  const { data: groups = [] } = useGroups(gradeId);
+  const createGroup = useCreateGroup(gradeId);
+  const deleteGroup = useDeleteGroup();
+
+  const next = nextGroupLetter(groups.map((g) => g.name ?? ""));
+
+  function handleAddGroup() {
+    if (!next) return;
+    createGroup.mutate({ name: next });
+  }
+
+  return (
+    <li className="py-1.5 px-3 rounded-md bg-muted/50 space-y-1.5">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">{grade.name}</span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+          onClick={onDelete}
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </Button>
+      </div>
+
+      {/* Groups row */}
+      <div className="flex flex-wrap items-center gap-1.5 pl-0.5">
+        {groups.map((group) => (
+          <Badge key={group.id} variant="secondary" className="gap-1 pr-1 text-xs">
+            {group.name}
+            <button
+              className="text-muted-foreground hover:text-destructive leading-none ml-0.5"
+              onClick={() => deleteGroup.mutate({ gradeId, id: group.id! })}
+              aria-label={`Remove group ${group.name}`}
+            >
+              ×
+            </button>
+          </Badge>
+        ))}
+        {next && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5 text-muted-foreground hover:text-foreground"
+            onClick={handleAddGroup}
+            disabled={createGroup.isPending}
+            title={`Add group ${next}`}
+          >
+            <Plus className="w-3 h-3" />
+          </Button>
+        )}
+      </div>
+    </li>
+  );
+}
 
 export function Step1Grades() {
   const { markStepCompleted, setCurrentStep } = useWizardStore();
@@ -65,17 +147,11 @@ export function Step1Grades() {
       ) : (
         <ul className="space-y-1">
           {grades.map((g) => (
-            <li key={g.id} className="flex items-center justify-between py-1.5 px-3 rounded-md bg-muted/50">
-              <span className="text-sm font-medium">{g.name}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                onClick={() => deleteGrade.mutate(g.id!)}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </Button>
-            </li>
+            <GradeItem
+              key={g.id}
+              grade={g}
+              onDelete={() => deleteGrade.mutate(g.id!)}
+            />
           ))}
         </ul>
       )}

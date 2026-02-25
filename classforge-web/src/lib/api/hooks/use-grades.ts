@@ -10,6 +10,7 @@ type GroupResponse = components["schemas"]["GroupResponse"];
 type CreateGradeRequest = components["schemas"]["CreateGradeRequest"];
 type UpdateGradeRequest = components["schemas"]["UpdateGradeRequest"];
 type CreateGroupRequest = components["schemas"]["CreateGroupRequest"];
+type UpdateGroupRequest = components["schemas"]["UpdateGroupRequest"];
 
 export function useGrades() {
   return useQuery({
@@ -100,5 +101,32 @@ export function useCreateGroup(gradeId: string) {
       return data!;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["grades", gradeId, "groups"] }),
+  });
+}
+
+export function useUpdateGroup() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ gradeId, id, body }: { gradeId: string; id: string; body: UpdateGroupRequest }) => {
+      const { data, error } = await apiClient.PUT("/api/v1/grades/{gradeId}/groups/{id}", {
+        params: { path: { gradeId, id } }, body,
+      });
+      if (error) throw error;
+      return data!;
+    },
+    onSuccess: (_, { gradeId }) => qc.invalidateQueries({ queryKey: ["grades", gradeId, "groups"] }),
+  });
+}
+
+export function useDeleteGroup() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ gradeId, id }: { gradeId: string; id: string }) => {
+      const { error } = await apiClient.DELETE("/api/v1/grades/{gradeId}/groups/{id}", {
+        params: { path: { gradeId, id } },
+      });
+      if (error) throw error;
+    },
+    onSuccess: (_, { gradeId }) => qc.invalidateQueries({ queryKey: ["grades", gradeId, "groups"] }),
   });
 }

@@ -10,14 +10,14 @@ Built with Next.js 16, TypeScript, Tailwind CSS, and shadcn/ui. Designed to depl
 
 - **Multi-tenant** — each school is an isolated tenant
 - **Setup wizard** — 8-step onboarding; selecting a built-in template (barneskole, ungdomsskole, combined, videregående) automatically seeds grades and subjects via bulk API calls so those steps can be skipped
-- **Academic structure** — full CRUD for grades, groups, subjects (with color coding), and rooms; grades, subjects, and rooms all support inline editing
+- **Academic structure** — full CRUD for grades, subjects (with color coding), and rooms; each grade supports sub-groups (e.g. 5A, 5B) with inline add/rename/delete; all entities support inline editing
 - **Time structure** — enable teaching days (Mon–Sun), build a period/break template, and fine-tune per-day slots via a weekly calendar grid
 - **Teacher management** — qualifications, availability grids, blocked time slots
 - **Timetable generation** — async generation with real-time progress polling
 - **Timetable views** — group view, teacher view, with color-coded subject cells
 - **Manual editing** — click any cell to reassign subject/teacher/room; hard-constraint validation on save
 - **Quality report** — scored soft-constraint analysis grouped by severity
-- **Export** — Excel (SheetJS), PDF (@react-pdf/renderer), browser print
+- **Export** — Excel (SheetJS), PDF (@react-pdf/renderer), browser print (react-to-print)
 - **User management** — invite users, assign roles (OrgAdmin / ScheduleManager / Viewer)
 - **My Schedule** — mobile-optimized teacher self-service view
 - **Localization** — Norwegian Bokmål, Nynorsk, English
@@ -80,7 +80,10 @@ npx openapi-typescript requirements/swagger.json -o src/lib/api/schema.ts
 | Data fetching | TanStack React Query v5 |
 | Forms | react-hook-form + Zod |
 | i18n | next-intl (nb / nn / en) |
+| Tables | TanStack React Table v8 |
 | Charts | Recharts |
+| Dates | date-fns |
+| Toasts | Sonner |
 | Export | SheetJS (xlsx), @react-pdf/renderer, react-to-print |
 | Animation | Framer Motion |
 | Font | Nunito (Google Fonts) |
