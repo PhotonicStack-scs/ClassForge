@@ -97,8 +97,26 @@ export function useGrades() {
 ```
 Schema types are often `string | null | undefined` — always use `?? ""` or `?? []`.
 
+### Per-row component extraction
+When a hook takes an entity ID as an **argument** (e.g. `useGroups(gradeId)`, `useCreateGroup(gradeId)`), it cannot be called inside a `.map()` loop — that violates Rules of Hooks. Extract a dedicated row/item component that receives the ID as a prop and calls the hooks internally:
+
+```tsx
+// ✗ Wrong — hooks inside a loop
+grades.map((g) => { const groups = useGroups(g.id!); … })
+
+// ✓ Correct — one component instance per row
+function GradeRow({ grade }: { grade: GradeResponse }) {
+  const { data: groups } = useGroups(grade.id!);
+  const createGroup = useCreateGroup(grade.id!);
+  // …
+}
+grades.map((g) => <GradeRow key={g.id} grade={g} />)
+```
+
+This pattern is used in `grades/page.tsx` (`GradeRow`) and `step-1-grades.tsx` (`GradeItem`). Contrast with `useUpdateGroup`/`useDeleteGroup`, which take the IDs as mutation variables (not hook args) and can be called once at any level.
+
 ### Parallel fetching with useQueries
-When a page needs slots/details for a dynamic list of resources (e.g. time slots for each active teaching day), use `useQueries` — calling a single hook inside a loop violates Rules of Hooks:
+When a page needs data for a dynamic list of resources (e.g. time slots for each active teaching day), use `useQueries` — calling a single hook inside a loop violates Rules of Hooks:
 
 ```ts
 import { useQueries } from "@tanstack/react-query";
@@ -133,17 +151,37 @@ Translation files: `messages/{nb,nn,en}/{namespace}.json`
 Install new components: `npx shadcn@latest add <component>`
 All components land in `src/components/ui/`.
 
+### List item rows
+Two row styles are used consistently across CRUD list pages:
+
+**Basic row** (grades, rooms):
+```tsx
+<div className="flex items-center justify-between px-4 py-3 rounded-xl border bg-card shadow-sm">
+```
+
+**Color-stripe row** (subjects):
+```tsx
+<div className="flex items-stretch rounded-xl border bg-card shadow-sm overflow-hidden">
+  <div className="w-3 shrink-0" style={{ backgroundColor: color }} />
+  <div className="flex flex-1 items-center justify-between px-4 py-3">
+```
+
+### Inline edit pattern
+Grades, subjects, rooms, and groups use the same inline editing approach: a local `editingId` state drives a conditional render — display row vs edit row. Edit rows use `h-8 text-sm` inputs, a green `<Check>` ghost button (`text-green-600 hover:text-green-700 hover:bg-green-50`), and a muted `<X>` ghost button. The pencil trigger uses `variant="outline"` with muted text, matching the destructive delete button's border style.
+
 ## Important Gotchas
 
 | Issue | Detail |
 |-------|--------|
 | `proxy.ts` not `middleware.ts` | next-intl requires the middleware file to be named `proxy.ts` in this project — `middleware.ts` is not used |
+| Wizard file names ≠ positions | `step-2-subjects.tsx` renders at position 3; `step-3-rooms.tsx` at position 2. Actual order: 0 Template, 1 Grades, 2 Rooms, 3 Subjects, 4 Time, 5 Teachers, 6 Curriculum, 7 Review. Use position numbers when calling `markStepCompleted`/`setCurrentStep`. |
 | `TeacherResponse.name` | API has `name` (not `firstName`/`lastName`) |
-| `GradeResponse` has no `groups` | Fetch groups separately via `useGroups(gradeId)` |
+| `GradeResponse` has no `groups` | Fetch groups separately via `useGroups(gradeId)` and `useCreateGroup(gradeId)` (hook-arg pattern); `useUpdateGroup`/`useDeleteGroup` take IDs as mutation variables instead |
 | `schema.ts` is auto-generated | Re-generate with: `npx openapi-typescript requirements/swagger.json -o src/lib/api/schema.ts` |
 | Access token in memory | Refresh token in localStorage; access token never persisted |
 | Timetable polling | `refetchInterval: 2000` when `status === "Generating"` |
 | Time display formatting | Use `Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" })` to display times — never interpolate raw `HH:mm` strings, as this ignores the user's 12/24h system preference |
+| Template seeding | `step-0-template.tsx` bulk-creates grades/subjects on non-custom template selection and marks wizard steps completed. Bulk hooks (`useBulkCreateGrades`, `useBulkCreateSubjects`) follow the same pattern as `useBulkCreateTimeSlots` in `use-teaching-days.ts`. |
 
 ## Brand Colors
 
