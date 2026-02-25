@@ -87,10 +87,10 @@ public class TimetableGenerationService : BackgroundService
                         TeacherId = entry.TeacherId,
                         RoomId = entry.RoomId,
                         IsDoublePeriod = entry.IsDoublePeriod,
-                        CombinedLessonGroupId = entry.CombinedLessonGroupId,
-                        Groups = entry.GroupIds.Select(gid => new TimetableEntryGroup
+                        CombinedLessonClassId = entry.CombinedLessonClassId,
+                        Classes = entry.ClassIds.Select(cid => new TimetableEntryClass
                         {
-                            GroupId = gid
+                            ClassId = cid
                         }).ToList()
                     };
                     db.TimetableEntries.Add(timetableEntry);

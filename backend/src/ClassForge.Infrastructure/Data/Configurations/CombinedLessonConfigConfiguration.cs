@@ -10,17 +10,17 @@ public class CombinedLessonConfigConfiguration : IEntityTypeConfiguration<Combin
     {
         builder.HasKey(c => c.Id);
         builder.HasOne(c => c.Tenant).WithMany().HasForeignKey(c => c.TenantId).OnDelete(DeleteBehavior.Cascade);
-        builder.HasOne(c => c.Grade).WithMany().HasForeignKey(c => c.GradeId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasOne(c => c.Year).WithMany().HasForeignKey(c => c.YearId).OnDelete(DeleteBehavior.NoAction);
         builder.HasOne(c => c.Subject).WithMany().HasForeignKey(c => c.SubjectId).OnDelete(DeleteBehavior.NoAction);
     }
 }
 
-public class CombinedLessonGroupConfiguration : IEntityTypeConfiguration<CombinedLessonGroup>
+public class CombinedLessonClassConfiguration : IEntityTypeConfiguration<CombinedLessonClass>
 {
-    public void Configure(EntityTypeBuilder<CombinedLessonGroup> builder)
+    public void Configure(EntityTypeBuilder<CombinedLessonClass> builder)
     {
-        builder.HasKey(g => new { g.CombinedLessonConfigId, g.GroupId });
-        builder.HasOne(g => g.CombinedLessonConfig).WithMany(c => c.Groups).HasForeignKey(g => g.CombinedLessonConfigId).OnDelete(DeleteBehavior.Cascade);
-        builder.HasOne(g => g.Group).WithMany().HasForeignKey(g => g.GroupId).OnDelete(DeleteBehavior.NoAction);
+        builder.HasKey(c => new { c.CombinedLessonConfigId, c.ClassId });
+        builder.HasOne(c => c.CombinedLessonConfig).WithMany(cfg => cfg.Classes).HasForeignKey(c => c.CombinedLessonConfigId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(c => c.Class).WithMany().HasForeignKey(c => c.ClassId).OnDelete(DeleteBehavior.NoAction);
     }
 }

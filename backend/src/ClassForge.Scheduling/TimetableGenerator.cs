@@ -42,7 +42,7 @@ public class TimetableGenerator : ITimetableGenerator
                 v.CurrentAssignment.RoomId,
                 v.IsDoublePeriod,
                 v.CombinedLessonId,
-                v.GroupIds))
+                v.ClassIds))
             .ToList();
 
         var generatedReports = ReportGenerator.Generate(state, input);

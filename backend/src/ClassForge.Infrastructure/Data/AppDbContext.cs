@@ -19,23 +19,23 @@ public class AppDbContext : DbContext, IAppDbContext
 
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<User> Users => Set<User>();
-    public DbSet<Grade> Grades => Set<Grade>();
-    public DbSet<Group> Groups => Set<Group>();
+    public DbSet<Year> Years => Set<Year>();
+    public DbSet<Class> Classes => Set<Class>();
     public DbSet<Subject> Subjects => Set<Subject>();
     public DbSet<Room> Rooms => Set<Room>();
-    public DbSet<GradeSubjectRequirement> GradeSubjectRequirements => Set<GradeSubjectRequirement>();
+    public DbSet<YearCurriculum> YearCurricula => Set<YearCurriculum>();
     public DbSet<CombinedLessonConfig> CombinedLessonConfigs => Set<CombinedLessonConfig>();
-    public DbSet<CombinedLessonGroup> CombinedLessonGroups => Set<CombinedLessonGroup>();
-    public DbSet<TeachingDay> TeachingDays => Set<TeachingDay>();
+    public DbSet<CombinedLessonClass> CombinedLessonClasses => Set<CombinedLessonClass>();
+    public DbSet<SchoolDay> SchoolDays => Set<SchoolDay>();
     public DbSet<TimeSlot> TimeSlots => Set<TimeSlot>();
-    public DbSet<GradeDayConfig> GradeDayConfigs => Set<GradeDayConfig>();
+    public DbSet<YearDayConfig> YearDayConfigs => Set<YearDayConfig>();
     public DbSet<Teacher> Teachers => Set<Teacher>();
     public DbSet<TeacherSubjectQualification> TeacherSubjectQualifications => Set<TeacherSubjectQualification>();
     public DbSet<TeacherDayConfig> TeacherDayConfigs => Set<TeacherDayConfig>();
     public DbSet<TeacherSlotBlock> TeacherSlotBlocks => Set<TeacherSlotBlock>();
     public DbSet<Timetable> Timetables => Set<Timetable>();
     public DbSet<TimetableEntry> TimetableEntries => Set<TimetableEntry>();
-    public DbSet<TimetableEntryGroup> TimetableEntryGroups => Set<TimetableEntryGroup>();
+    public DbSet<TimetableEntryClass> TimetableEntryClasses => Set<TimetableEntryClass>();
     public DbSet<TimetableReport> TimetableReports => Set<TimetableReport>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

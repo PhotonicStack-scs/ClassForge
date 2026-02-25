@@ -1,3 +1,0 @@
-namespace ClassForge.Application.DTOs.GradeSubjectRequirements;
-
-public record BulkCreateGradeSubjectRequirementsRequest(List<CreateGradeSubjectRequirementRequest> Items);

@@ -27,19 +27,19 @@ public static class SoftConstraintScorer
         return score;
     }
 
-    /// <summary>SC-1: Prefer same teacher per subject per group (teacher consistency).</summary>
+    /// <summary>SC-1: Prefer same teacher per subject per class (teacher consistency).</summary>
     private static int ScoreSameTeacher(SchedulingState state, LessonVariable variable, Assignment candidate)
     {
-        // Check if this teacher is already assigned to the same subject for these groups
+        // Check if this teacher is already assigned to the same subject for these classes
         var sameSubjectVars = state.Variables.Where(v =>
             v.IsAssigned &&
             v.SubjectId == variable.SubjectId &&
-            v.GroupIds.Intersect(variable.GroupIds).Any());
+            v.ClassIds.Intersect(variable.ClassIds).Any());
 
         if (sameSubjectVars.Any(v => v.CurrentAssignment!.TeacherId == candidate.TeacherId))
             return SC1_SameTeacherWeight;
 
-        // No existing assignment for this subject/group combo — neutral
+        // No existing assignment for this subject/class combo — neutral
         if (!sameSubjectVars.Any())
             return SC1_SameTeacherWeight;
 
@@ -50,8 +50,8 @@ public static class SoftConstraintScorer
     private static int ScoreMinimizeGaps(
         SchedulingState state, SchedulingInput input, Assignment candidate)
     {
-        var slot = input.TeachingDays.SelectMany(d => d.TimeSlots).First(s => s.Id == candidate.TimeSlotId);
-        var day = input.TeachingDays.First(d => d.Id == slot.TeachingDayId);
+        var slot = input.SchoolDays.SelectMany(d => d.TimeSlots).First(s => s.Id == candidate.TimeSlotId);
+        var day = input.SchoolDays.First(d => d.Id == slot.SchoolDayId);
 
         if (!state.TeacherSlotUsage.TryGetValue(candidate.TeacherId, out var usedSlots))
             return SC2_MinimizeGapsWeight;
@@ -81,11 +81,11 @@ public static class SoftConstraintScorer
     {
         if (variable.IsDoublePeriod) return SC3_AvoidSameSubjectWeight;
 
-        var slot = input.TeachingDays.SelectMany(d => d.TimeSlots).First(s => s.Id == candidate.TimeSlotId);
+        var slot = input.SchoolDays.SelectMany(d => d.TimeSlots).First(s => s.Id == candidate.TimeSlotId);
 
-        foreach (var groupId in variable.GroupIds)
+        foreach (var classId in variable.ClassIds)
         {
-            var count = state.GroupSubjectDailyCount.GetValueOrDefault((groupId, variable.SubjectId, slot.TeachingDayId));
+            var count = state.ClassSubjectDailyCount.GetValueOrDefault((classId, variable.SubjectId, slot.SchoolDayId));
             if (count > 0) return 0;
         }
 
@@ -97,22 +97,22 @@ public static class SoftConstraintScorer
         SchedulingState state, SchedulingInput input,
         LessonVariable variable, Assignment candidate)
     {
-        var slot = input.TeachingDays.SelectMany(d => d.TimeSlots).First(s => s.Id == candidate.TimeSlotId);
-        var teachingDayId = slot.TeachingDayId;
+        var slot = input.SchoolDays.SelectMany(d => d.TimeSlots).First(s => s.Id == candidate.TimeSlotId);
+        var schoolDayId = slot.SchoolDayId;
 
-        // Count how many periods of this subject are already on each day for these groups
+        // Count how many periods of this subject are already on each day for these classes
         var dayCounts = new Dictionary<Guid, int>();
-        foreach (var day in input.TeachingDays)
+        foreach (var day in input.SchoolDays)
         {
             var count = 0;
-            foreach (var groupId in variable.GroupIds)
+            foreach (var classId in variable.ClassIds)
             {
-                count += state.GroupSubjectDailyCount.GetValueOrDefault((groupId, variable.SubjectId, day.Id));
+                count += state.ClassSubjectDailyCount.GetValueOrDefault((classId, variable.SubjectId, day.Id));
             }
             dayCounts[day.Id] = count;
         }
 
-        var currentDayCount = dayCounts.GetValueOrDefault(teachingDayId);
+        var currentDayCount = dayCounts.GetValueOrDefault(schoolDayId);
         var minDayCount = dayCounts.Values.DefaultIfEmpty(0).Min();
 
         // Prefer placing on a day with fewer periods of this subject

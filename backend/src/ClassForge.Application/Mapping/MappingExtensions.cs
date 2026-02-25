@@ -1,21 +1,21 @@
 using System.Text.Json;
 using ClassForge.Application.DTOs.Auth;
+using ClassForge.Application.DTOs.Classes;
 using ClassForge.Application.DTOs.CombinedLessons;
-using ClassForge.Application.DTOs.GradeDayConfigs;
-using ClassForge.Application.DTOs.Grades;
-using ClassForge.Application.DTOs.GradeSubjectRequirements;
-using ClassForge.Application.DTOs.Groups;
+using ClassForge.Application.DTOs.Curricula;
 using ClassForge.Application.DTOs.Rooms;
+using ClassForge.Application.DTOs.SchoolDays;
 using ClassForge.Application.DTOs.Subjects;
 using ClassForge.Application.DTOs.TeacherDayConfigs;
 using ClassForge.Application.DTOs.TeacherQualifications;
 using ClassForge.Application.DTOs.Teachers;
 using ClassForge.Application.DTOs.TeacherSlotBlocks;
-using ClassForge.Application.DTOs.TeachingDays;
 using ClassForge.Application.DTOs.Tenants;
 using ClassForge.Application.DTOs.Timetables;
 using ClassForge.Application.DTOs.TimeSlots;
 using ClassForge.Application.DTOs.Users;
+using ClassForge.Application.DTOs.YearDayConfigs;
+using ClassForge.Application.DTOs.Years;
 using ClassForge.Domain.Entities;
 using ClassForge.Domain.Enums;
 
@@ -48,19 +48,19 @@ public static class MappingExtensions
         new(user.Id, user.TenantId, user.Email, user.DisplayName, user.Role.ToString(),
             user.ExternalProvider, user.LanguagePreference);
 
-    // Grade
-    public static GradeResponse ToResponse(this Grade grade) =>
-        new(grade.Id, grade.Name, grade.SortOrder);
+    // Year
+    public static YearResponse ToResponse(this Year year) =>
+        new(year.Id, year.Name, year.SortOrder);
 
-    public static Grade ToEntity(this CreateGradeRequest request, Guid tenantId) =>
+    public static Year ToEntity(this CreateYearRequest request, Guid tenantId) =>
         new() { Id = Guid.NewGuid(), TenantId = tenantId, Name = request.Name, SortOrder = request.SortOrder };
 
-    // Group
-    public static GroupResponse ToResponse(this Group group) =>
-        new(group.Id, group.GradeId, group.Name, group.SortOrder);
+    // Class
+    public static ClassResponse ToResponse(this Class @class) =>
+        new(@class.Id, @class.YearId, @class.Name, @class.SortOrder);
 
-    public static Group ToEntity(this CreateGroupRequest request, Guid tenantId, Guid gradeId) =>
-        new() { Id = Guid.NewGuid(), TenantId = tenantId, GradeId = gradeId, Name = request.Name, SortOrder = request.SortOrder };
+    public static Class ToEntity(this CreateClassRequest request, Guid tenantId, Guid yearId) =>
+        new() { Id = Guid.NewGuid(), TenantId = tenantId, YearId = yearId, Name = request.Name, SortOrder = request.SortOrder };
 
     // Subject
     public static SubjectResponse ToResponse(this Subject subject) =>
@@ -81,15 +81,15 @@ public static class MappingExtensions
     public static Room ToEntity(this CreateRoomRequest request, Guid tenantId) =>
         new() { Id = Guid.NewGuid(), TenantId = tenantId, Name = request.Name, Capacity = request.Capacity };
 
-    // GradeSubjectRequirement
-    public static GradeSubjectRequirementResponse ToResponse(this GradeSubjectRequirement r) =>
-        new(r.Id, r.GradeId, r.SubjectId, r.PeriodsPerWeek, r.PreferDoublePeriods,
+    // YearCurriculum
+    public static YearCurriculumResponse ToResponse(this YearCurriculum r) =>
+        new(r.Id, r.YearId, r.SubjectId, r.PeriodsPerWeek, r.PreferDoublePeriods,
             r.MaxPeriodsPerDay, r.AllowDoublePeriods, r.Subject.Name);
 
-    public static GradeSubjectRequirement ToEntity(this CreateGradeSubjectRequirementRequest request, Guid tenantId, Guid gradeId) =>
+    public static YearCurriculum ToEntity(this CreateYearCurriculumRequest request, Guid tenantId, Guid yearId) =>
         new()
         {
-            Id = Guid.NewGuid(), TenantId = tenantId, GradeId = gradeId,
+            Id = Guid.NewGuid(), TenantId = tenantId, YearId = yearId,
             SubjectId = request.SubjectId, PeriodsPerWeek = request.PeriodsPerWeek,
             PreferDoublePeriods = request.PreferDoublePeriods,
             MaxPeriodsPerDay = request.MaxPeriodsPerDay, AllowDoublePeriods = request.AllowDoublePeriods
@@ -97,46 +97,46 @@ public static class MappingExtensions
 
     // CombinedLessonConfig
     public static CombinedLessonConfigResponse ToResponse(this CombinedLessonConfig config) =>
-        new(config.Id, config.GradeId, config.SubjectId, config.IsMandatory, config.MaxGroupsPerLesson,
-            config.Groups.Select(g => g.GroupId).ToList());
+        new(config.Id, config.YearId, config.SubjectId, config.IsMandatory, config.MaxClassesPerLesson,
+            config.Classes.Select(c => c.ClassId).ToList());
 
-    public static CombinedLessonConfig ToEntity(this CreateCombinedLessonConfigRequest request, Guid tenantId, Guid gradeId) =>
+    public static CombinedLessonConfig ToEntity(this CreateCombinedLessonConfigRequest request, Guid tenantId, Guid yearId) =>
         new()
         {
-            Id = Guid.NewGuid(), TenantId = tenantId, GradeId = gradeId,
+            Id = Guid.NewGuid(), TenantId = tenantId, YearId = yearId,
             SubjectId = request.SubjectId, IsMandatory = request.IsMandatory,
-            MaxGroupsPerLesson = request.MaxGroupsPerLesson,
-            Groups = request.GroupIds.Select(gid => new CombinedLessonGroup { GroupId = gid }).ToList()
+            MaxClassesPerLesson = request.MaxClassesPerLesson,
+            Classes = request.ClassIds.Select(cid => new CombinedLessonClass { ClassId = cid }).ToList()
         };
 
-    // TeachingDay
-    public static TeachingDayResponse ToResponse(this TeachingDay day) =>
+    // SchoolDay
+    public static SchoolDayResponse ToResponse(this SchoolDay day) =>
         new(day.Id, day.DayOfWeek, ((DayOfWeek)day.DayOfWeek).ToString(), day.IsActive, day.SortOrder);
 
-    public static TeachingDay ToEntity(this CreateTeachingDayRequest request, Guid tenantId) =>
+    public static SchoolDay ToEntity(this CreateSchoolDayRequest request, Guid tenantId) =>
         new() { Id = Guid.NewGuid(), TenantId = tenantId, DayOfWeek = request.DayOfWeek, IsActive = request.IsActive, SortOrder = request.SortOrder };
 
     // TimeSlot
     public static TimeSlotResponse ToResponse(this TimeSlot slot) =>
-        new(slot.Id, slot.TeachingDayId, slot.SlotNumber, slot.StartTime.ToString("HH:mm"), slot.EndTime.ToString("HH:mm"), slot.IsBreak);
+        new(slot.Id, slot.SchoolDayId, slot.SlotNumber, slot.StartTime.ToString("HH:mm"), slot.EndTime.ToString("HH:mm"), slot.IsBreak);
 
-    public static TimeSlot ToEntity(this CreateTimeSlotRequest request, Guid tenantId, Guid teachingDayId) =>
+    public static TimeSlot ToEntity(this CreateTimeSlotRequest request, Guid tenantId, Guid schoolDayId) =>
         new()
         {
-            Id = Guid.NewGuid(), TenantId = tenantId, TeachingDayId = teachingDayId,
+            Id = Guid.NewGuid(), TenantId = tenantId, SchoolDayId = schoolDayId,
             SlotNumber = request.SlotNumber, StartTime = TimeOnly.Parse(request.StartTime),
             EndTime = TimeOnly.Parse(request.EndTime), IsBreak = request.IsBreak
         };
 
-    // GradeDayConfig
-    public static GradeDayConfigResponse ToResponse(this GradeDayConfig config) =>
-        new(config.Id, config.GradeId, config.TeachingDayId, config.MaxPeriods);
+    // YearDayConfig
+    public static YearDayConfigResponse ToResponse(this YearDayConfig config) =>
+        new(config.Id, config.YearId, config.SchoolDayId, config.MaxPeriods);
 
-    public static GradeDayConfig ToEntity(this CreateGradeDayConfigRequest request, Guid tenantId, Guid gradeId) =>
+    public static YearDayConfig ToEntity(this CreateYearDayConfigRequest request, Guid tenantId, Guid yearId) =>
         new()
         {
-            Id = Guid.NewGuid(), TenantId = tenantId, GradeId = gradeId,
-            TeachingDayId = request.TeachingDayId, MaxPeriods = request.MaxPeriods
+            Id = Guid.NewGuid(), TenantId = tenantId, YearId = yearId,
+            SchoolDayId = request.SchoolDayId, MaxPeriods = request.MaxPeriods
         };
 
     // Teacher
@@ -148,24 +148,24 @@ public static class MappingExtensions
 
     // TeacherSubjectQualification
     public static TeacherQualificationResponse ToResponse(this TeacherSubjectQualification q) =>
-        new(q.Id, q.SubjectId, q.MinGradeId, q.MaxGradeId, q.Subject.Name, q.MinGrade.Name, q.MaxGrade.Name);
+        new(q.Id, q.SubjectId, q.MinYearId, q.MaxYearId, q.Subject.Name, q.MinYear.Name, q.MaxYear.Name);
 
     public static TeacherSubjectQualification ToEntity(this CreateTeacherQualificationRequest request, Guid teacherId) =>
         new()
         {
             Id = Guid.NewGuid(), TeacherId = teacherId,
-            SubjectId = request.SubjectId, MinGradeId = request.MinGradeId, MaxGradeId = request.MaxGradeId
+            SubjectId = request.SubjectId, MinYearId = request.MinYearId, MaxYearId = request.MaxYearId
         };
 
     // TeacherDayConfig
     public static TeacherDayConfigResponse ToResponse(this TeacherDayConfig config) =>
-        new(config.Id, config.TeachingDayId, config.MaxPeriods);
+        new(config.Id, config.SchoolDayId, config.MaxPeriods);
 
     public static TeacherDayConfig ToEntity(this CreateTeacherDayConfigRequest request, Guid teacherId) =>
         new()
         {
             Id = Guid.NewGuid(), TeacherId = teacherId,
-            TeachingDayId = request.TeachingDayId, MaxPeriods = request.MaxPeriods
+            SchoolDayId = request.SchoolDayId, MaxPeriods = request.MaxPeriods
         };
 
     // TeacherSlotBlock
@@ -188,8 +188,8 @@ public static class MappingExtensions
     // TimetableEntry
     public static TimetableEntryResponse ToResponse(this TimetableEntry entry) =>
         new(entry.Id, entry.TimeSlotId, entry.SubjectId, entry.TeacherId,
-            entry.RoomId, entry.IsDoublePeriod, entry.CombinedLessonGroupId,
-            entry.Groups.Select(g => g.GroupId).ToList());
+            entry.RoomId, entry.IsDoublePeriod, entry.CombinedLessonClassId,
+            entry.Classes.Select(c => c.ClassId).ToList());
 
     // TimetableReport
     public static TimetableReportResponse ToResponse(this TimetableReport report) =>

@@ -2,5 +2,5 @@ namespace ClassForge.Application.DTOs.TeacherDayConfigs;
 
 public record TeacherDayConfigResponse(
     Guid Id,
-    Guid TeachingDayId,
+    Guid SchoolDayId,
     int MaxPeriods);

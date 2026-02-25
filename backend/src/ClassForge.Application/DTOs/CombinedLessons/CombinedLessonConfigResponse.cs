@@ -2,8 +2,8 @@ namespace ClassForge.Application.DTOs.CombinedLessons;
 
 public record CombinedLessonConfigResponse(
     Guid Id,
-    Guid GradeId,
+    Guid YearId,
     Guid SubjectId,
     bool IsMandatory,
-    int MaxGroupsPerLesson,
-    List<Guid> GroupIds);
+    int MaxClassesPerLesson,
+    List<Guid> ClassIds);

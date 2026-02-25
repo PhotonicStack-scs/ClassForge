@@ -1,20 +1,20 @@
 namespace ClassForge.Application.DTOs.Timetables;
 
 public record SchedulingInput(
-    List<SchedulingGrade> Grades,
-    List<SchedulingGroup> Groups,
+    List<SchedulingYear> Years,
+    List<SchedulingClass> Classes,
     List<SchedulingSubject> Subjects,
     List<SchedulingRoom> Rooms,
     List<SchedulingTeacher> Teachers,
-    List<SchedulingTeachingDay> TeachingDays,
+    List<SchedulingSchoolDay> SchoolDays,
     List<SchedulingRequirement> Requirements,
     List<SchedulingCombinedLesson> CombinedLessons,
-    List<SchedulingGradeDayConfig> GradeDayConfigs
+    List<SchedulingYearDayConfig> YearDayConfigs
 );
 
-public record SchedulingGrade(Guid Id, string Name, int SortOrder);
+public record SchedulingYear(Guid Id, string Name, int SortOrder);
 
-public record SchedulingGroup(Guid Id, Guid GradeId, string Name, int SortOrder);
+public record SchedulingClass(Guid Id, Guid YearId, string Name, int SortOrder);
 
 public record SchedulingSubject(
     Guid Id, string Name, bool RequiresSpecialRoom, Guid? SpecialRoomId);
@@ -27,18 +27,18 @@ public record SchedulingTeacher(
     List<SchedulingTeacherDayConfig> DayConfigs,
     List<Guid> BlockedSlotIds);
 
-public record SchedulingTeacherQualification(Guid SubjectId, int MinGradeSortOrder, int MaxGradeSortOrder);
+public record SchedulingTeacherQualification(Guid SubjectId, int MinYearSortOrder, int MaxYearSortOrder);
 
-public record SchedulingTeacherDayConfig(Guid TeachingDayId, int MaxPeriods);
+public record SchedulingTeacherDayConfig(Guid SchoolDayId, int MaxPeriods);
 
-public record SchedulingTeachingDay(Guid Id, int DayOfWeek, int SortOrder, List<SchedulingTimeSlot> TimeSlots);
+public record SchedulingSchoolDay(Guid Id, int DayOfWeek, int SortOrder, List<SchedulingTimeSlot> TimeSlots);
 
-public record SchedulingTimeSlot(Guid Id, Guid TeachingDayId, int SlotNumber, bool IsBreak);
+public record SchedulingTimeSlot(Guid Id, Guid SchoolDayId, int SlotNumber, bool IsBreak);
 
-public record SchedulingRequirement(Guid Id, Guid GradeId, Guid SubjectId, int PeriodsPerWeek, bool PreferDoublePeriods, int MaxPeriodsPerDay, bool AllowDoublePeriods);
+public record SchedulingRequirement(Guid Id, Guid YearId, Guid SubjectId, int PeriodsPerWeek, bool PreferDoublePeriods, int MaxPeriodsPerDay, bool AllowDoublePeriods);
 
 public record SchedulingCombinedLesson(
-    Guid Id, Guid GradeId, Guid SubjectId, bool IsMandatory,
-    int MaxGroupsPerLesson, List<Guid> GroupIds);
+    Guid Id, Guid YearId, Guid SubjectId, bool IsMandatory,
+    int MaxClassesPerLesson, List<Guid> ClassIds);
 
-public record SchedulingGradeDayConfig(Guid GradeId, Guid TeachingDayId, int MaxPeriods);
+public record SchedulingYearDayConfig(Guid YearId, Guid SchoolDayId, int MaxPeriods);

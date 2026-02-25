@@ -92,7 +92,7 @@ public class BacktrackingSolver
     private int CountEliminations(LessonVariable variable, Assignment candidate)
     {
         var count = 0;
-        var slot = _input.TeachingDays.SelectMany(d => d.TimeSlots).First(s => s.Id == candidate.TimeSlotId);
+        var slot = _input.SchoolDays.SelectMany(d => d.TimeSlots).First(s => s.Id == candidate.TimeSlotId);
 
         foreach (var other in _state.Variables.Where(v => !v.IsAssigned && v.Id != variable.Id))
         {
@@ -102,7 +102,7 @@ public class BacktrackingSolver
                 if (otherAssignment.TimeSlotId == candidate.TimeSlotId)
                 {
                     if (otherAssignment.TeacherId == candidate.TeacherId) count++;
-                    else if (other.GroupIds.Intersect(variable.GroupIds).Any()) count++;
+                    else if (other.ClassIds.Intersect(variable.ClassIds).Any()) count++;
                     else if (candidate.RoomId is not null && otherAssignment.RoomId == candidate.RoomId) count++;
                 }
             }

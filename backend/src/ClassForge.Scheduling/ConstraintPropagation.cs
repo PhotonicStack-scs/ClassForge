@@ -12,26 +12,26 @@ public static class ConstraintPropagation
         var variables = new List<LessonVariable>();
 
         // Build a lookup of all non-break time slots
-        var allSlots = input.TeachingDays
+        var allSlots = input.SchoolDays
             .SelectMany(d => d.TimeSlots)
             .Where(s => !s.IsBreak)
             .ToList();
 
-        // Build qualified teacher lookup: (subjectId, gradeId) -> [teacherIds]
+        // Build qualified teacher lookup: (subjectId, yearId) -> [teacherIds]
         var qualifiedTeachers = BuildQualifiedTeacherLookup(input);
 
-        // Process combined lessons first (mandatory ones merge groups)
-        var processedCombined = new HashSet<(Guid GradeId, Guid SubjectId)>();
+        // Process combined lessons first (mandatory ones merge classes)
+        var processedCombined = new HashSet<(Guid YearId, Guid SubjectId)>();
         foreach (var combined in input.CombinedLessons.Where(c => c.IsMandatory))
         {
             var requirement = input.Requirements.FirstOrDefault(r =>
-                r.GradeId == combined.GradeId && r.SubjectId == combined.SubjectId);
+                r.YearId == combined.YearId && r.SubjectId == combined.SubjectId);
             if (requirement is null) continue;
 
-            processedCombined.Add((combined.GradeId, combined.SubjectId));
+            processedCombined.Add((combined.YearId, combined.SubjectId));
 
-            // Create variables for combined groups
-            var combinedGroupIds = combined.GroupIds;
+            // Create variables for combined classes
+            var combinedClassIds = combined.ClassIds;
             var periodsPerWeek = requirement.PeriodsPerWeek;
             var subject = input.Subjects.First(s => s.Id == combined.SubjectId);
             var useDouble = requirement.PreferDoublePeriods && requirement.AllowDoublePeriods;
@@ -40,50 +40,50 @@ public static class ConstraintPropagation
 
             for (var i = 0; i < doubleCount; i++)
             {
-                variables.Add(CreateVariable(input, combined.GradeId, combined.SubjectId,
-                    combinedGroupIds, i, true, combined.Id, qualifiedTeachers, allSlots, subject, requirement.MaxPeriodsPerDay));
+                variables.Add(CreateVariable(input, combined.YearId, combined.SubjectId,
+                    combinedClassIds, i, true, combined.Id, qualifiedTeachers, allSlots, subject, requirement.MaxPeriodsPerDay));
             }
             for (var i = 0; i < singleCount; i++)
             {
-                variables.Add(CreateVariable(input, combined.GradeId, combined.SubjectId,
-                    combinedGroupIds, doubleCount + i, false, combined.Id, qualifiedTeachers, allSlots, subject, requirement.MaxPeriodsPerDay));
+                variables.Add(CreateVariable(input, combined.YearId, combined.SubjectId,
+                    combinedClassIds, doubleCount + i, false, combined.Id, qualifiedTeachers, allSlots, subject, requirement.MaxPeriodsPerDay));
             }
         }
 
-        // Process individual group requirements
-        var groups = input.Groups.ToList();
+        // Process individual class requirements
+        var schoolClasses = input.Classes.ToList();
         foreach (var requirement in input.Requirements)
         {
-            var gradeGroups = groups.Where(g => g.GradeId == requirement.GradeId).ToList();
+            var yearClasses = schoolClasses.Where(c => c.YearId == requirement.YearId).ToList();
             var subject = input.Subjects.First(s => s.Id == requirement.SubjectId);
 
-            foreach (var group in gradeGroups)
+            foreach (var schoolClass in yearClasses)
             {
-                // Skip if this subject/grade is handled by a mandatory combined lesson
-                if (processedCombined.Contains((requirement.GradeId, requirement.SubjectId)))
+                // Skip if this subject/year is handled by a mandatory combined lesson
+                if (processedCombined.Contains((requirement.YearId, requirement.SubjectId)))
                     continue;
 
-                var groupIds = new List<Guid> { group.Id };
+                var classIds = new List<Guid> { schoolClass.Id };
                 var useDouble = requirement.PreferDoublePeriods && requirement.AllowDoublePeriods;
                 var doubleCount = useDouble ? requirement.PeriodsPerWeek / 2 : 0;
                 var singleCount = requirement.PeriodsPerWeek - doubleCount * 2;
 
                 // Check for optional combined lessons
                 var optionalCombined = input.CombinedLessons.FirstOrDefault(c =>
-                    !c.IsMandatory && c.GradeId == requirement.GradeId &&
-                    c.SubjectId == requirement.SubjectId && c.GroupIds.Contains(group.Id));
+                    !c.IsMandatory && c.YearId == requirement.YearId &&
+                    c.SubjectId == requirement.SubjectId && c.ClassIds.Contains(schoolClass.Id));
 
                 Guid? combinedId = optionalCombined?.Id;
 
                 for (var i = 0; i < doubleCount; i++)
                 {
-                    variables.Add(CreateVariable(input, requirement.GradeId, requirement.SubjectId,
-                        groupIds, i, true, combinedId, qualifiedTeachers, allSlots, subject, requirement.MaxPeriodsPerDay));
+                    variables.Add(CreateVariable(input, requirement.YearId, requirement.SubjectId,
+                        classIds, i, true, combinedId, qualifiedTeachers, allSlots, subject, requirement.MaxPeriodsPerDay));
                 }
                 for (var i = 0; i < singleCount; i++)
                 {
-                    variables.Add(CreateVariable(input, requirement.GradeId, requirement.SubjectId,
-                        groupIds, doubleCount + i, false, combinedId, qualifiedTeachers, allSlots, subject, requirement.MaxPeriodsPerDay));
+                    variables.Add(CreateVariable(input, requirement.YearId, requirement.SubjectId,
+                        classIds, doubleCount + i, false, combinedId, qualifiedTeachers, allSlots, subject, requirement.MaxPeriodsPerDay));
                 }
             }
         }
@@ -94,17 +94,17 @@ public static class ConstraintPropagation
     }
 
     private static LessonVariable CreateVariable(
-        SchedulingInput input, Guid gradeId, Guid subjectId,
-        List<Guid> groupIds, int periodIndex, bool isDouble, Guid? combinedLessonId,
-        Dictionary<(Guid SubjectId, Guid GradeId), List<Guid>> qualifiedTeachers,
+        SchedulingInput input, Guid yearId, Guid subjectId,
+        List<Guid> classIds, int periodIndex, bool isDouble, Guid? combinedLessonId,
+        Dictionary<(Guid SubjectId, Guid YearId), List<Guid>> qualifiedTeachers,
         List<SchedulingTimeSlot> allSlots, SchedulingSubject subject, int maxPeriodsPerDay)
     {
         var variable = new LessonVariable
         {
-            GradeId = gradeId,
+            YearId = yearId,
             SubjectId = subjectId,
             PeriodIndex = periodIndex,
-            GroupIds = groupIds.ToList(),
+            ClassIds = classIds.ToList(),
             IsDoublePeriod = isDouble,
             CombinedLessonId = combinedLessonId,
             RequiresSpecialRoom = subject.RequiresSpecialRoom,
@@ -113,7 +113,7 @@ public static class ConstraintPropagation
         };
 
         // Build initial domain
-        var teachers = qualifiedTeachers.GetValueOrDefault((subjectId, gradeId)) ?? [];
+        var teachers = qualifiedTeachers.GetValueOrDefault((subjectId, yearId)) ?? [];
         Guid? roomId = subject.RequiresSpecialRoom ? subject.SpecialRoomId : null;
 
         var domain = new List<Assignment>();
@@ -126,29 +126,29 @@ public static class ConstraintPropagation
                 if (teacher.BlockedSlotIds.Contains(slot.Id)) continue;
 
                 // HC-5: Teacher has a day config for this day
-                var dayConfig = teacher.DayConfigs.FirstOrDefault(dc => dc.TeachingDayId == slot.TeachingDayId);
+                var dayConfig = teacher.DayConfigs.FirstOrDefault(dc => dc.SchoolDayId == slot.SchoolDayId);
                 if (dayConfig is null || dayConfig.MaxPeriods == 0) continue;
 
-                // HC-8: Slot within grade day config
-                var gradeDayConfig = input.GradeDayConfigs.FirstOrDefault(c =>
-                    c.GradeId == gradeId && c.TeachingDayId == slot.TeachingDayId);
-                if (gradeDayConfig is null) continue;
+                // HC-8: Slot within year day config
+                var yearDayConfig = input.YearDayConfigs.FirstOrDefault(c =>
+                    c.YearId == yearId && c.SchoolDayId == slot.SchoolDayId);
+                if (yearDayConfig is null) continue;
 
                 // Count non-break slots up to this slot number to get position
-                var nonBreakPosition = input.TeachingDays
-                    .First(d => d.Id == slot.TeachingDayId).TimeSlots
+                var nonBreakPosition = input.SchoolDays
+                    .First(d => d.Id == slot.SchoolDayId).TimeSlots
                     .Count(s => !s.IsBreak && s.SlotNumber <= slot.SlotNumber);
-                if (nonBreakPosition > gradeDayConfig.MaxPeriods) continue;
+                if (nonBreakPosition > yearDayConfig.MaxPeriods) continue;
 
                 // HC-9: Double periods need a consecutive slot
                 if (isDouble)
                 {
                     var nextSlot = SchedulingState.FindNextNonBreakSlot(input, slot);
                     if (nextSlot is null) continue;
-                    var nextPosition = input.TeachingDays
-                        .First(d => d.Id == slot.TeachingDayId).TimeSlots
+                    var nextPosition = input.SchoolDays
+                        .First(d => d.Id == slot.SchoolDayId).TimeSlots
                         .Count(s => !s.IsBreak && s.SlotNumber <= nextSlot.SlotNumber);
-                    if (nextPosition > gradeDayConfig.MaxPeriods) continue;
+                    if (nextPosition > yearDayConfig.MaxPeriods) continue;
                     if (teacher.BlockedSlotIds.Contains(nextSlot.Id)) continue;
                 }
 
@@ -160,7 +160,7 @@ public static class ConstraintPropagation
         return variable;
     }
 
-    private static Dictionary<(Guid SubjectId, Guid GradeId), List<Guid>> BuildQualifiedTeacherLookup(SchedulingInput input)
+    private static Dictionary<(Guid SubjectId, Guid YearId), List<Guid>> BuildQualifiedTeacherLookup(SchedulingInput input)
     {
         var lookup = new Dictionary<(Guid, Guid), List<Guid>>();
 
@@ -168,12 +168,12 @@ public static class ConstraintPropagation
         {
             foreach (var qual in teacher.Qualifications)
             {
-                var qualifiedGrades = input.Grades
-                    .Where(g => g.SortOrder >= qual.MinGradeSortOrder && g.SortOrder <= qual.MaxGradeSortOrder);
+                var qualifiedYears = input.Years
+                    .Where(y => y.SortOrder >= qual.MinYearSortOrder && y.SortOrder <= qual.MaxYearSortOrder);
 
-                foreach (var grade in qualifiedGrades)
+                foreach (var year in qualifiedYears)
                 {
-                    var key = (qual.SubjectId, grade.Id);
+                    var key = (qual.SubjectId, year.Id);
                     if (!lookup.ContainsKey(key))
                         lookup[key] = [];
                     lookup[key].Add(teacher.Id);

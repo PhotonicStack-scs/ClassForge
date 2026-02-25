@@ -11,7 +11,7 @@ public record TimetableResponse(
 
 public record TimetableEntryResponse(
     Guid Id, Guid TimeSlotId, Guid SubjectId, Guid TeacherId,
-    Guid? RoomId, bool IsDoublePeriod, Guid? CombinedLessonGroupId, List<Guid> GroupIds);
+    Guid? RoomId, bool IsDoublePeriod, Guid? CombinedLessonClassId, List<Guid> ClassIds);
 
 public record TimetableReportResponse(
     Guid Id, string Type, string Category, string Message,
@@ -19,7 +19,7 @@ public record TimetableReportResponse(
 
 public record TimetableViewEntry(
     Guid EntryId, int DayOfWeek, int SlotNumber, string SubjectName,
-    string TeacherName, string? RoomName, bool IsDoublePeriod, List<string> GroupNames);
+    string TeacherName, string? RoomName, bool IsDoublePeriod, List<string> ClassNames);
 
 public record TimetableViewResponse(
     Guid TimetableId, string ViewType, string ViewName, List<TimetableViewEntry> Entries);

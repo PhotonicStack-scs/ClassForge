@@ -19,10 +19,10 @@ public class PreflightValidator : IPreflightValidator
 
         await CheckSubjectsWithNoQualifiedTeachers(issues, cancellationToken);
         await CheckTeachersWithZeroAvailableHours(issues, cancellationToken);
-        await CheckGradesExceedingAvailableSlots(issues, cancellationToken);
-        await CheckCombinedLessonGroupsNotInGrade(issues, cancellationToken);
+        await CheckYearsExceedingAvailableSlots(issues, cancellationToken);
+        await CheckCombinedLessonClassesNotInYear(issues, cancellationToken);
         await CheckInvalidSubjectReferences(issues, cancellationToken);
-        await CheckTeachingDaysWithNoTimeSlots(issues, cancellationToken);
+        await CheckSchoolDaysWithNoTimeSlots(issues, cancellationToken);
         await CheckRoomCapacityForCombinedLessons(issues, cancellationToken);
 
         var errorCount = issues.Count(i => i.Severity == "Error");
@@ -33,30 +33,30 @@ public class PreflightValidator : IPreflightValidator
 
     private async Task CheckSubjectsWithNoQualifiedTeachers(List<PreflightIssue> issues, CancellationToken ct)
     {
-        var requirements = await _db.GradeSubjectRequirements
-            .Include(r => r.Grade)
+        var requirements = await _db.YearCurricula
+            .Include(r => r.Year)
             .Include(r => r.Subject)
             .ToListAsync(ct);
 
         var qualifications = await _db.TeacherSubjectQualifications
-            .Include(q => q.MinGrade)
-            .Include(q => q.MaxGrade)
+            .Include(q => q.MinYear)
+            .Include(q => q.MaxYear)
             .ToListAsync(ct);
 
         foreach (var req in requirements)
         {
             var hasQualifiedTeacher = qualifications.Any(q =>
                 q.SubjectId == req.SubjectId &&
-                q.MinGrade.SortOrder <= req.Grade.SortOrder &&
-                q.MaxGrade.SortOrder >= req.Grade.SortOrder);
+                q.MinYear.SortOrder <= req.Year.SortOrder &&
+                q.MaxYear.SortOrder >= req.Year.SortOrder);
 
             if (!hasQualifiedTeacher)
             {
                 issues.Add(new PreflightIssue(
                     "Error",
                     "TeacherCoverage",
-                    $"Subject '{req.Subject.Name}' in grade '{req.Grade.Name}' has no qualified teacher.",
-                    "GradeSubjectRequirement",
+                    $"Subject '{req.Subject.Name}' in year '{req.Year.Name}' has no qualified teacher.",
+                    "YearCurriculum",
                     req.Id));
             }
         }
@@ -87,20 +87,20 @@ public class PreflightValidator : IPreflightValidator
         }
     }
 
-    private async Task CheckGradesExceedingAvailableSlots(List<PreflightIssue> issues, CancellationToken ct)
+    private async Task CheckYearsExceedingAvailableSlots(List<PreflightIssue> issues, CancellationToken ct)
     {
-        var grades = await _db.Grades.ToListAsync(ct);
-        var requirements = await _db.GradeSubjectRequirements.ToListAsync(ct);
-        var dayConfigs = await _db.GradeDayConfigs.ToListAsync(ct);
+        var years = await _db.Years.ToListAsync(ct);
+        var requirements = await _db.YearCurricula.ToListAsync(ct);
+        var dayConfigs = await _db.YearDayConfigs.ToListAsync(ct);
 
-        foreach (var grade in grades)
+        foreach (var year in years)
         {
             var totalRequired = requirements
-                .Where(r => r.GradeId == grade.Id)
+                .Where(r => r.YearId == year.Id)
                 .Sum(r => r.PeriodsPerWeek);
 
             var totalAvailable = dayConfigs
-                .Where(dc => dc.GradeId == grade.Id)
+                .Where(dc => dc.YearId == year.Id)
                 .Sum(dc => dc.MaxPeriods);
 
             if (totalRequired > totalAvailable)
@@ -108,34 +108,34 @@ public class PreflightValidator : IPreflightValidator
                 issues.Add(new PreflightIssue(
                     "Error",
                     "SlotCapacity",
-                    $"Grade '{grade.Name}' requires {totalRequired} periods/week but only {totalAvailable} slots are available.",
-                    "Grade",
-                    grade.Id));
+                    $"Year '{year.Name}' requires {totalRequired} periods/week but only {totalAvailable} slots are available.",
+                    "Year",
+                    year.Id));
             }
         }
     }
 
-    private async Task CheckCombinedLessonGroupsNotInGrade(List<PreflightIssue> issues, CancellationToken ct)
+    private async Task CheckCombinedLessonClassesNotInYear(List<PreflightIssue> issues, CancellationToken ct)
     {
         var configs = await _db.CombinedLessonConfigs
-            .Include(c => c.Groups)
-            .Include(c => c.Grade)
+            .Include(c => c.Classes)
+            .Include(c => c.Year)
             .Include(c => c.Subject)
             .ToListAsync(ct);
 
-        var groups = await _db.Groups.ToListAsync(ct);
+        var classes = await _db.Classes.ToListAsync(ct);
 
         foreach (var config in configs)
         {
-            foreach (var clg in config.Groups)
+            foreach (var clc in config.Classes)
             {
-                var group = groups.FirstOrDefault(g => g.Id == clg.GroupId);
-                if (group is not null && group.GradeId != config.GradeId)
+                var schoolClass = classes.FirstOrDefault(c => c.Id == clc.ClassId);
+                if (schoolClass is not null && schoolClass.YearId != config.YearId)
                 {
                     issues.Add(new PreflightIssue(
                         "Error",
                         "CombinedLessonConfig",
-                        $"Combined lesson for '{config.Subject.Name}' in grade '{config.Grade.Name}' references group '{group.Name}' from a different grade.",
+                        $"Combined lesson for '{config.Subject.Name}' in year '{config.Year.Name}' references class '{schoolClass.Name}' from a different year.",
                         "CombinedLessonConfig",
                         config.Id));
                 }
@@ -147,8 +147,8 @@ public class PreflightValidator : IPreflightValidator
     {
         var subjectIds = (await _db.Subjects.Select(s => s.Id).ToListAsync(ct)).ToHashSet();
 
-        var requirements = await _db.GradeSubjectRequirements
-            .Include(r => r.Grade)
+        var requirements = await _db.YearCurricula
+            .Include(r => r.Year)
             .ToListAsync(ct);
 
         foreach (var req in requirements)
@@ -158,16 +158,16 @@ public class PreflightValidator : IPreflightValidator
                 issues.Add(new PreflightIssue(
                     "Error",
                     "DataConsistency",
-                    $"Grade '{req.Grade.Name}' references a non-existent subject (ID: {req.SubjectId}).",
-                    "GradeSubjectRequirement",
+                    $"Year '{req.Year.Name}' references a non-existent subject (ID: {req.SubjectId}).",
+                    "YearCurriculum",
                     req.Id));
             }
         }
     }
 
-    private async Task CheckTeachingDaysWithNoTimeSlots(List<PreflightIssue> issues, CancellationToken ct)
+    private async Task CheckSchoolDaysWithNoTimeSlots(List<PreflightIssue> issues, CancellationToken ct)
     {
-        var days = await _db.TeachingDays
+        var days = await _db.SchoolDays
             .Include(d => d.TimeSlots)
             .Where(d => d.IsActive)
             .ToListAsync(ct);
@@ -180,8 +180,8 @@ public class PreflightValidator : IPreflightValidator
                 issues.Add(new PreflightIssue(
                     "Warning",
                     "TimeStructure",
-                    $"Teaching day {day.DayOfWeek} is active but has no non-break time slots.",
-                    "TeachingDay",
+                    $"School day {day.DayOfWeek} is active but has no non-break time slots.",
+                    "SchoolDay",
                     day.Id));
             }
         }
@@ -191,7 +191,7 @@ public class PreflightValidator : IPreflightValidator
     {
         var configs = await _db.CombinedLessonConfigs
             .Include(c => c.Subject)
-            .Include(c => c.Grade)
+            .Include(c => c.Year)
             .Where(c => c.Subject.RequiresSpecialRoom && c.Subject.SpecialRoomId != null)
             .ToListAsync(ct);
 
@@ -200,12 +200,12 @@ public class PreflightValidator : IPreflightValidator
         foreach (var config in configs)
         {
             var room = rooms.FirstOrDefault(r => r.Id == config.Subject.SpecialRoomId);
-            if (room is not null && room.Capacity < config.MaxGroupsPerLesson)
+            if (room is not null && room.Capacity < config.MaxClassesPerLesson)
             {
                 issues.Add(new PreflightIssue(
                     "Error",
                     "RoomCapacity",
-                    $"Room '{room.Name}' (capacity {room.Capacity}) cannot fit {config.MaxGroupsPerLesson} groups for combined '{config.Subject.Name}' in grade '{config.Grade.Name}'.",
+                    $"Room '{room.Name}' (capacity {room.Capacity}) cannot fit {config.MaxClassesPerLesson} classes for combined '{config.Subject.Name}' in year '{config.Year.Name}'.",
                     "CombinedLessonConfig",
                     config.Id));
             }

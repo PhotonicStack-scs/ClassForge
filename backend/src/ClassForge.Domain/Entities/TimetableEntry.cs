@@ -11,7 +11,7 @@ public class TimetableEntry : IAuditableEntity
     public Guid TeacherId { get; set; }
     public Guid? RoomId { get; set; }
     public bool IsDoublePeriod { get; set; }
-    public Guid? CombinedLessonGroupId { get; set; }
+    public Guid? CombinedLessonClassId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 
@@ -20,5 +20,5 @@ public class TimetableEntry : IAuditableEntity
     public Subject Subject { get; set; } = null!;
     public Teacher Teacher { get; set; } = null!;
     public Room? Room { get; set; }
-    public List<TimetableEntryGroup> Groups { get; set; } = [];
+    public List<TimetableEntryClass> Classes { get; set; } = [];
 }

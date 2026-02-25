@@ -46,10 +46,10 @@ Infrastructure  Scheduling
   +--- API -------+
 ```
 
-- **Domain** — Entities (20), enums (`UserRole`, `TimetableStatus`, `ReportType`), interfaces (`ITenantEntity`, `IAuditableEntity`). Zero dependencies.
+- **Domain** — Entities (20), enums (`UserRole`, `TimetableStatus`, `ReportType`), interfaces (`ITenantEntity`, `IAuditableEntity`). Zero dependencies. Entity terminology: `Year` = grade level (e.g., "Year 6"), `Class` = class section within a year (e.g., "6A"), `SchoolDay` = day-of-week configuration (Mon–Fri), `YearCurriculum` = per-year subject requirement (periods/week, double-period settings), `YearDayConfig` = max total schedulable periods for a year on a given school day.
 - **Application** — DTOs (records), FluentValidation validators, interfaces (`IAppDbContext`, `ITenantProvider`, `ITokenService`, `ITimetableGenerator`, `IPreflightValidator`, `ITimetableEntryValidator`, `ITimetableGenerationQueue`), mapping extensions.
 - **Infrastructure** — `AppDbContext`, EF configurations (`Data/Configurations/`), services (`Services/`). DI wired via `DependencyInjection.AddInfrastructure()`. Contains: `TenantProvider`, `TokenService`, `PreflightValidator`, `TimetableEntryValidator`, `SchedulingInputBuilder`, `TimetableGenerationQueue` (Channel&lt;T&gt;), `TimetableGenerationService` (BackgroundService), `TimetableProgressTracker` (singleton, `ConcurrentDictionary<Guid, int>` for live progress).
-- **Scheduling** — Timetable generation engine. Depends only on Application (no EF/Infrastructure). Contains: `TimetableGenerator` (implements `ITimetableGenerator`), `ConstraintPropagation`, `BacktrackingSolver`, `HardConstraintChecker`, `SoftConstraintScorer`, `ReportGenerator`. Registered in `Program.cs`, not `AddInfrastructure()`. `ConstraintPropagation` reads `MaxPeriodsPerDay` and `AllowDoublePeriods` from `SchedulingRequirement` (not `SchedulingSubject`) and stores `MaxPeriodsPerDay` on `LessonVariable` for use by `HardConstraintChecker.CheckSubjectDailyLimit`.
+- **Scheduling** — Timetable generation engine. Depends only on Application (no EF/Infrastructure). Contains: `TimetableGenerator` (implements `ITimetableGenerator`), `ConstraintPropagation`, `BacktrackingSolver`, `HardConstraintChecker`, `SoftConstraintScorer`, `ReportGenerator`. Registered in `Program.cs`, not `AddInfrastructure()`. `ConstraintPropagation` reads `MaxPeriodsPerDay` and `AllowDoublePeriods` from `SchedulingRequirement` (not `SchedulingSubject`) and stores `MaxPeriodsPerDay` on `LessonVariable` for use by `HardConstraintChecker.CheckSubjectDailyLimit`. `SchedulingInput` also carries `SchedulingYearDayConfig` (year × school-day max total periods), used by `HardConstraintChecker.CheckYearDayLimit` (HC-8) to enforce the year-level slot cap.
 - **API** — `Program.cs`, 17 endpoint files (`Endpoints/`), `ValidationFilter<T>`, `GlobalExceptionHandler`.
 
 **Test projects:**
@@ -82,7 +82,7 @@ Timetable creation is asynchronous: `POST /api/v1/timetables` creates a record w
 - **EF Configurations**: One `IEntityTypeConfiguration<T>` per entity in `Infrastructure/Data/Configurations/`. Unique indexes typically on `TenantId + Name`. Enum properties use `.HasConversion<string>()`.
 - **Authorization policies**: `"OrgAdmin"` and `"ScheduleManagerOrAbove"` (OrgAdmin + ScheduleManager).
 - **Entity patterns**: All entities use `Guid` primary keys. Navigation properties assigned `= null!`. Collections initialized with `= []`. `TimeOnly` used for time slots. Tenant-scoped entities implement `ITenantEntity`. Auditable entities implement `IAuditableEntity`. Child-of-tenant entities (e.g., `TeacherSubjectQualification`) may only implement `IAuditableEntity` — their tenancy is enforced via their parent's query filter. `Tenant` is the root entity (implements `IAuditableEntity` only, not `ITenantEntity`).
-- **Notable entity fields**: `Subject.Color` (hex string, default `"#DBEAFE"`) for UI rendering. `Tenant.DefaultLanguage` (default `"nb"`), `Tenant.SetupCompleted` (bool), `Tenant.SetupProgressJson` (nullable JSON string). `User.LanguagePreference` (nullable, overrides tenant default). `GradeSubjectRequirement.MaxPeriodsPerDay` (default 2) and `GradeSubjectRequirement.AllowDoublePeriods` (default false) — per-grade scheduling constraints; these live on the requirement, not on `Subject`.
+- **Notable entity fields**: `Subject.Color` (hex string, default `"#DBEAFE"`) for UI rendering. `Tenant.DefaultLanguage` (default `"nb"`), `Tenant.SetupCompleted` (bool), `Tenant.SetupProgressJson` (nullable JSON string). `User.LanguagePreference` (nullable, overrides tenant default). `YearCurriculum.MaxPeriodsPerDay` (default 2) and `YearCurriculum.AllowDoublePeriods` (default false) — per-subject-per-year scheduling constraints; these live on the curriculum, not on `Subject`. `YearDayConfig.MaxPeriods` — caps the total number of period slots a year-level can be assigned on a given school day (HC-8); distinct from `YearCurriculum.MaxPeriodsPerDay` which limits a single subject.
 - **Sub-resource endpoints**: Verify parent existence via `AnyAsync` before proceeding. Filter by both parent ID and item ID.
 
 ## Database
@@ -91,14 +91,14 @@ PostgreSQL via Npgsql. Connection string in `appsettings.json` under `Connection
 
 ## API Routes
 
-All under `/api/v1/`. Auth routes are anonymous. Most resource routes require `ScheduleManagerOrAbove`. User management requires `OrgAdmin`. Sub-resources are nested (e.g., `/grades/{gradeId}/groups`, `/teachers/{teacherId}/qualifications`).
+All under `/api/v1/`. Auth routes are anonymous. Most resource routes require `ScheduleManagerOrAbove`. User management requires `OrgAdmin`. Sub-resources are nested (e.g., `/years/{yearId}/classes`, `/teachers/{teacherId}/qualifications`).
 
 Notable non-obvious routes:
 - `GET /auth/my-teacher` — resolves the `Teacher` record linked to the current user's email
-- `GET /school/stats` — aggregated dashboard counts (grades, groups, teachers, subjects, rooms, timetables, published timetable ID)
+- `GET /school/stats` — aggregated dashboard counts (years, classes, teachers, subjects, rooms, timetables, published timetable ID)
 - `PUT /school/setup-progress` — updates `Tenant.SetupCompleted` and `SetupProgressJson` (onboarding wizard state)
 - `GET /timetables/published` — returns the single `Published` status timetable (uses `IgnoreQueryFilters` for tenant, returns 404 if none)
-- Bulk create endpoints: `POST /grades/bulk`, `POST /subjects/bulk`, `POST /teachers/bulk`, `POST /teaching-days/{dayId}/time-slots/bulk`, `POST /grades/{gradeId}/subject-requirements/bulk`
+- Bulk create endpoints: `POST /years/bulk`, `POST /subjects/bulk`, `POST /teachers/bulk`, `POST /school-days/{dayId}/time-slots/bulk`, `POST /years/{yearId}/curriculum/bulk`
 
 ## Tech Stack
 

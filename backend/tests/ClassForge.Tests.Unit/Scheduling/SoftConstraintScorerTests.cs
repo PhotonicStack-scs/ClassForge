@@ -13,16 +13,16 @@ public class SoftConstraintScorerTests
         var input = TestDataBuilder.CreateMinimalInput();
         var teacherId = input.Teachers[0].Id;
         var subjectId = input.Subjects[0].Id;
-        var groupId = input.Groups[0].Id;
-        var slot1 = input.TeachingDays[0].TimeSlots[0];
-        var slot2 = input.TeachingDays[0].TimeSlots[1];
+        var classId = input.Classes[0].Id;
+        var slot1 = input.SchoolDays[0].TimeSlots[0];
+        var slot2 = input.SchoolDays[0].TimeSlots[1];
 
         var state = new SchedulingState();
         var assigned = new LessonVariable
         {
-            GradeId = input.Grades[0].Id,
+            YearId = input.Years[0].Id,
             SubjectId = subjectId,
-            GroupIds = [groupId],
+            ClassIds = [classId],
             PeriodIndex = 0,
             Domain = []
         };
@@ -31,9 +31,9 @@ public class SoftConstraintScorerTests
 
         var next = new LessonVariable
         {
-            GradeId = input.Grades[0].Id,
+            YearId = input.Years[0].Id,
             SubjectId = subjectId,
-            GroupIds = [groupId],
+            ClassIds = [classId],
             PeriodIndex = 1,
             Domain = []
         };
@@ -54,13 +54,13 @@ public class SoftConstraintScorerTests
         var state = new SchedulingState();
         var variable = new LessonVariable
         {
-            GradeId = input.Grades[0].Id,
+            YearId = input.Years[0].Id,
             SubjectId = input.Subjects[0].Id,
-            GroupIds = [input.Groups[0].Id],
+            ClassIds = [input.Classes[0].Id],
             PeriodIndex = 0,
             Domain = []
         };
-        variable.CurrentAssignment = new Assignment(input.Teachers[0].Id, input.TeachingDays[0].TimeSlots[0].Id, null);
+        variable.CurrentAssignment = new Assignment(input.Teachers[0].Id, input.SchoolDays[0].TimeSlots[0].Id, null);
         state.Variables.Add(variable);
 
         var score = SoftConstraintScorer.ComputeQualityScore(state, input);
