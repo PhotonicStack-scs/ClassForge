@@ -224,16 +224,260 @@
         }
       }
     },
-    "/api/v1/grades/{gradeId}/combined-lessons": {
+    "/api/v1/years/{yearId}/classes": {
+      "get": {
+        "tags": [
+          "Classes"
+        ],
+        "summary": "List classes for a year",
+        "description": "Returns all classes within the specified year, ordered by sort order.",
+        "parameters": [
+          {
+            "name": "yearId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClassResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Classes"
+        ],
+        "summary": "Create a class",
+        "description": "Creates a new class within a year. Classes represent class divisions (e.g. 8A, 8B).",
+        "parameters": [
+          {
+            "name": "yearId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClassRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/years/{yearId}/classes/{id}": {
+      "get": {
+        "tags": [
+          "Classes"
+        ],
+        "summary": "Get a class by ID",
+        "parameters": [
+          {
+            "name": "yearId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Classes"
+        ],
+        "summary": "Update a class",
+        "parameters": [
+          {
+            "name": "yearId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateClassRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Classes"
+        ],
+        "summary": "Delete a class",
+        "parameters": [
+          {
+            "name": "yearId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/years/{yearId}/combined-lessons": {
       "get": {
         "tags": [
           "Combined Lessons"
         ],
-        "summary": "List combined lesson configs for a grade",
-        "description": "Returns all combined lesson configurations for the specified grade. Combined lessons allow multiple groups to share a time slot for the same subject.",
+        "summary": "List combined lesson configs for a year",
+        "description": "Returns all combined lesson configurations for the specified year. Combined lessons allow multiple classes to share a time slot for the same subject.",
         "parameters": [
           {
-            "name": "gradeId",
+            "name": "yearId",
             "in": "path",
             "required": true,
             "schema": {
@@ -263,10 +507,10 @@
           "Combined Lessons"
         ],
         "summary": "Create a combined lesson config",
-        "description": "Defines a combined lesson where specified groups share a time slot for a subject. Set isMandatory to true if groups must always be combined.",
+        "description": "Defines a combined lesson where specified classes share a time slot for a subject. Set isMandatory to true if classes must always be combined.",
         "parameters": [
           {
-            "name": "gradeId",
+            "name": "yearId",
             "in": "path",
             "required": true,
             "schema": {
@@ -309,7 +553,7 @@
         }
       }
     },
-    "/api/v1/grades/{gradeId}/combined-lessons/{id}": {
+    "/api/v1/years/{yearId}/combined-lessons/{id}": {
       "get": {
         "tags": [
           "Combined Lessons"
@@ -317,7 +561,7 @@
         "summary": "Get a combined lesson config by ID",
         "parameters": [
           {
-            "name": "gradeId",
+            "name": "yearId",
             "in": "path",
             "required": true,
             "schema": {
@@ -363,10 +607,10 @@
           "Combined Lessons"
         ],
         "summary": "Update a combined lesson config",
-        "description": "Updates the combined lesson settings and replaces the list of participating groups.",
+        "description": "Updates the combined lesson settings and replaces the list of participating classes.",
         "parameters": [
           {
-            "name": "gradeId",
+            "name": "yearId",
             "in": "path",
             "required": true,
             "schema": {
@@ -434,7 +678,7 @@
         "summary": "Delete a combined lesson config",
         "parameters": [
           {
-            "name": "gradeId",
+            "name": "yearId",
             "in": "path",
             "required": true,
             "schema": {
@@ -469,16 +713,16 @@
         }
       }
     },
-    "/api/v1/grades/{gradeId}/day-config": {
+    "/api/v1/years/{yearId}/curriculum": {
       "get": {
         "tags": [
-          "Grade Day Config"
+          "Curriculum"
         ],
-        "summary": "List day configs for a grade",
-        "description": "Returns all day-specific period limits for the specified grade. Each config caps how many periods a grade can have on a given teaching day.",
+        "summary": "List curriculum for a year",
+        "description": "Returns all subject-period requirements for the specified year. Each defines how many periods per week a subject needs.",
         "parameters": [
           {
-            "name": "gradeId",
+            "name": "yearId",
             "in": "path",
             "required": true,
             "schema": {
@@ -495,7 +739,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/GradeDayConfigResponse"
+                    "$ref": "#/components/schemas/YearCurriculumResponse"
                   }
                 }
               }
@@ -505,13 +749,13 @@
       },
       "post": {
         "tags": [
-          "Grade Day Config"
+          "Curriculum"
         ],
-        "summary": "Create a grade day config",
-        "description": "Sets the maximum number of teaching periods a grade can have on a specific teaching day.",
+        "summary": "Create a curriculum entry",
+        "description": "Defines how many periods per week a subject needs for this year, and whether double periods are preferred.",
         "parameters": [
           {
-            "name": "gradeId",
+            "name": "yearId",
             "in": "path",
             "required": true,
             "schema": {
@@ -524,7 +768,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateGradeDayConfigRequest"
+                "$ref": "#/components/schemas/CreateYearCurriculumRequest"
               }
             }
           },
@@ -536,7 +780,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GradeDayConfigResponse"
+                  "$ref": "#/components/schemas/YearCurriculumResponse"
                 }
               }
             }
@@ -554,15 +798,15 @@
         }
       }
     },
-    "/api/v1/grades/{gradeId}/day-config/{id}": {
+    "/api/v1/years/{yearId}/curriculum/{id}": {
       "get": {
         "tags": [
-          "Grade Day Config"
+          "Curriculum"
         ],
-        "summary": "Get a grade day config by ID",
+        "summary": "Get a curriculum entry by ID",
         "parameters": [
           {
-            "name": "gradeId",
+            "name": "yearId",
             "in": "path",
             "required": true,
             "schema": {
@@ -586,7 +830,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GradeDayConfigResponse"
+                  "$ref": "#/components/schemas/YearCurriculumResponse"
                 }
               }
             }
@@ -605,12 +849,12 @@
       },
       "put": {
         "tags": [
-          "Grade Day Config"
+          "Curriculum"
         ],
-        "summary": "Update a grade day config",
+        "summary": "Update a curriculum entry",
         "parameters": [
           {
-            "name": "gradeId",
+            "name": "yearId",
             "in": "path",
             "required": true,
             "schema": {
@@ -632,7 +876,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateGradeDayConfigRequest"
+                "$ref": "#/components/schemas/UpdateYearCurriculumRequest"
               }
             }
           },
@@ -644,7 +888,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GradeDayConfigResponse"
+                  "$ref": "#/components/schemas/YearCurriculumResponse"
                 }
               }
             }
@@ -673,12 +917,12 @@
       },
       "delete": {
         "tags": [
-          "Grade Day Config"
+          "Curriculum"
         ],
-        "summary": "Delete a grade day config",
+        "summary": "Delete a curriculum entry",
         "parameters": [
           {
-            "name": "gradeId",
+            "name": "yearId",
             "in": "path",
             "required": true,
             "schema": {
@@ -713,49 +957,15 @@
         }
       }
     },
-    "/api/v1/grades/{gradeId}/subject-requirements": {
-      "get": {
-        "tags": [
-          "Grade Subject Requirements"
-        ],
-        "summary": "List subject requirements for a grade",
-        "description": "Returns all subject-period requirements for the specified grade. Each defines how many periods per week a subject needs.",
-        "parameters": [
-          {
-            "name": "gradeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GradeSubjectRequirementResponse"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
+    "/api/v1/years/{yearId}/curriculum/bulk": {
       "post": {
         "tags": [
-          "Grade Subject Requirements"
+          "Curriculum"
         ],
-        "summary": "Create a subject requirement",
-        "description": "Defines how many periods per week a subject needs for this grade, and whether double periods are preferred.",
+        "summary": "Bulk create curriculum entries",
         "parameters": [
           {
-            "name": "gradeId",
+            "name": "yearId",
             "in": "path",
             "required": true,
             "schema": {
@@ -768,217 +978,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateGradeSubjectRequirementRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GradeSubjectRequirementResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/grades/{gradeId}/subject-requirements/{id}": {
-      "get": {
-        "tags": [
-          "Grade Subject Requirements"
-        ],
-        "summary": "Get a subject requirement by ID",
-        "parameters": [
-          {
-            "name": "gradeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GradeSubjectRequirementResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Grade Subject Requirements"
-        ],
-        "summary": "Update a subject requirement",
-        "parameters": [
-          {
-            "name": "gradeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateGradeSubjectRequirementRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GradeSubjectRequirementResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Grade Subject Requirements"
-        ],
-        "summary": "Delete a subject requirement",
-        "parameters": [
-          {
-            "name": "gradeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/grades/{gradeId}/subject-requirements/bulk": {
-      "post": {
-        "tags": [
-          "Grade Subject Requirements"
-        ],
-        "summary": "Bulk create subject requirements",
-        "parameters": [
-          {
-            "name": "gradeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkCreateGradeSubjectRequirementsRequest"
+                "$ref": "#/components/schemas/BulkCreateYearCurriculaRequest"
               }
             }
           },
@@ -992,7 +992,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/GradeSubjectRequirementResponse"
+                    "$ref": "#/components/schemas/YearCurriculumResponse"
                   }
                 }
               }
@@ -1004,489 +1004,6 @@
               "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/grades": {
-      "get": {
-        "tags": [
-          "Grades"
-        ],
-        "summary": "List all grades",
-        "description": "Returns all grades (e.g. Grade 1, Grade 2) for the current tenant, ordered by sort order.",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GradeResponse"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Grades"
-        ],
-        "summary": "Create a grade",
-        "description": "Creates a new grade level. Grades represent year levels in the school (e.g. Grade 8, Grade 9).",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateGradeRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GradeResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/grades/{id}": {
-      "get": {
-        "tags": [
-          "Grades"
-        ],
-        "summary": "Get a grade by ID",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GradeResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Grades"
-        ],
-        "summary": "Update a grade",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateGradeRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GradeResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Grades"
-        ],
-        "summary": "Delete a grade",
-        "description": "Permanently removes a grade and cascades to associated groups and configurations.",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/grades/bulk": {
-      "post": {
-        "tags": [
-          "Grades"
-        ],
-        "summary": "Bulk create grades",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkCreateGradesRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GradeResponse"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/grades/{gradeId}/groups": {
-      "get": {
-        "tags": [
-          "Groups"
-        ],
-        "summary": "List groups for a grade",
-        "description": "Returns all groups (class divisions) within the specified grade, ordered by sort order.",
-        "parameters": [
-          {
-            "name": "gradeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GroupResponse"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Groups"
-        ],
-        "summary": "Create a group",
-        "description": "Creates a new group within a grade. Groups represent class divisions (e.g. 8A, 8B).",
-        "parameters": [
-          {
-            "name": "gradeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateGroupRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GroupResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/grades/{gradeId}/groups/{id}": {
-      "get": {
-        "tags": [
-          "Groups"
-        ],
-        "summary": "Get a group by ID",
-        "parameters": [
-          {
-            "name": "gradeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GroupResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Groups"
-        ],
-        "summary": "Update a group",
-        "parameters": [
-          {
-            "name": "gradeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateGroupRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GroupResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Groups"
-        ],
-        "summary": "Delete a group",
-        "parameters": [
-          {
-            "name": "gradeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -1834,6 +1351,203 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DashboardStatsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/school-days": {
+      "get": {
+        "tags": [
+          "School Days"
+        ],
+        "summary": "List all school days",
+        "description": "Returns all school days for the current tenant, ordered by sort order. School days represent the weekly schedule (e.g. Monday–Friday).",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SchoolDayResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "School Days"
+        ],
+        "summary": "Create a school day",
+        "description": "Creates a new school day. Each day has a day-of-week, active flag, and sort order.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSchoolDayRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolDayResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/school-days/{id}": {
+      "get": {
+        "tags": [
+          "School Days"
+        ],
+        "summary": "Get a school day by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolDayResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "School Days"
+        ],
+        "summary": "Update a school day",
+        "description": "Updates the active status and sort order of a school day.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSchoolDayRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchoolDayResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "School Days"
+        ],
+        "summary": "Delete a school day",
+        "description": "Permanently removes a school day and its associated time slots.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -3042,210 +2756,13 @@
         }
       }
     },
-    "/api/v1/teaching-days": {
-      "get": {
-        "tags": [
-          "Teaching Days"
-        ],
-        "summary": "List all teaching days",
-        "description": "Returns all teaching days for the current tenant, ordered by sort order. Teaching days represent the weekly schedule (e.g. Monday–Friday).",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TeachingDayResponse"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Teaching Days"
-        ],
-        "summary": "Create a teaching day",
-        "description": "Creates a new teaching day. Each day has a day-of-week, active flag, and sort order.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateTeachingDayRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TeachingDayResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/teaching-days/{id}": {
-      "get": {
-        "tags": [
-          "Teaching Days"
-        ],
-        "summary": "Get a teaching day by ID",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TeachingDayResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Teaching Days"
-        ],
-        "summary": "Update a teaching day",
-        "description": "Updates the active status and sort order of a teaching day.",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateTeachingDayRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TeachingDayResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Teaching Days"
-        ],
-        "summary": "Delete a teaching day",
-        "description": "Permanently removes a teaching day and its associated time slots.",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/teaching-days/{dayId}/time-slots": {
+    "/api/v1/school-days/{dayId}/time-slots": {
       "get": {
         "tags": [
           "Time Slots"
         ],
-        "summary": "List time slots for a teaching day",
-        "description": "Returns all time slots for the specified teaching day, ordered by slot number. Includes both lesson slots and breaks.",
+        "summary": "List time slots for a school day",
+        "description": "Returns all time slots for the specified school day, ordered by slot number. Includes both lesson slots and breaks.",
         "parameters": [
           {
             "name": "dayId",
@@ -3278,7 +2795,7 @@
           "Time Slots"
         ],
         "summary": "Create a time slot",
-        "description": "Creates a new time slot within a teaching day. Specify start/end times (HH:mm) and whether this slot is a break.",
+        "description": "Creates a new time slot within a school day. Specify start/end times (HH:mm) and whether this slot is a break.",
         "parameters": [
           {
             "name": "dayId",
@@ -3324,7 +2841,7 @@
         }
       }
     },
-    "/api/v1/teaching-days/{dayId}/time-slots/{id}": {
+    "/api/v1/school-days/{dayId}/time-slots/{id}": {
       "get": {
         "tags": [
           "Time Slots"
@@ -3483,7 +3000,7 @@
         }
       }
     },
-    "/api/v1/teaching-days/{dayId}/time-slots/bulk": {
+    "/api/v1/school-days/{dayId}/time-slots/bulk": {
       "post": {
         "tags": [
           "Time Slots"
@@ -3791,7 +3308,7 @@
           "Timetables"
         ],
         "summary": "Get timetable entries",
-        "description": "Returns entries, optionally filtered by groupId, teacherId, or teachingDayId query parameters.",
+        "description": "Returns entries, optionally filtered by classId, teacherId, or schoolDayId query parameters.",
         "parameters": [
           {
             "name": "id",
@@ -3803,7 +3320,7 @@
             }
           },
           {
-            "name": "groupId",
+            "name": "classId",
             "in": "query",
             "schema": {
               "type": "string",
@@ -3819,7 +3336,7 @@
             }
           },
           {
-            "name": "teachingDayId",
+            "name": "schoolDayId",
             "in": "query",
             "schema": {
               "type": "string",
@@ -3995,12 +3512,12 @@
         }
       }
     },
-    "/api/v1/timetables/{id}/by-group/{groupId}": {
+    "/api/v1/timetables/{id}/by-class/{classId}": {
       "get": {
         "tags": [
           "Timetables"
         ],
-        "summary": "Get weekly view for a group",
+        "summary": "Get weekly view for a class",
         "parameters": [
           {
             "name": "id",
@@ -4012,7 +3529,7 @@
             }
           },
           {
-            "name": "groupId",
+            "name": "classId",
             "in": "path",
             "required": true,
             "schema": {
@@ -4422,6 +3939,489 @@
           }
         }
       }
+    },
+    "/api/v1/years/{yearId}/day-config": {
+      "get": {
+        "tags": [
+          "Year Day Config"
+        ],
+        "summary": "List day configs for a year",
+        "description": "Returns all day-specific period limits for the specified year. Each config caps how many periods a year can have on a given school day.",
+        "parameters": [
+          {
+            "name": "yearId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/YearDayConfigResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Year Day Config"
+        ],
+        "summary": "Create a year day config",
+        "description": "Sets the maximum number of teaching periods a year can have on a specific school day.",
+        "parameters": [
+          {
+            "name": "yearId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateYearDayConfigRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YearDayConfigResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/years/{yearId}/day-config/{id}": {
+      "get": {
+        "tags": [
+          "Year Day Config"
+        ],
+        "summary": "Get a year day config by ID",
+        "parameters": [
+          {
+            "name": "yearId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YearDayConfigResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Year Day Config"
+        ],
+        "summary": "Update a year day config",
+        "parameters": [
+          {
+            "name": "yearId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateYearDayConfigRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YearDayConfigResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Year Day Config"
+        ],
+        "summary": "Delete a year day config",
+        "parameters": [
+          {
+            "name": "yearId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/years": {
+      "get": {
+        "tags": [
+          "Years"
+        ],
+        "summary": "List all years",
+        "description": "Returns all year levels (e.g. Year 6, Year 7) for the current tenant, ordered by sort order.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/YearResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Years"
+        ],
+        "summary": "Create a year",
+        "description": "Creates a new year level. Years represent year levels in the school (e.g. Year 8, Year 9).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateYearRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YearResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/years/{id}": {
+      "get": {
+        "tags": [
+          "Years"
+        ],
+        "summary": "Get a year by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YearResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Years"
+        ],
+        "summary": "Update a year",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateYearRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YearResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Years"
+        ],
+        "summary": "Delete a year",
+        "description": "Permanently removes a year and cascades to associated classes and configurations.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/years/bulk": {
+      "post": {
+        "tags": [
+          "Years"
+        ],
+        "summary": "Bulk create years",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCreateYearsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/YearResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4440,32 +4440,6 @@
           "expiresAt": {
             "type": "string",
             "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
-      "BulkCreateGradeSubjectRequirementsRequest": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CreateGradeSubjectRequirementRequest"
-            },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "BulkCreateGradesRequest": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CreateGradeRequest"
-            },
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -4509,6 +4483,54 @@
         },
         "additionalProperties": false
       },
+      "BulkCreateYearCurriculaRequest": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateYearCurriculumRequest"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BulkCreateYearsRequest": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateYearRequest"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ClassResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "yearId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "CombinedLessonConfigResponse": {
         "type": "object",
         "properties": {
@@ -4516,7 +4538,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "gradeId": {
+          "yearId": {
             "type": "string",
             "format": "uuid"
           },
@@ -4527,17 +4549,31 @@
           "isMandatory": {
             "type": "boolean"
           },
-          "maxGroupsPerLesson": {
+          "maxClassesPerLesson": {
             "type": "integer",
             "format": "int32"
           },
-          "groupIds": {
+          "classIds": {
             "type": "array",
             "items": {
               "type": "string",
               "format": "uuid"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateClassRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -4552,83 +4588,17 @@
           "isMandatory": {
             "type": "boolean"
           },
-          "maxGroupsPerLesson": {
+          "maxClassesPerLesson": {
             "type": "integer",
             "format": "int32"
           },
-          "groupIds": {
+          "classIds": {
             "type": "array",
             "items": {
               "type": "string",
               "format": "uuid"
             },
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "CreateGradeDayConfigRequest": {
-        "type": "object",
-        "properties": {
-          "teachingDayId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "maxPeriods": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "CreateGradeRequest": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "sortOrder": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "CreateGradeSubjectRequirementRequest": {
-        "type": "object",
-        "properties": {
-          "subjectId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "periodsPerWeek": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "preferDoublePeriods": {
-            "type": "boolean"
-          },
-          "maxPeriodsPerDay": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "allowDoublePeriods": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
-      "CreateGroupRequest": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "sortOrder": {
-            "type": "integer",
-            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -4641,6 +4611,23 @@
             "nullable": true
           },
           "capacity": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateSchoolDayRequest": {
+        "type": "object",
+        "properties": {
+          "dayOfWeek": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "sortOrder": {
             "type": "integer",
             "format": "int32"
           }
@@ -4672,7 +4659,7 @@
       "CreateTeacherDayConfigRequest": {
         "type": "object",
         "properties": {
-          "teachingDayId": {
+          "schoolDayId": {
             "type": "string",
             "format": "uuid"
           },
@@ -4690,11 +4677,11 @@
             "type": "string",
             "format": "uuid"
           },
-          "minGradeId": {
+          "minYearId": {
             "type": "string",
             "format": "uuid"
           },
-          "maxGradeId": {
+          "maxYearId": {
             "type": "string",
             "format": "uuid"
           }
@@ -4725,23 +4712,6 @@
           "reason": {
             "type": "string",
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "CreateTeachingDayRequest": {
-        "type": "object",
-        "properties": {
-          "dayOfWeek": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "sortOrder": {
-            "type": "integer",
-            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -4803,14 +4773,66 @@
         },
         "additionalProperties": false
       },
-      "DashboardStatsResponse": {
+      "CreateYearCurriculumRequest": {
         "type": "object",
         "properties": {
-          "gradeCount": {
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "periodsPerWeek": {
             "type": "integer",
             "format": "int32"
           },
-          "groupCount": {
+          "preferDoublePeriods": {
+            "type": "boolean"
+          },
+          "maxPeriodsPerDay": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allowDoublePeriods": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateYearDayConfigRequest": {
+        "type": "object",
+        "properties": {
+          "schoolDayId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maxPeriods": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateYearRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DashboardStatsResponse": {
+        "type": "object",
+        "properties": {
+          "yearCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "classCount": {
             "type": "integer",
             "format": "int32"
           },
@@ -4834,104 +4856,6 @@
             "type": "string",
             "format": "uuid",
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "GradeDayConfigResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "gradeId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "teachingDayId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "maxPeriods": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "GradeResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "sortOrder": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "GradeSubjectRequirementResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "gradeId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "subjectId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "periodsPerWeek": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "preferDoublePeriods": {
-            "type": "boolean"
-          },
-          "maxPeriodsPerDay": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "allowDoublePeriods": {
-            "type": "boolean"
-          },
-          "subjectName": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "GroupResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "gradeId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "sortOrder": {
-            "type": "integer",
-            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -5119,6 +5043,31 @@
         },
         "additionalProperties": false
       },
+      "SchoolDayResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dayOfWeek": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "SubjectResponse": {
         "type": "object",
         "properties": {
@@ -5152,7 +5101,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "teachingDayId": {
+          "schoolDayId": {
             "type": "string",
             "format": "uuid"
           },
@@ -5174,11 +5123,11 @@
             "type": "string",
             "format": "uuid"
           },
-          "minGradeId": {
+          "minYearId": {
             "type": "string",
             "format": "uuid"
           },
-          "maxGradeId": {
+          "maxYearId": {
             "type": "string",
             "format": "uuid"
           },
@@ -5186,11 +5135,11 @@
             "type": "string",
             "nullable": true
           },
-          "minGradeName": {
+          "minYearName": {
             "type": "string",
             "nullable": true
           },
-          "maxGradeName": {
+          "maxYearName": {
             "type": "string",
             "nullable": true
           }
@@ -5229,31 +5178,6 @@
           "reason": {
             "type": "string",
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "TeachingDayResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "dayOfWeek": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "sortOrder": {
-            "type": "integer",
-            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -5297,7 +5221,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "teachingDayId": {
+          "schoolDayId": {
             "type": "string",
             "format": "uuid"
           },
@@ -5346,12 +5270,12 @@
           "isDoublePeriod": {
             "type": "boolean"
           },
-          "combinedLessonGroupId": {
+          "combinedLessonClassId": {
             "type": "string",
             "format": "uuid",
             "nullable": true
           },
-          "groupIds": {
+          "classIds": {
             "type": "array",
             "items": {
               "type": "string",
@@ -5468,7 +5392,7 @@
           "isDoublePeriod": {
             "type": "boolean"
           },
-          "groupNames": {
+          "classNames": {
             "type": "array",
             "items": {
               "type": "string"
@@ -5503,81 +5427,37 @@
         },
         "additionalProperties": false
       },
+      "UpdateClassRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "UpdateCombinedLessonConfigRequest": {
         "type": "object",
         "properties": {
           "isMandatory": {
             "type": "boolean"
           },
-          "maxGroupsPerLesson": {
+          "maxClassesPerLesson": {
             "type": "integer",
             "format": "int32"
           },
-          "groupIds": {
+          "classIds": {
             "type": "array",
             "items": {
               "type": "string",
               "format": "uuid"
             },
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "UpdateGradeDayConfigRequest": {
-        "type": "object",
-        "properties": {
-          "maxPeriods": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UpdateGradeRequest": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "sortOrder": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UpdateGradeSubjectRequirementRequest": {
-        "type": "object",
-        "properties": {
-          "periodsPerWeek": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "preferDoublePeriods": {
-            "type": "boolean"
-          },
-          "maxPeriodsPerDay": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "allowDoublePeriods": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UpdateGroupRequest": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "sortOrder": {
-            "type": "integer",
-            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -5590,6 +5470,19 @@
             "nullable": true
           },
           "capacity": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateSchoolDayRequest": {
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean"
+          },
+          "sortOrder": {
             "type": "integer",
             "format": "int32"
           }
@@ -5651,11 +5544,11 @@
             "type": "string",
             "format": "uuid"
           },
-          "minGradeId": {
+          "minYearId": {
             "type": "string",
             "format": "uuid"
           },
-          "maxGradeId": {
+          "maxYearId": {
             "type": "string",
             "format": "uuid"
           }
@@ -5682,19 +5575,6 @@
           "reason": {
             "type": "string",
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "UpdateTeachingDayRequest": {
-        "type": "object",
-        "properties": {
-          "isActive": {
-            "type": "boolean"
-          },
-          "sortOrder": {
-            "type": "integer",
-            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -5757,7 +5637,7 @@
           "isDoublePeriod": {
             "type": "boolean"
           },
-          "groupIds": {
+          "classIds": {
             "type": "array",
             "items": {
               "type": "string",
@@ -5792,6 +5672,50 @@
           "languagePreference": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateYearCurriculumRequest": {
+        "type": "object",
+        "properties": {
+          "periodsPerWeek": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "preferDoublePeriods": {
+            "type": "boolean"
+          },
+          "maxPeriodsPerDay": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allowDoublePeriods": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateYearDayConfigRequest": {
+        "type": "object",
+        "properties": {
+          "maxPeriods": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateYearRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -5863,6 +5787,82 @@
           }
         },
         "additionalProperties": false
+      },
+      "YearCurriculumResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "yearId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "subjectId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "periodsPerWeek": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "preferDoublePeriods": {
+            "type": "boolean"
+          },
+          "maxPeriodsPerDay": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allowDoublePeriods": {
+            "type": "boolean"
+          },
+          "subjectName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "YearDayConfigResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "yearId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "schoolDayId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maxPeriods": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "YearResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
@@ -5884,25 +5884,22 @@
       "name": "Auth"
     },
     {
+      "name": "Classes"
+    },
+    {
       "name": "Combined Lessons"
     },
     {
-      "name": "Grade Day Config"
-    },
-    {
-      "name": "Grade Subject Requirements"
-    },
-    {
-      "name": "Grades"
-    },
-    {
-      "name": "Groups"
+      "name": "Curriculum"
     },
     {
       "name": "Rooms"
     },
     {
       "name": "School"
+    },
+    {
+      "name": "School Days"
     },
     {
       "name": "Subjects"
@@ -5920,9 +5917,6 @@
       "name": "Teachers"
     },
     {
-      "name": "Teaching Days"
-    },
-    {
       "name": "Time Slots"
     },
     {
@@ -5930,6 +5924,12 @@
     },
     {
       "name": "Users"
+    },
+    {
+      "name": "Year Day Config"
+    },
+    {
+      "name": "Years"
     }
   ]
 }

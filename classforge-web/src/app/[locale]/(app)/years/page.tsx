@@ -1,6 +1,6 @@
 "use client";
 
-import { useGrades, useCreateGrade, useUpdateGrade, useDeleteGrade } from "@/lib/api/hooks/use-grades";
+import { useYears, useCreateYear, useUpdateYear, useDeleteYear } from "@/lib/api/hooks/use-years";
 import { useState } from "react";
 import { Pencil, Trash2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,11 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function GradesPage() {
-  const { data: grades, isLoading } = useGrades();
-  const createGrade = useCreateGrade();
-  const updateGrade = useUpdateGrade();
-  const deleteGrade = useDeleteGrade();
+export default function YearsPage() {
+  const { data: years, isLoading } = useYears();
+  const createYear = useCreateYear();
+  const updateYear = useUpdateYear();
+  const deleteYear = useDeleteYear();
   const [name, setName] = useState("");
   const [sortOrder, setSortOrder] = useState(1);
 
@@ -22,18 +22,18 @@ export default function GradesPage() {
 
   function handleCreate() {
     if (!name.trim()) return;
-    createGrade.mutate({ name, sortOrder }, { onSuccess: () => { setName(""); setSortOrder(1); } });
+    createYear.mutate({ name, sortOrder }, { onSuccess: () => { setName(""); setSortOrder(1); } });
   }
 
-  function startEdit(grade: { id: string; name?: string | null; sortOrder?: number | null }) {
-    setEditingId(grade.id);
-    setEditName(grade.name ?? "");
-    setEditSortOrder(grade.sortOrder ?? 1);
+  function startEdit(year: { id: string; name?: string | null; sortOrder?: number | null }) {
+    setEditingId(year.id);
+    setEditName(year.name ?? "");
+    setEditSortOrder(year.sortOrder ?? 1);
   }
 
   function handleSave(id: string) {
     if (!editName.trim()) return;
-    updateGrade.mutate(
+    updateYear.mutate(
       { id, body: { name: editName, sortOrder: editSortOrder } },
       { onSuccess: () => setEditingId(null) }
     );
@@ -43,27 +43,27 @@ export default function GradesPage() {
 
   return (
     <div className="container mx-auto p-8 max-w-3xl">
-      <h1 className="text-2xl font-bold mb-6">Grades</h1>
+      <h1 className="text-2xl font-bold mb-6">Years</h1>
       <Card className="mb-6">
-        <CardHeader><CardTitle>Add Grade</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Add Year</CardTitle></CardHeader>
         <CardContent>
           <div className="flex gap-3 items-end">
             <div className="flex-1 space-y-1">
-              <Label htmlFor="gradeName">Grade name</Label>
-              <Input id="gradeName" placeholder="e.g. 1. klasse" value={name} onChange={(e) => setName(e.target.value)} />
+              <Label htmlFor="yearName">Year name</Label>
+              <Input id="yearName" placeholder="e.g. 1. klasse" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="w-28 space-y-1">
               <Label htmlFor="sortOrder">Sort order</Label>
               <Input id="sortOrder" type="number" value={sortOrder} onChange={(e) => setSortOrder(Number(e.target.value))} />
             </div>
-            <Button onClick={handleCreate} disabled={createGrade.isPending}>Add</Button>
+            <Button onClick={handleCreate} disabled={createYear.isPending}>Add</Button>
           </div>
         </CardContent>
       </Card>
       <div className="space-y-2">
-        {grades?.map((grade) =>
-          editingId === grade.id ? (
-            <div key={grade.id!} className="flex items-center gap-2 px-4 py-2 rounded-xl border bg-card shadow-sm">
+        {years?.map((year) =>
+          editingId === year.id ? (
+            <div key={year.id!} className="flex items-center gap-2 px-4 py-2 rounded-xl border bg-card shadow-sm">
               <Input
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
@@ -79,8 +79,8 @@ export default function GradesPage() {
                 size="icon"
                 variant="ghost"
                 className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
-                onClick={() => handleSave(grade.id!)}
-                disabled={updateGrade.isPending}
+                onClick={() => handleSave(year.id!)}
+                disabled={updateYear.isPending}
               >
                 <Check className="w-4 h-4" />
               </Button>
@@ -94,14 +94,14 @@ export default function GradesPage() {
               </Button>
             </div>
           ) : (
-            <div key={grade.id!} className="flex items-center justify-between px-4 py-3 rounded-xl border bg-card shadow-sm">
-              <span className="font-medium">{grade.name}</span>
+            <div key={year.id!} className="flex items-center justify-between px-4 py-3 rounded-xl border bg-card shadow-sm">
+              <span className="font-medium">{year.name}</span>
               <div className="flex gap-1">
                 <Button
                   variant="outline"
                   size="icon"
                   className="text-muted-foreground hover:text-foreground"
-                  onClick={() => startEdit({ id: grade.id!, name: grade.name, sortOrder: grade.sortOrder })}
+                  onClick={() => startEdit({ id: year.id!, name: year.name, sortOrder: year.sortOrder })}
                 >
                   <Pencil className="w-4 h-4" />
                 </Button>
@@ -109,7 +109,7 @@ export default function GradesPage() {
                   variant="outline"
                   size="icon"
                   className="border-destructive/30 text-destructive/60 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50"
-                  onClick={() => deleteGrade.mutate(grade.id!)}
+                  onClick={() => deleteYear.mutate(year.id!)}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

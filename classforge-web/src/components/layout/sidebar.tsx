@@ -32,7 +32,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", icon: LayoutDashboard, labelKey: "dashboard" },
-  { href: "/grades", icon: GraduationCap, labelKey: "grades", roles: ["OrgAdmin", "ScheduleManager"] },
+  { href: "/years", icon: GraduationCap, labelKey: "years", roles: ["OrgAdmin", "ScheduleManager"] },
   { href: "/subjects", icon: BookOpen, labelKey: "subjects", roles: ["OrgAdmin", "ScheduleManager"] },
   { href: "/rooms", icon: DoorOpen, labelKey: "rooms", roles: ["OrgAdmin", "ScheduleManager"] },
   { href: "/teachers", icon: Users, labelKey: "teachers", roles: ["OrgAdmin", "ScheduleManager"] },

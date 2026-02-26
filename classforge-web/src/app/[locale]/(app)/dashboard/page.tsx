@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/auth-store";
-import { useGrades } from "@/lib/api/hooks/use-grades";
+import { useYears } from "@/lib/api/hooks/use-years";
 import { useSubjects } from "@/lib/api/hooks/use-subjects";
 import { useRooms } from "@/lib/api/hooks/use-rooms";
 import { useTeachers } from "@/lib/api/hooks/use-teachers";
@@ -50,7 +50,7 @@ export default function DashboardPage() {
   const locale = (params?.locale as string) ?? "nb";
   const user = useAuthStore((s) => s.user);
 
-  const { data: grades } = useGrades();
+  const { data: years } = useYears();
   const { data: subjects } = useSubjects();
   const { data: rooms } = useRooms();
   const { data: teachers } = useTeachers();
@@ -74,9 +74,9 @@ export default function DashboardPage() {
       {isAdmin && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard
-            label="Grades"
-            count={grades?.length}
-            href={`/${locale}/grades`}
+            label="Years"
+            count={years?.length}
+            href={`/${locale}/years`}
             icon={<GraduationCap className="w-4 h-4" />}
           />
           <StatCard
@@ -157,13 +157,13 @@ export default function DashboardPage() {
       </div>
 
       {/* Setup prompt if school data is missing */}
-      {isAdmin && grades?.length === 0 && (
+      {isAdmin && years?.length === 0 && (
         <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
           <CardContent className="py-4 flex items-center justify-between gap-4">
             <div>
               <p className="font-medium">Complete your school setup</p>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Add grades, subjects, rooms, and teachers before generating a timetable.
+                Add years, subjects, rooms, and teachers before generating a timetable.
               </p>
             </div>
             <Link href={`/${locale}/setup`}>

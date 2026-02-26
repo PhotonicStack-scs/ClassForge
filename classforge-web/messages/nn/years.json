@@ -1,0 +1,17 @@
+{
+  "title": "Trinn og klassar",
+  "year": "Trinn",
+  "years": "Trinn",
+  "class": "Klasse",
+  "classes": "Klassar",
+  "addYear": "Legg til trinn",
+  "addClass": "Legg til klasse",
+  "editYear": "Rediger trinn",
+  "editClass": "Rediger klasse",
+  "deleteYear": "Slett trinn",
+  "deleteClass": "Slett klasse",
+  "yearName": "Trinnnamn",
+  "className": "Klassenamn",
+  "noYears": "Ingen trinn lagde til enno",
+  "noClasses": "Ingen klassar for dette trinnet"
+}

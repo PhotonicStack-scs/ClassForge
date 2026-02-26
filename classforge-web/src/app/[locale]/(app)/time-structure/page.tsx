@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { useQueryClient, useQueries } from "@tanstack/react-query";
 import {
-  useTeachingDays,
-  useCreateTeachingDay,
-  useUpdateTeachingDay,
-} from "@/lib/api/hooks/use-teaching-days";
+  useSchoolDays,
+  useCreateSchoolDay,
+  useUpdateSchoolDay,
+} from "@/lib/api/hooks/use-school-days";
 import { apiClient } from "@/lib/api/client";
 import {
   PeriodTemplateBuilder,
@@ -29,7 +29,6 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { components } from "@/lib/api/schema";
 
-type TeachingDayResponse = components["schemas"]["TeachingDayResponse"];
 type TimeSlotResponse = components["schemas"]["TimeSlotResponse"];
 
 const WEEKDAYS = [
@@ -64,9 +63,9 @@ function deriveTemplate(slotsByDay: Map<string, TimeSlotResponse[]>): PeriodDef[
 
 export default function TimeStructurePage() {
   const qc = useQueryClient();
-  const { data: days = [], isLoading } = useTeachingDays();
-  const createDay = useCreateTeachingDay();
-  const updateDay = useUpdateTeachingDay();
+  const { data: days = [], isLoading } = useSchoolDays();
+  const createDay = useCreateSchoolDay();
+  const updateDay = useUpdateSchoolDay();
 
   const [periods, setPeriods] = useState<PeriodDef[]>([]);
   const [templateDirty, setTemplateDirty] = useState(false);
@@ -79,10 +78,10 @@ export default function TimeStructurePage() {
   // Fetch slots for all active days in parallel
   const slotQueries = useQueries({
     queries: activeDays.map((day) => ({
-      queryKey: ["teaching-days", day.id!, "time-slots"],
+      queryKey: ["school-days", day.id!, "time-slots"],
       queryFn: async () => {
         const { data, error } = await apiClient.GET(
-          "/api/v1/teaching-days/{dayId}/time-slots",
+          "/api/v1/school-days/{dayId}/time-slots",
           { params: { path: { dayId: day.id! } } }
         );
         if (error) throw error;
@@ -142,20 +141,20 @@ export default function TimeStructurePage() {
     for (const day of activeDays) {
       try {
         const { data: existing } = await apiClient.GET(
-          "/api/v1/teaching-days/{dayId}/time-slots",
+          "/api/v1/school-days/{dayId}/time-slots",
           { params: { path: { dayId: day.id! } } }
         );
 
         await Promise.all(
           (existing ?? []).map((slot: TimeSlotResponse) =>
-            apiClient.DELETE("/api/v1/teaching-days/{dayId}/time-slots/{id}", {
+            apiClient.DELETE("/api/v1/school-days/{dayId}/time-slots/{id}", {
               params: { path: { dayId: day.id!, id: slot.id! } },
             })
           )
         );
 
         const { error } = await apiClient.POST(
-          "/api/v1/teaching-days/{dayId}/time-slots/bulk",
+          "/api/v1/school-days/{dayId}/time-slots/bulk",
           {
             params: { path: { dayId: day.id! } },
             body: {
@@ -171,7 +170,7 @@ export default function TimeStructurePage() {
         if (error) errors++;
 
         await qc.invalidateQueries({
-          queryKey: ["teaching-days", day.id!, "time-slots"],
+          queryKey: ["school-days", day.id!, "time-slots"],
         });
       } catch {
         errors++;
@@ -194,12 +193,12 @@ export default function TimeStructurePage() {
       if (currentlyEnabled) {
         const existing = slotsByDay.get(dayId)?.find((s) => s.slotNumber === slot.slotNumber);
         if (existing?.id) {
-          await apiClient.DELETE("/api/v1/teaching-days/{dayId}/time-slots/{id}", {
+          await apiClient.DELETE("/api/v1/school-days/{dayId}/time-slots/{id}", {
             params: { path: { dayId, id: existing.id } },
           });
         }
       } else {
-        await apiClient.POST("/api/v1/teaching-days/{dayId}/time-slots", {
+        await apiClient.POST("/api/v1/school-days/{dayId}/time-slots", {
           params: { path: { dayId } },
           body: {
             slotNumber: slot.slotNumber,
@@ -209,7 +208,7 @@ export default function TimeStructurePage() {
           },
         });
       }
-      await qc.invalidateQueries({ queryKey: ["teaching-days", dayId, "time-slots"] });
+      await qc.invalidateQueries({ queryKey: ["school-days", dayId, "time-slots"] });
     } catch {
       toast.error("Failed to update slot");
     } finally {
@@ -233,7 +232,7 @@ export default function TimeStructurePage() {
       {/* Teaching Days */}
       <Card>
         <CardHeader>
-          <CardTitle>Teaching Days</CardTitle>
+          <CardTitle>School Days</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-center gap-4">
@@ -351,7 +350,7 @@ export default function TimeStructurePage() {
       {/* Prompt when no days/template yet */}
       {activeDays.length === 0 && periods.length > 0 && (
         <p className="text-sm text-muted-foreground">
-          Enable at least one teaching day above to see the weekly schedule.
+          Enable at least one school day above to see the weekly schedule.
         </p>
       )}
 

@@ -14,7 +14,7 @@ export async function exportTimetableToExcel(
     Subject: e.subjectName ?? "",
     Teacher: e.teacherName ?? "",
     Room: e.roomName ?? "",
-    Groups: (e.groupNames ?? []).join(", "),
+    Classes: (e.classNames ?? []).join(", "),
   }));
 
   const ws = xlsx.utils.json_to_sheet(rows);

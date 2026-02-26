@@ -1,6 +1,6 @@
 {
   "title": "Tidsstruktur",
-  "teachingDays": "Undervisningsdager",
+  "schoolDays": "Skoledager",
   "periods": "Timer",
   "period": "Time",
   "addPeriod": "Legg til time",

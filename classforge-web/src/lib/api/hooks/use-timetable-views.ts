@@ -7,21 +7,21 @@ import type { components } from "@/lib/api/schema";
 type TimetableViewResponse = components["schemas"]["TimetableViewResponse"];
 type TimetableReportResponse = components["schemas"]["TimetableReportResponse"];
 
-export function useTimetableByGroup(
+export function useTimetableByClass(
   timetableId: string,
-  groupId: string | null
+  classId: string | null
 ) {
   return useQuery({
-    queryKey: ["timetable-view", timetableId, "group", groupId],
+    queryKey: ["timetable-view", timetableId, "class", classId],
     queryFn: async () => {
       const { data, error } = await apiClient.GET(
-        "/api/v1/timetables/{id}/by-group/{groupId}",
-        { params: { path: { id: timetableId, groupId: groupId! } } }
+        "/api/v1/timetables/{id}/by-class/{classId}",
+        { params: { path: { id: timetableId, classId: classId! } } }
       );
       if (error) throw error;
       return data as TimetableViewResponse;
     },
-    enabled: !!timetableId && !!groupId,
+    enabled: !!timetableId && !!classId,
   });
 }
 
@@ -60,7 +60,7 @@ export function useTimetableReport(timetableId: string) {
 
 export function useTimetableEntries(
   timetableId: string,
-  params?: { groupId?: string; teacherId?: string }
+  params?: { classId?: string; teacherId?: string }
 ) {
   return useQuery({
     queryKey: ["timetable-entries", timetableId, params],

@@ -9,12 +9,12 @@ Built with Next.js 16, TypeScript, Tailwind CSS, and shadcn/ui. Designed to depl
 ## Features
 
 - **Multi-tenant** — each school is an isolated tenant
-- **Setup wizard** — 8-step onboarding; selecting a built-in template (barneskole, ungdomsskole, combined, videregående) automatically seeds grades and subjects via bulk API calls so those steps can be skipped
-- **Academic structure** — full CRUD for grades, groups, subjects (with color coding), and rooms; grades, subjects, and rooms all support inline editing
-- **Time structure** — enable teaching days (Mon–Sun), build a period/break template, and fine-tune per-day slots via a weekly calendar grid
+- **Setup wizard** — 8-step onboarding; selecting a built-in template (barneskole, ungdomsskole, combined, videregående) automatically seeds years and subjects via bulk API calls so those steps can be skipped
+- **Academic structure** — full CRUD for years, classes, subjects (with color coding), and rooms; years, subjects, and rooms all support inline editing
+- **Time structure** — enable school days (Mon–Sun), build a period/break template, and fine-tune per-day slots via a weekly calendar grid
 - **Teacher management** — qualifications, availability grids, blocked time slots
 - **Timetable generation** — async generation with real-time progress polling
-- **Timetable views** — group view, teacher view, with color-coded subject cells
+- **Timetable views** — class view, teacher view, with color-coded subject cells
 - **Manual editing** — click any cell to reassign subject/teacher/room; hard-constraint validation on save
 - **Quality report** — scored soft-constraint analysis grouped by severity
 - **Export** — Excel (SheetJS), PDF (@react-pdf/renderer), browser print
@@ -97,7 +97,7 @@ src/
 │   │   ├── (auth)/          # Login, register
 │   │   ├── (app)/           # Protected pages (sidebar layout)
 │   │   │   ├── dashboard/
-│   │   │   ├── grades/
+│   │   │   ├── years/
 │   │   │   ├── subjects/
 │   │   │   ├── rooms/
 │   │   │   ├── teachers/

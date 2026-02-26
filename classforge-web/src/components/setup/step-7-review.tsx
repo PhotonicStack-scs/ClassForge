@@ -3,11 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useWizardStore } from "@/lib/stores/wizard-store";
 import { useUpdateSetupProgress } from "@/lib/api/hooks/use-setup";
-import { useGrades } from "@/lib/api/hooks/use-grades";
+import { useYears } from "@/lib/api/hooks/use-years";
 import { useSubjects } from "@/lib/api/hooks/use-subjects";
 import { useRooms } from "@/lib/api/hooks/use-rooms";
 import { useTeachers } from "@/lib/api/hooks/use-teachers";
-import { useTeachingDays } from "@/lib/api/hooks/use-teaching-days";
+import { useSchoolDays } from "@/lib/api/hooks/use-school-days";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Circle, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
@@ -41,11 +41,11 @@ export function Step7Review({ locale }: { locale: string }) {
   const { completedSteps, markStepCompleted } = useWizardStore();
   const { mutate, isPending } = useUpdateSetupProgress();
 
-  const { data: grades = [] } = useGrades();
+  const { data: years = [] } = useYears();
   const { data: subjects = [] } = useSubjects();
   const { data: rooms = [] } = useRooms();
   const { data: teachers = [] } = useTeachers();
-  const { data: days = [] } = useTeachingDays();
+  const { data: days = [] } = useSchoolDays();
 
   const activeDays = days.filter((d) => d.isActive);
 
@@ -69,7 +69,7 @@ export function Step7Review({ locale }: { locale: string }) {
     );
   }
 
-  const allConfigured = grades.length > 0 && subjects.length > 0 && rooms.length > 0 && teachers.length > 0 && activeDays.length > 0;
+  const allConfigured = years.length > 0 && subjects.length > 0 && rooms.length > 0 && teachers.length > 0 && activeDays.length > 0;
 
   return (
     <div className="space-y-4">
@@ -84,11 +84,11 @@ export function Step7Review({ locale }: { locale: string }) {
       </div>
 
       <div className="border rounded-lg divide-y">
-        <SummaryRow label="Grades" count={grades.length} unit="grade" />
+        <SummaryRow label="Years" count={years.length} unit="year" />
         <SummaryRow label="Subjects" count={subjects.length} unit="subject" />
         <SummaryRow label="Rooms" count={rooms.length} unit="room" />
         <SummaryRow label="Teachers" count={teachers.length} unit="teacher" />
-        <SummaryRow label="Teaching days" count={activeDays.length} unit="day" />
+        <SummaryRow label="School days" count={activeDays.length} unit="day" />
       </div>
 
       {!allConfigured && (

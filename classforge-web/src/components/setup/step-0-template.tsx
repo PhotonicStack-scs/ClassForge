@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useWizardStore } from "@/lib/stores/wizard-store";
-import { useBulkCreateGrades, useGrades } from "@/lib/api/hooks/use-grades";
+import { useBulkCreateYears, useYears } from "@/lib/api/hooks/use-years";
 import { useBulkCreateSubjects, useSubjects } from "@/lib/api/hooks/use-subjects";
 import { SUBJECT_COLORS } from "@/lib/utils/color";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,7 @@ const TEMPLATES = [
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
 
-const TEMPLATE_GRADES: Record<TemplateId, { name: string; sortOrder: number }[]> = {
+const TEMPLATE_YEARS: Record<TemplateId, { name: string; sortOrder: number }[]> = {
   barneskole: Array.from({ length: 7 }, (_, i) => ({ name: `${i + 1}. klasse`, sortOrder: i })),
   ungdomsskole: Array.from({ length: 3 }, (_, i) => ({ name: `${i + 8}. klasse`, sortOrder: i })),
   combined: Array.from({ length: 10 }, (_, i) => ({ name: `${i + 1}. klasse`, sortOrder: i })),
@@ -43,9 +43,9 @@ export function Step0Template() {
   const { template, setTemplate, markStepCompleted, setCurrentStep } = useWizardStore();
   const [seeding, setSeeding] = useState(false);
 
-  const { data: existingGrades = [] } = useGrades();
+  const { data: existingYears = [] } = useYears();
   const { data: existingSubjects = [] } = useSubjects();
-  const bulkCreateGrades = useBulkCreateGrades();
+  const bulkCreateYears = useBulkCreateYears();
   const bulkCreateSubjects = useBulkCreateSubjects();
 
   async function handleSelect(id: TemplateId) {
@@ -59,9 +59,9 @@ export function Step0Template() {
 
     setSeeding(true);
     try {
-      const grades = TEMPLATE_GRADES[id];
-      if (grades.length > 0 && existingGrades.length === 0) {
-        await bulkCreateGrades.mutateAsync({ items: grades });
+      const years = TEMPLATE_YEARS[id];
+      if (years.length > 0 && existingYears.length === 0) {
+        await bulkCreateYears.mutateAsync({ items: years });
       }
 
       const subjects = TEMPLATE_SUBJECTS[id];
