@@ -25,12 +25,12 @@ function formatTime(hhmm: string): string {
   }).format(new Date(1970, 0, 1, h, m));
 }
 
-type TeachingDayResponse = components["schemas"]["TeachingDayResponse"];
+type SchoolDayResponse = components["schemas"]["SchoolDayResponse"];
 type TimeSlotResponse = components["schemas"]["TimeSlotResponse"];
 
 type Props = {
   template: PeriodDef[];
-  activeDays: TeachingDayResponse[];
+  activeDays: SchoolDayResponse[];
   slotsByDay: Map<string, TimeSlotResponse[]>;
   onCellToggle: (dayId: string, slot: PeriodDef, currentlyEnabled: boolean) => Promise<void>;
   toggling: Set<string>;

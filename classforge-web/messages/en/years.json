@@ -1,0 +1,17 @@
+{
+  "title": "Years & classes",
+  "year": "Year",
+  "years": "Years",
+  "class": "Class",
+  "classes": "Classes",
+  "addYear": "Add year",
+  "addClass": "Add class",
+  "editYear": "Edit year",
+  "editClass": "Edit class",
+  "deleteYear": "Delete year",
+  "deleteClass": "Delete class",
+  "yearName": "Year name",
+  "className": "Class name",
+  "noYears": "No years added yet",
+  "noClasses": "No classes for this year"
+}

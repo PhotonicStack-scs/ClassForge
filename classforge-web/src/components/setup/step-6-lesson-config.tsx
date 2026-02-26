@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWizardStore } from "@/lib/stores/wizard-store";
-import { useGrades } from "@/lib/api/hooks/use-grades";
+import { useYears } from "@/lib/api/hooks/use-years";
 import { useSubjects } from "@/lib/api/hooks/use-subjects";
 import { apiClient } from "@/lib/api/client";
 import type { components } from "@/lib/api/schema";
@@ -15,57 +15,57 @@ import { Badge } from "@/components/ui/badge";
 import { Trash2, Plus, LayoutGrid } from "lucide-react";
 import { toast } from "sonner";
 
-type GradeSubjectRequirementResponse = components["schemas"]["GradeSubjectRequirementResponse"];
+type YearCurriculumResponse = components["schemas"]["YearCurriculumResponse"];
 
-function useGradeSubjectRequirements(gradeId: string) {
-  return useQuery<GradeSubjectRequirementResponse[]>({
-    queryKey: ["grades", gradeId, "subject-requirements"],
+function useYearCurriculum(yearId: string) {
+  return useQuery<YearCurriculumResponse[]>({
+    queryKey: ["years", yearId, "curriculum"],
     queryFn: async () => {
       const { data, error } = await apiClient.GET(
-        "/api/v1/grades/{gradeId}/subject-requirements",
-        { params: { path: { gradeId } } }
+        "/api/v1/years/{yearId}/curriculum",
+        { params: { path: { yearId } } }
       );
       if (error) throw error;
-      return (data ?? []) as GradeSubjectRequirementResponse[];
+      return (data ?? []) as YearCurriculumResponse[];
     },
-    enabled: !!gradeId,
+    enabled: !!yearId,
   });
 }
 
-function useCreateGradeSubjectRequirement(gradeId: string) {
+function useCreateCurriculumEntry(yearId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (body: components["schemas"]["CreateGradeSubjectRequirementRequest"]) => {
+    mutationFn: async (body: components["schemas"]["CreateYearCurriculumRequest"]) => {
       const { data, error } = await apiClient.POST(
-        "/api/v1/grades/{gradeId}/subject-requirements",
-        { params: { path: { gradeId } }, body }
+        "/api/v1/years/{yearId}/curriculum",
+        { params: { path: { yearId } }, body }
       );
       if (error) throw error;
       return data!;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["grades", gradeId, "subject-requirements"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["years", yearId, "curriculum"] }),
   });
 }
 
-function useDeleteGradeSubjectRequirement(gradeId: string) {
+function useDeleteCurriculumEntry(yearId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await apiClient.DELETE(
-        "/api/v1/grades/{gradeId}/subject-requirements/{id}",
-        { params: { path: { gradeId, id } } }
+        "/api/v1/years/{yearId}/curriculum/{id}",
+        { params: { path: { yearId, id } } }
       );
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["grades", gradeId, "subject-requirements"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["years", yearId, "curriculum"] }),
   });
 }
 
-function RequirementsForGrade({ gradeId, gradeName }: { gradeId: string; gradeName: string }) {
-  const { data: requirements = [] } = useGradeSubjectRequirements(gradeId);
+function RequirementsForYear({ yearId, yearName }: { yearId: string; yearName: string }) {
+  const { data: requirements = [] } = useYearCurriculum(yearId);
   const { data: subjects = [] } = useSubjects();
-  const createReq = useCreateGradeSubjectRequirement(gradeId);
-  const deleteReq = useDeleteGradeSubjectRequirement(gradeId);
+  const createReq = useCreateCurriculumEntry(yearId);
+  const deleteReq = useDeleteCurriculumEntry(yearId);
 
   const [subjectId, setSubjectId] = useState("");
   const [periods, setPeriods] = useState("3");
@@ -91,7 +91,7 @@ function RequirementsForGrade({ gradeId, gradeName }: { gradeId: string; gradeNa
 
   return (
     <div className="border rounded-lg p-4 space-y-3">
-      <h3 className="font-medium text-sm">{gradeName}</h3>
+      <h3 className="font-medium text-sm">{yearName}</h3>
 
       {requirements.length > 0 && (
         <ul className="space-y-1">
@@ -155,7 +155,7 @@ function RequirementsForGrade({ gradeId, gradeName }: { gradeId: string; gradeNa
 
 export function Step6LessonConfig() {
   const { markStepCompleted, setCurrentStep } = useWizardStore();
-  const { data: grades = [], isLoading } = useGrades();
+  const { data: years = [], isLoading } = useYears();
 
   return (
     <div className="space-y-4">
@@ -165,18 +165,18 @@ export function Step6LessonConfig() {
           Lesson Requirements
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Set how many periods per week each subject should be taught per grade.
+          Set how many periods per week each subject should be taught per year.
         </p>
       </div>
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
-      ) : grades.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No grades found — go back and add grades first.</p>
+      ) : years.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No years found — go back and add years first.</p>
       ) : (
         <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
-          {grades.map((g) => (
-            <RequirementsForGrade key={g.id} gradeId={g.id!} gradeName={g.name ?? "—"} />
+          {years.map((y) => (
+            <RequirementsForYear key={y.id} yearId={y.id!} yearName={y.name ?? "—"} />
           ))}
         </div>
       )}
@@ -184,7 +184,7 @@ export function Step6LessonConfig() {
       <div className="pt-2">
         <Button onClick={() => { markStepCompleted(6); setCurrentStep(7); }}>
           Continue to Review
-          {grades.length > 0 && <Badge variant="secondary" className="ml-2">{grades.length} grade{grades.length !== 1 ? "s" : ""}</Badge>}
+          {years.length > 0 && <Badge variant="secondary" className="ml-2">{years.length} year{years.length !== 1 ? "s" : ""}</Badge>}
         </Button>
       </div>
     </div>

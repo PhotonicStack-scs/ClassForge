@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useTimetable, usePublishTimetable } from "@/lib/api/hooks/use-timetables";
 import { useTeachers } from "@/lib/api/hooks/use-teachers";
-import { useTimetableByGroup, useTimetableByTeacher } from "@/lib/api/hooks/use-timetable-views";
+import { useTimetableByClass, useTimetableByTeacher } from "@/lib/api/hooks/use-timetable-views";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,7 +17,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { ArrowLeft, FileText } from "lucide-react";
 
-type ViewMode = "group" | "teacher";
+type ViewMode = "class" | "teacher";
 const DAY_NAMES = ["Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag"];
 const DEFAULT_SLOTS = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ slotNumber: n, label: `Time ${n}` }));
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -27,8 +27,8 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "
 export default function TimetableDetailPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
   const { id, locale } = use(params);
   const t = useTranslations("timetable");
-  const [viewMode, setViewMode] = useState<ViewMode>("group");
-  const [selectedGroupId, setSelectedGroupId] = useState<string>("");
+  const [viewMode, setViewMode] = useState<ViewMode>("class");
+  const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
   const { data: timetable, isLoading } = useTimetable(id);
   const { data: teachersData } = useTeachers();
@@ -39,10 +39,10 @@ export default function TimetableDetailPage({ params }: { params: Promise<{ id: 
     label: teacher.name ?? "",
   })) ?? [];
 
-  const { data: groupView } = useTimetableByGroup(id, viewMode === "group" && selectedGroupId ? selectedGroupId : null);
+  const { data: classView } = useTimetableByClass(id, viewMode === "class" && selectedClassId ? selectedClassId : null);
   const { data: teacherView } = useTimetableByTeacher(id, viewMode === "teacher" && selectedTeacherId ? selectedTeacherId : null);
-  const entries = viewMode === "group" ? groupView?.entries ?? [] : teacherView?.entries ?? [];
-  const hasSelection = viewMode === "group" ? !!selectedGroupId : !!selectedTeacherId;
+  const entries = viewMode === "class" ? classView?.entries ?? [] : teacherView?.entries ?? [];
+  const hasSelection = viewMode === "class" ? !!selectedClassId : !!selectedTeacherId;
 
   if (isLoading) return <div className="p-8 text-muted-foreground">Laster...</div>;
   if (!timetable) return <div className="p-8">Timeplan ikke funnet.</div>;
@@ -94,16 +94,16 @@ export default function TimetableDetailPage({ params }: { params: Promise<{ id: 
         <div className="flex items-center gap-4 flex-wrap">
           <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
             <TabsList>
-              <TabsTrigger value="group">{t("viewByGroup")}</TabsTrigger>
+              <TabsTrigger value="class">{t("viewByClass")}</TabsTrigger>
               <TabsTrigger value="teacher">{t("viewByTeacher")}</TabsTrigger>
             </TabsList>
           </Tabs>
-          {viewMode === "group" && (
+          {viewMode === "class" && (
             <Input
               className="w-72"
-              placeholder="Gruppe-ID (lim inn fra grupper-siden)"
-              value={selectedGroupId}
-              onChange={(e) => setSelectedGroupId(e.target.value)}
+              placeholder="Klasse-ID (lim inn fra klasser-siden)"
+              value={selectedClassId}
+              onChange={(e) => setSelectedClassId(e.target.value)}
             />
           )}
           {viewMode === "teacher" && (
@@ -122,7 +122,7 @@ export default function TimetableDetailPage({ params }: { params: Promise<{ id: 
       {hasSelection && <TimetableGrid entries={entries} days={DAY_NAMES} slots={DEFAULT_SLOTS} />}
       {!hasSelection && timetable.status !== "Generating" && (
         <div className="text-center py-16 text-muted-foreground">
-          Velg en {viewMode === "group" ? "gruppe" : "lærer"} for å vise timeplanen.
+          Velg en {viewMode === "class" ? "klasse" : "lærer"} for å vise timeplanen.
         </div>
       )}
     </div>

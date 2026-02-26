@@ -2,7 +2,7 @@
 
 import { useWizardStore } from "@/lib/stores/wizard-store";
 import { Step0Template } from "./step-0-template";
-import { Step1Grades } from "./step-1-grades";
+import { Step1Years } from "./step-1-years";
 import { Step2Subjects } from "./step-2-subjects";
 import { Step3Rooms } from "./step-3-rooms";
 import { Step4TimeStructure } from "./step-4-time-structure";
@@ -16,7 +16,7 @@ import { Check } from "lucide-react";
 
 const STEPS = [
   "Template",
-  "Grades",
+  "Years",
   "Rooms",
   "Subjects",
   "Time",
@@ -30,7 +30,7 @@ export function WizardShell({ locale }: { locale: string }) {
 
   const stepComponents = [
     <Step0Template key={0} />,
-    <Step1Grades key={1} />,
+    <Step1Years key={1} />,
     <Step3Rooms key={2} />,
     <Step2Subjects key={3} />,
     <Step4TimeStructure key={4} />,

@@ -330,7 +330,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/grades/{gradeId}/combined-lessons": {
+    "/api/v1/years/{yearId}/classes": {
         parameters: {
             query?: never;
             header?: never;
@@ -338,15 +338,217 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List combined lesson configs for a grade
-         * @description Returns all combined lesson configurations for the specified grade. Combined lessons allow multiple groups to share a time slot for the same subject.
+         * List classes for a year
+         * @description Returns all classes within the specified year, ordered by sort order.
          */
         get: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    gradeId: string;
+                    yearId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ClassResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Create a class
+         * @description Creates a new class within a year. Classes represent class divisions (e.g. 8A, 8B).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    yearId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateClassRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ClassResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/years/{yearId}/classes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a class by ID */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    yearId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ClassResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        /** Update a class */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    yearId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateClassRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ClassResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** Delete a class */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    yearId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/years/{yearId}/combined-lessons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List combined lesson configs for a year
+         * @description Returns all combined lesson configurations for the specified year. Combined lessons allow multiple classes to share a time slot for the same subject.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    yearId: string;
                 };
                 cookie?: never;
             };
@@ -366,14 +568,14 @@ export interface paths {
         put?: never;
         /**
          * Create a combined lesson config
-         * @description Defines a combined lesson where specified groups share a time slot for a subject. Set isMandatory to true if groups must always be combined.
+         * @description Defines a combined lesson where specified classes share a time slot for a subject. Set isMandatory to true if classes must always be combined.
          */
         post: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    gradeId: string;
+                    yearId: string;
                 };
                 cookie?: never;
             };
@@ -409,7 +611,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/grades/{gradeId}/combined-lessons/{id}": {
+    "/api/v1/years/{yearId}/combined-lessons/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -422,7 +624,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    gradeId: string;
+                    yearId: string;
                     id: string;
                 };
                 cookie?: never;
@@ -451,14 +653,14 @@ export interface paths {
         };
         /**
          * Update a combined lesson config
-         * @description Updates the combined lesson settings and replaces the list of participating groups.
+         * @description Updates the combined lesson settings and replaces the list of participating classes.
          */
         put: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    gradeId: string;
+                    yearId: string;
                     id: string;
                 };
                 cookie?: never;
@@ -505,7 +707,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    gradeId: string;
+                    yearId: string;
                     id: string;
                 };
                 cookie?: never;
@@ -535,7 +737,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/grades/{gradeId}/day-config": {
+    "/api/v1/years/{yearId}/curriculum": {
         parameters: {
             query?: never;
             header?: never;
@@ -543,15 +745,15 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List day configs for a grade
-         * @description Returns all day-specific period limits for the specified grade. Each config caps how many periods a grade can have on a given teaching day.
+         * List curriculum for a year
+         * @description Returns all subject-period requirements for the specified year. Each defines how many periods per week a subject needs.
          */
         get: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    gradeId: string;
+                    yearId: string;
                 };
                 cookie?: never;
             };
@@ -563,28 +765,28 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GradeDayConfigResponse"][];
+                        "application/json": components["schemas"]["YearCurriculumResponse"][];
                     };
                 };
             };
         };
         put?: never;
         /**
-         * Create a grade day config
-         * @description Sets the maximum number of teaching periods a grade can have on a specific teaching day.
+         * Create a curriculum entry
+         * @description Defines how many periods per week a subject needs for this year, and whether double periods are preferred.
          */
         post: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    gradeId: string;
+                    yearId: string;
                 };
                 cookie?: never;
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["CreateGradeDayConfigRequest"];
+                    "application/json": components["schemas"]["CreateYearCurriculumRequest"];
                 };
             };
             responses: {
@@ -594,7 +796,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GradeDayConfigResponse"];
+                        "application/json": components["schemas"]["YearCurriculumResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -614,20 +816,20 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/grades/{gradeId}/day-config/{id}": {
+    "/api/v1/years/{yearId}/curriculum/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get a grade day config by ID */
+        /** Get a curriculum entry by ID */
         get: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    gradeId: string;
+                    yearId: string;
                     id: string;
                 };
                 cookie?: never;
@@ -640,7 +842,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GradeDayConfigResponse"];
+                        "application/json": components["schemas"]["YearCurriculumResponse"];
                     };
                 };
                 /** @description Not Found */
@@ -654,20 +856,20 @@ export interface paths {
                 };
             };
         };
-        /** Update a grade day config */
+        /** Update a curriculum entry */
         put: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    gradeId: string;
+                    yearId: string;
                     id: string;
                 };
                 cookie?: never;
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["UpdateGradeDayConfigRequest"];
+                    "application/json": components["schemas"]["UpdateYearCurriculumRequest"];
                 };
             };
             responses: {
@@ -677,7 +879,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GradeDayConfigResponse"];
+                        "application/json": components["schemas"]["YearCurriculumResponse"];
                     };
                 };
                 /** @description Bad Request */
@@ -701,13 +903,13 @@ export interface paths {
             };
         };
         post?: never;
-        /** Delete a grade day config */
+        /** Delete a curriculum entry */
         delete: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    gradeId: string;
+                    yearId: string;
                     id: string;
                 };
                 cookie?: never;
@@ -737,209 +939,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/grades/{gradeId}/subject-requirements": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List subject requirements for a grade
-         * @description Returns all subject-period requirements for the specified grade. Each defines how many periods per week a subject needs.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    gradeId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GradeSubjectRequirementResponse"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        /**
-         * Create a subject requirement
-         * @description Defines how many periods per week a subject needs for this grade, and whether double periods are preferred.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    gradeId: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["CreateGradeSubjectRequirementRequest"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GradeSubjectRequirementResponse"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/grades/{gradeId}/subject-requirements/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a subject requirement by ID */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    gradeId: string;
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GradeSubjectRequirementResponse"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        /** Update a subject requirement */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    gradeId: string;
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["UpdateGradeSubjectRequirementRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GradeSubjectRequirementResponse"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        /** Delete a subject requirement */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    gradeId: string;
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/grades/{gradeId}/subject-requirements/bulk": {
+    "/api/v1/years/{yearId}/curriculum/bulk": {
         parameters: {
             query?: never;
             header?: never;
@@ -948,19 +948,19 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Bulk create subject requirements */
+        /** Bulk create curriculum entries */
         post: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    gradeId: string;
+                    yearId: string;
                 };
                 cookie?: never;
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["BulkCreateGradeSubjectRequirementsRequest"];
+                    "application/json": components["schemas"]["BulkCreateYearCurriculaRequest"];
                 };
             };
             responses: {
@@ -970,7 +970,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["GradeSubjectRequirementResponse"][];
+                        "application/json": components["schemas"]["YearCurriculumResponse"][];
                     };
                 };
                 /** @description Bad Request */
@@ -985,455 +985,6 @@ export interface paths {
             };
         };
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/grades": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List all grades
-         * @description Returns all grades (e.g. Grade 1, Grade 2) for the current tenant, ordered by sort order.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GradeResponse"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        /**
-         * Create a grade
-         * @description Creates a new grade level. Grades represent year levels in the school (e.g. Grade 8, Grade 9).
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["CreateGradeRequest"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GradeResponse"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/grades/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a grade by ID */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GradeResponse"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        /** Update a grade */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["UpdateGradeRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GradeResponse"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        /**
-         * Delete a grade
-         * @description Permanently removes a grade and cascades to associated groups and configurations.
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/grades/bulk": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Bulk create grades */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["BulkCreateGradesRequest"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GradeResponse"][];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/grades/{gradeId}/groups": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List groups for a grade
-         * @description Returns all groups (class divisions) within the specified grade, ordered by sort order.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    gradeId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GroupResponse"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        /**
-         * Create a group
-         * @description Creates a new group within a grade. Groups represent class divisions (e.g. 8A, 8B).
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    gradeId: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["CreateGroupRequest"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GroupResponse"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/grades/{gradeId}/groups/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a group by ID */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    gradeId: string;
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GroupResponse"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        /** Update a group */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    gradeId: string;
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["UpdateGroupRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["GroupResponse"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        /** Delete a group */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    gradeId: string;
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
         options?: never;
         head?: never;
         patch?: never;
@@ -1822,6 +1373,207 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/school-days": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all school days
+         * @description Returns all school days for the current tenant, ordered by sort order. School days represent the weekly schedule (e.g. Monday–Friday).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SchoolDayResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Create a school day
+         * @description Creates a new school day. Each day has a day-of-week, active flag, and sort order.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateSchoolDayRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SchoolDayResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/school-days/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a school day by ID */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SchoolDayResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        /**
+         * Update a school day
+         * @description Updates the active status and sort order of a school day.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateSchoolDayRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SchoolDayResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /**
+         * Delete a school day
+         * @description Permanently removes a school day and its associated time slots.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -2921,7 +2673,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/teaching-days": {
+    "/api/v1/school-days/{dayId}/time-slots": {
         parameters: {
             query?: never;
             header?: never;
@@ -2929,209 +2681,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List all teaching days
-         * @description Returns all teaching days for the current tenant, ordered by sort order. Teaching days represent the weekly schedule (e.g. Monday–Friday).
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TeachingDayResponse"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        /**
-         * Create a teaching day
-         * @description Creates a new teaching day. Each day has a day-of-week, active flag, and sort order.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["CreateTeachingDayRequest"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TeachingDayResponse"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/teaching-days/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a teaching day by ID */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TeachingDayResponse"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        /**
-         * Update a teaching day
-         * @description Updates the active status and sort order of a teaching day.
-         */
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["UpdateTeachingDayRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TeachingDayResponse"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        /**
-         * Delete a teaching day
-         * @description Permanently removes a teaching day and its associated time slots.
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/problem+json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/teaching-days/{dayId}/time-slots": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List time slots for a teaching day
-         * @description Returns all time slots for the specified teaching day, ordered by slot number. Includes both lesson slots and breaks.
+         * List time slots for a school day
+         * @description Returns all time slots for the specified school day, ordered by slot number. Includes both lesson slots and breaks.
          */
         get: {
             parameters: {
@@ -3158,7 +2709,7 @@ export interface paths {
         put?: never;
         /**
          * Create a time slot
-         * @description Creates a new time slot within a teaching day. Specify start/end times (HH:mm) and whether this slot is a break.
+         * @description Creates a new time slot within a school day. Specify start/end times (HH:mm) and whether this slot is a break.
          */
         post: {
             parameters: {
@@ -3201,7 +2752,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/teaching-days/{dayId}/time-slots/{id}": {
+    "/api/v1/school-days/{dayId}/time-slots/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -3324,7 +2875,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/teaching-days/{dayId}/time-slots/bulk": {
+    "/api/v1/school-days/{dayId}/time-slots/bulk": {
         parameters: {
             query?: never;
             header?: never;
@@ -3669,14 +3220,14 @@ export interface paths {
         };
         /**
          * Get timetable entries
-         * @description Returns entries, optionally filtered by groupId, teacherId, or teachingDayId query parameters.
+         * @description Returns entries, optionally filtered by classId, teacherId, or schoolDayId query parameters.
          */
         get: {
             parameters: {
                 query?: {
-                    groupId?: string;
+                    classId?: string;
                     teacherId?: string;
-                    teachingDayId?: string;
+                    schoolDayId?: string;
                 };
                 header?: never;
                 path: {
@@ -3870,21 +3421,21 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/timetables/{id}/by-group/{groupId}": {
+    "/api/v1/timetables/{id}/by-class/{classId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get weekly view for a group */
+        /** Get weekly view for a class */
         get: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
                     id: string;
-                    groupId: string;
+                    classId: string;
                 };
                 cookie?: never;
             };
@@ -4288,6 +3839,455 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/years/{yearId}/day-config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List day configs for a year
+         * @description Returns all day-specific period limits for the specified year. Each config caps how many periods a year can have on a given school day.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    yearId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["YearDayConfigResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Create a year day config
+         * @description Sets the maximum number of teaching periods a year can have on a specific school day.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    yearId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateYearDayConfigRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["YearDayConfigResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/years/{yearId}/day-config/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a year day config by ID */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    yearId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["YearDayConfigResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        /** Update a year day config */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    yearId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateYearDayConfigRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["YearDayConfigResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** Delete a year day config */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    yearId: string;
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/years": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all years
+         * @description Returns all year levels (e.g. Year 6, Year 7) for the current tenant, ordered by sort order.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["YearResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Create a year
+         * @description Creates a new year level. Years represent year levels in the school (e.g. Year 8, Year 9).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateYearRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["YearResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/years/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a year by ID */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["YearResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        /** Update a year */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateYearRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["YearResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /**
+         * Delete a year
+         * @description Permanently removes a year and cascades to associated classes and configurations.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/years/bulk": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bulk create years */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["BulkCreateYearsRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["YearResponse"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["HttpValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -4298,12 +4298,6 @@ export interface components {
             /** Format: date-time */
             expiresAt?: string;
         };
-        BulkCreateGradeSubjectRequirementsRequest: {
-            items?: components["schemas"]["CreateGradeSubjectRequirementRequest"][] | null;
-        };
-        BulkCreateGradesRequest: {
-            items?: components["schemas"]["CreateGradeRequest"][] | null;
-        };
         BulkCreateSubjectsRequest: {
             items?: components["schemas"]["CreateSubjectRequest"][] | null;
         };
@@ -4313,56 +4307,57 @@ export interface components {
         BulkCreateTimeSlotsRequest: {
             items?: components["schemas"]["CreateTimeSlotRequest"][] | null;
         };
+        BulkCreateYearCurriculaRequest: {
+            items?: components["schemas"]["CreateYearCurriculumRequest"][] | null;
+        };
+        BulkCreateYearsRequest: {
+            items?: components["schemas"]["CreateYearRequest"][] | null;
+        };
+        ClassResponse: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            yearId?: string;
+            name?: string | null;
+            /** Format: int32 */
+            sortOrder?: number;
+        };
         CombinedLessonConfigResponse: {
             /** Format: uuid */
             id?: string;
             /** Format: uuid */
-            gradeId?: string;
+            yearId?: string;
             /** Format: uuid */
             subjectId?: string;
             isMandatory?: boolean;
             /** Format: int32 */
-            maxGroupsPerLesson?: number;
-            groupIds?: string[] | null;
+            maxClassesPerLesson?: number;
+            classIds?: string[] | null;
+        };
+        CreateClassRequest: {
+            name?: string | null;
+            /** Format: int32 */
+            sortOrder?: number;
         };
         CreateCombinedLessonConfigRequest: {
             /** Format: uuid */
             subjectId?: string;
             isMandatory?: boolean;
             /** Format: int32 */
-            maxGroupsPerLesson?: number;
-            groupIds?: string[] | null;
-        };
-        CreateGradeDayConfigRequest: {
-            /** Format: uuid */
-            teachingDayId?: string;
-            /** Format: int32 */
-            maxPeriods?: number;
-        };
-        CreateGradeRequest: {
-            name?: string | null;
-            /** Format: int32 */
-            sortOrder?: number;
-        };
-        CreateGradeSubjectRequirementRequest: {
-            /** Format: uuid */
-            subjectId?: string;
-            /** Format: int32 */
-            periodsPerWeek?: number;
-            preferDoublePeriods?: boolean;
-            /** Format: int32 */
-            maxPeriodsPerDay?: number;
-            allowDoublePeriods?: boolean;
-        };
-        CreateGroupRequest: {
-            name?: string | null;
-            /** Format: int32 */
-            sortOrder?: number;
+            maxClassesPerLesson?: number;
+            classIds?: string[] | null;
         };
         CreateRoomRequest: {
             name?: string | null;
             /** Format: int32 */
             capacity?: number;
+        };
+        CreateSchoolDayRequest: {
+            /** Format: int32 */
+            dayOfWeek?: number;
+            isActive?: boolean;
+            /** Format: int32 */
+            sortOrder?: number;
         };
         CreateSubjectRequest: {
             name?: string | null;
@@ -4373,7 +4368,7 @@ export interface components {
         };
         CreateTeacherDayConfigRequest: {
             /** Format: uuid */
-            teachingDayId?: string;
+            schoolDayId?: string;
             /** Format: int32 */
             maxPeriods?: number;
         };
@@ -4381,9 +4376,9 @@ export interface components {
             /** Format: uuid */
             subjectId?: string;
             /** Format: uuid */
-            minGradeId?: string;
+            minYearId?: string;
             /** Format: uuid */
-            maxGradeId?: string;
+            maxYearId?: string;
         };
         CreateTeacherRequest: {
             name?: string | null;
@@ -4393,13 +4388,6 @@ export interface components {
             /** Format: uuid */
             timeSlotId?: string;
             reason?: string | null;
-        };
-        CreateTeachingDayRequest: {
-            /** Format: int32 */
-            dayOfWeek?: number;
-            isActive?: boolean;
-            /** Format: int32 */
-            sortOrder?: number;
         };
         CreateTimeSlotRequest: {
             /** Format: int32 */
@@ -4418,11 +4406,32 @@ export interface components {
             role?: string | null;
             languagePreference?: string | null;
         };
+        CreateYearCurriculumRequest: {
+            /** Format: uuid */
+            subjectId?: string;
+            /** Format: int32 */
+            periodsPerWeek?: number;
+            preferDoublePeriods?: boolean;
+            /** Format: int32 */
+            maxPeriodsPerDay?: number;
+            allowDoublePeriods?: boolean;
+        };
+        CreateYearDayConfigRequest: {
+            /** Format: uuid */
+            schoolDayId?: string;
+            /** Format: int32 */
+            maxPeriods?: number;
+        };
+        CreateYearRequest: {
+            name?: string | null;
+            /** Format: int32 */
+            sortOrder?: number;
+        };
         DashboardStatsResponse: {
             /** Format: int32 */
-            gradeCount?: number;
+            yearCount?: number;
             /** Format: int32 */
-            groupCount?: number;
+            classCount?: number;
             /** Format: int32 */
             teacherCount?: number;
             /** Format: int32 */
@@ -4433,47 +4442,6 @@ export interface components {
             timetableCount?: number;
             /** Format: uuid */
             publishedTimetableId?: string | null;
-        };
-        GradeDayConfigResponse: {
-            /** Format: uuid */
-            id?: string;
-            /** Format: uuid */
-            gradeId?: string;
-            /** Format: uuid */
-            teachingDayId?: string;
-            /** Format: int32 */
-            maxPeriods?: number;
-        };
-        GradeResponse: {
-            /** Format: uuid */
-            id?: string;
-            name?: string | null;
-            /** Format: int32 */
-            sortOrder?: number;
-        };
-        GradeSubjectRequirementResponse: {
-            /** Format: uuid */
-            id?: string;
-            /** Format: uuid */
-            gradeId?: string;
-            /** Format: uuid */
-            subjectId?: string;
-            /** Format: int32 */
-            periodsPerWeek?: number;
-            preferDoublePeriods?: boolean;
-            /** Format: int32 */
-            maxPeriodsPerDay?: number;
-            allowDoublePeriods?: boolean;
-            subjectName?: string | null;
-        };
-        GroupResponse: {
-            /** Format: uuid */
-            id?: string;
-            /** Format: uuid */
-            gradeId?: string;
-            name?: string | null;
-            /** Format: int32 */
-            sortOrder?: number;
         };
         HttpValidationProblemDetails: {
             type?: string | null;
@@ -4535,6 +4503,16 @@ export interface components {
             /** Format: int32 */
             capacity?: number;
         };
+        SchoolDayResponse: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: int32 */
+            dayOfWeek?: number;
+            name?: string | null;
+            isActive?: boolean;
+            /** Format: int32 */
+            sortOrder?: number;
+        };
         SubjectResponse: {
             /** Format: uuid */
             id?: string;
@@ -4548,7 +4526,7 @@ export interface components {
             /** Format: uuid */
             id?: string;
             /** Format: uuid */
-            teachingDayId?: string;
+            schoolDayId?: string;
             /** Format: int32 */
             maxPeriods?: number;
         };
@@ -4558,12 +4536,12 @@ export interface components {
             /** Format: uuid */
             subjectId?: string;
             /** Format: uuid */
-            minGradeId?: string;
+            minYearId?: string;
             /** Format: uuid */
-            maxGradeId?: string;
+            maxYearId?: string;
             subjectName?: string | null;
-            minGradeName?: string | null;
-            maxGradeName?: string | null;
+            minYearName?: string | null;
+            maxYearName?: string | null;
         };
         TeacherResponse: {
             /** Format: uuid */
@@ -4577,16 +4555,6 @@ export interface components {
             /** Format: uuid */
             timeSlotId?: string;
             reason?: string | null;
-        };
-        TeachingDayResponse: {
-            /** Format: uuid */
-            id?: string;
-            /** Format: int32 */
-            dayOfWeek?: number;
-            name?: string | null;
-            isActive?: boolean;
-            /** Format: int32 */
-            sortOrder?: number;
         };
         TenantResponse: {
             /** Format: uuid */
@@ -4604,7 +4572,7 @@ export interface components {
             /** Format: uuid */
             id?: string;
             /** Format: uuid */
-            teachingDayId?: string;
+            schoolDayId?: string;
             /** Format: int32 */
             slotNumber?: number;
             startTime?: string | null;
@@ -4624,8 +4592,8 @@ export interface components {
             roomId?: string | null;
             isDoublePeriod?: boolean;
             /** Format: uuid */
-            combinedLessonGroupId?: string | null;
-            groupIds?: string[] | null;
+            combinedLessonClassId?: string | null;
+            classIds?: string[] | null;
         };
         TimetableReportResponse: {
             /** Format: uuid */
@@ -4665,7 +4633,7 @@ export interface components {
             teacherName?: string | null;
             roomName?: string | null;
             isDoublePeriod?: boolean;
-            groupNames?: string[] | null;
+            classNames?: string[] | null;
         };
         TimetableViewResponse: {
             /** Format: uuid */
@@ -4674,38 +4642,26 @@ export interface components {
             viewName?: string | null;
             entries?: components["schemas"]["TimetableViewEntry"][] | null;
         };
+        UpdateClassRequest: {
+            name?: string | null;
+            /** Format: int32 */
+            sortOrder?: number;
+        };
         UpdateCombinedLessonConfigRequest: {
             isMandatory?: boolean;
             /** Format: int32 */
-            maxGroupsPerLesson?: number;
-            groupIds?: string[] | null;
-        };
-        UpdateGradeDayConfigRequest: {
-            /** Format: int32 */
-            maxPeriods?: number;
-        };
-        UpdateGradeRequest: {
-            name?: string | null;
-            /** Format: int32 */
-            sortOrder?: number;
-        };
-        UpdateGradeSubjectRequirementRequest: {
-            /** Format: int32 */
-            periodsPerWeek?: number;
-            preferDoublePeriods?: boolean;
-            /** Format: int32 */
-            maxPeriodsPerDay?: number;
-            allowDoublePeriods?: boolean;
-        };
-        UpdateGroupRequest: {
-            name?: string | null;
-            /** Format: int32 */
-            sortOrder?: number;
+            maxClassesPerLesson?: number;
+            classIds?: string[] | null;
         };
         UpdateRoomRequest: {
             name?: string | null;
             /** Format: int32 */
             capacity?: number;
+        };
+        UpdateSchoolDayRequest: {
+            isActive?: boolean;
+            /** Format: int32 */
+            sortOrder?: number;
         };
         UpdateSetupProgressRequest: {
             setupCompleted?: boolean;
@@ -4728,9 +4684,9 @@ export interface components {
             /** Format: uuid */
             subjectId?: string;
             /** Format: uuid */
-            minGradeId?: string;
+            minYearId?: string;
             /** Format: uuid */
-            maxGradeId?: string;
+            maxYearId?: string;
         };
         UpdateTeacherRequest: {
             name?: string | null;
@@ -4738,11 +4694,6 @@ export interface components {
         };
         UpdateTeacherSlotBlockRequest: {
             reason?: string | null;
-        };
-        UpdateTeachingDayRequest: {
-            isActive?: boolean;
-            /** Format: int32 */
-            sortOrder?: number;
         };
         UpdateTenantRequest: {
             name?: string | null;
@@ -4765,7 +4716,7 @@ export interface components {
             /** Format: uuid */
             roomId?: string | null;
             isDoublePeriod?: boolean;
-            groupIds?: string[] | null;
+            classIds?: string[] | null;
         };
         UpdateTimetableRequest: {
             name?: string | null;
@@ -4774,6 +4725,23 @@ export interface components {
             displayName?: string | null;
             role?: string | null;
             languagePreference?: string | null;
+        };
+        UpdateYearCurriculumRequest: {
+            /** Format: int32 */
+            periodsPerWeek?: number;
+            preferDoublePeriods?: boolean;
+            /** Format: int32 */
+            maxPeriodsPerDay?: number;
+            allowDoublePeriods?: boolean;
+        };
+        UpdateYearDayConfigRequest: {
+            /** Format: int32 */
+            maxPeriods?: number;
+        };
+        UpdateYearRequest: {
+            name?: string | null;
+            /** Format: int32 */
+            sortOrder?: number;
         };
         UserProfileResponse: {
             /** Format: uuid */
@@ -4796,6 +4764,38 @@ export interface components {
             languagePreference?: string | null;
             /** Format: date-time */
             createdAt?: string;
+        };
+        YearCurriculumResponse: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            yearId?: string;
+            /** Format: uuid */
+            subjectId?: string;
+            /** Format: int32 */
+            periodsPerWeek?: number;
+            preferDoublePeriods?: boolean;
+            /** Format: int32 */
+            maxPeriodsPerDay?: number;
+            allowDoublePeriods?: boolean;
+            subjectName?: string | null;
+        };
+        YearDayConfigResponse: {
+            /** Format: uuid */
+            id?: string;
+            /** Format: uuid */
+            yearId?: string;
+            /** Format: uuid */
+            schoolDayId?: string;
+            /** Format: int32 */
+            maxPeriods?: number;
+        };
+        YearResponse: {
+            /** Format: uuid */
+            id?: string;
+            name?: string | null;
+            /** Format: int32 */
+            sortOrder?: number;
         };
     };
     responses: never;

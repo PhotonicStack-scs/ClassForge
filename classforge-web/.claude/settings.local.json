@@ -10,7 +10,15 @@
       "Bash(node --version:*)",
       "Bash(python:*)",
       "Bash(cat:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(test:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(grep:*)",
+      "Bash(cd \"/c/Users/Martin Damm Laupstad/source/repos/ClassForge/classforge-web\" && rm -rf .next && npm run build 2>&1)",
+      "Bash(cd \"/c/Users/Martin Damm Laupstad/source/repos/ClassForge/classforge-web\" && npm run lint 2>&1)",
+      "Bash(head:*)"
     ]
   }
 }

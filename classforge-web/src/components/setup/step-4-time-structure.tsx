@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useWizardStore } from "@/lib/stores/wizard-store";
 import {
-  useTeachingDays,
-  useCreateTeachingDay,
-  useUpdateTeachingDay,
-} from "@/lib/api/hooks/use-teaching-days";
+  useSchoolDays,
+  useCreateSchoolDay,
+  useUpdateSchoolDay,
+} from "@/lib/api/hooks/use-school-days";
 import { apiClient } from "@/lib/api/client";
 import {
   PeriodTemplateBuilder,
@@ -36,9 +36,9 @@ const WEEKEND = [
 
 export function Step4TimeStructure() {
   const { markStepCompleted, setCurrentStep } = useWizardStore();
-  const { data: days = [], isLoading } = useTeachingDays();
-  const createDay = useCreateTeachingDay();
-  const updateDay = useUpdateTeachingDay();
+  const { data: days = [], isLoading } = useSchoolDays();
+  const createDay = useCreateSchoolDay();
+  const updateDay = useUpdateSchoolDay();
 
   const [periods, setPeriods] = useState<PeriodDef[]>([]);
   const [applying, setApplying] = useState(false);
@@ -67,7 +67,7 @@ export function Step4TimeStructure() {
 
   async function handleApplyAndContinue() {
     if (activeDays.length === 0) {
-      toast.error("Enable at least one teaching day first");
+      toast.error("Enable at least one school day first");
       return;
     }
     if (periods.filter((p) => !p.isBreak).length === 0) {
@@ -82,14 +82,14 @@ export function Step4TimeStructure() {
       try {
         // Fetch current slots
         const { data: existing } = await apiClient.GET(
-          "/api/v1/teaching-days/{dayId}/time-slots",
+          "/api/v1/school-days/{dayId}/time-slots",
           { params: { path: { dayId: day.id! } } }
         );
 
         // Delete existing slots in parallel
         await Promise.all(
           (existing ?? []).map((slot: TimeSlotResponse) =>
-            apiClient.DELETE("/api/v1/teaching-days/{dayId}/time-slots/{id}", {
+            apiClient.DELETE("/api/v1/school-days/{dayId}/time-slots/{id}", {
               params: { path: { dayId: day.id!, id: slot.id! } },
             })
           )
@@ -97,7 +97,7 @@ export function Step4TimeStructure() {
 
         // Bulk create from template
         const { error } = await apiClient.POST(
-          "/api/v1/teaching-days/{dayId}/time-slots/bulk",
+          "/api/v1/school-days/{dayId}/time-slots/bulk",
           {
             params: { path: { dayId: day.id! } },
             body: {
@@ -145,7 +145,7 @@ export function Step4TimeStructure() {
         <>
           {/* Day toggles */}
           <div className="space-y-1">
-            <p className="text-sm font-medium">Teaching Days</p>
+            <p className="text-sm font-medium">School Days</p>
             <div className="flex flex-wrap items-center gap-4 py-2">
               {WEEKDAYS.map(({ dow, label }) => {
                 const day = days.find((d) => d.dayOfWeek === dow);
@@ -212,7 +212,7 @@ export function Step4TimeStructure() {
         </Button>
         {activeDays.length === 0 && (
           <p className="text-xs text-muted-foreground">
-            Enable at least one teaching day to continue.
+            Enable at least one school day to continue.
           </p>
         )}
         {activeDays.length > 0 && periods.filter((p) => !p.isBreak).length === 0 && (
