@@ -13,5 +13,7 @@
   "yearName": "Trinnnamn",
   "className": "Klassenamn",
   "noYears": "Ingen trinn lagde til enno",
-  "noClasses": "Ingen klassar for dette trinnet"
+  "noClasses": "Ingen klassar for dette trinnet",
+  "sortOrder": "Sorteringsrekkjefølge",
+  "yearNamePlaceholder": "t.d. 1. klasse"
 }

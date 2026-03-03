@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { components } from "@/lib/api/schema";
 import { TimetableCell } from "./timetable-cell";
 
@@ -22,6 +23,7 @@ export function TimetableGrid({
   editable = false,
   onCellClick,
 }: TimetableGridProps) {
+  const t = useTranslations("timetable");
   // Build lookup: day+slot → entry
   const entryMap = new Map<string, TimetableViewEntry>();
   for (const e of entries) {
@@ -34,7 +36,7 @@ export function TimetableGrid({
         <thead>
           <tr>
             <th className="w-20 p-2 text-left text-muted-foreground font-medium border-b border-border">
-              Tid
+              {t("timeHeader")}
             </th>
             {days.map((day, i) => (
               <th

@@ -18,5 +18,12 @@
   "csvImport": "CSV import",
   "addQualification": "Add qualification",
   "gradeRange": "Grade range",
-  "blockReason": "Reason for blocking"
+  "blockReason": "Reason for blocking",
+  "fullName": "Full name",
+  "teacherNotFound": "Teacher not found",
+  "selectSubject": "Select subject",
+  "timeSlotId": "Time slot ID",
+  "reason": "Reason",
+  "block": "Block",
+  "blocked": "Blocked"
 }

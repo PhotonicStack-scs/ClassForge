@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,8 @@ export default function SettingsPage() {
   const params = useParams();
   const locale = (params?.locale as string) ?? "nb";
   const user = useAuthStore((s) => s.user);
+  const t = useTranslations("settings");
+  const tc = useTranslations("common");
 
   const { data: school } = useSchool();
 
@@ -57,9 +60,9 @@ export default function SettingsPage() {
         body: { name: schoolName, defaultLanguage: language },
       });
       if (error) throw error;
-      toast.success("School settings saved");
+      toast.success(t("settingsSaved"));
     } catch {
-      toast.error("Failed to save school settings");
+      toast.error(tc("error"));
     } finally {
       setIsSaving(false);
     }
@@ -70,9 +73,9 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Settings className="w-6 h-6" />
-          Settings
+          {t("title")}
         </h1>
-        <p className="text-muted-foreground mt-1">Manage your school and account settings</p>
+        <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
       </div>
 
       {/* School Settings — OrgAdmin only */}
@@ -81,36 +84,36 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <School className="w-4 h-4" />
-              School Settings
+              {t("schoolSettings")}
             </CardTitle>
-            <CardDescription>Update your school name and default language</CardDescription>
+            <CardDescription>{t("schoolSettingsDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSaveSchool} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="schoolName">School Name</Label>
+                <Label htmlFor="schoolName">{t("schoolName")}</Label>
                 <Input
                   id="schoolName"
                   value={schoolName}
                   onChange={(e) => setSchoolName(e.target.value)}
-                  placeholder="Enter school name"
+                  placeholder={t("enterSchoolName")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="language">Default Language</Label>
+                <Label htmlFor="language">{t("defaultLanguage")}</Label>
                 <Select value={language} onValueChange={setLanguage}>
                   <SelectTrigger id="language">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="nb">Norwegian Bokmål</SelectItem>
-                    <SelectItem value="nn">Norwegian Nynorsk</SelectItem>
-                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="nb">{t("bokmaal")}</SelectItem>
+                    <SelectItem value="nn">{t("nynorsk")}</SelectItem>
+                    <SelectItem value="en">{t("english")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <Button type="submit" disabled={isSaving}>
-                {isSaving ? "Saving..." : "Save Changes"}
+                {isSaving ? t("saving") : t("saveChanges")}
               </Button>
             </form>
           </CardContent>
@@ -123,16 +126,16 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Wand2 className="w-4 h-4" />
-              Setup Wizard
+              {t("setupWizardSection")}
             </CardTitle>
-            <CardDescription>Re-run the school setup wizard to review or update your configuration</CardDescription>
+            <CardDescription>{t("setupWizardDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button
               variant="outline"
               onClick={() => router.push(`/${locale}/setup`)}
             >
-              Open Setup Wizard
+              {t("openSetupWizard")}
             </Button>
           </CardContent>
         </Card>
@@ -143,13 +146,13 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <User className="w-4 h-4" />
-            Account
+            {t("account")}
           </CardTitle>
-          <CardDescription>Your account information</CardDescription>
+          <CardDescription>{t("accountDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Name</span>
+            <span className="text-sm text-muted-foreground">{tc("name")}</span>
             <span className="text-sm font-medium">{user?.displayName}</span>
           </div>
           <Separator />
@@ -159,7 +162,7 @@ export default function SettingsPage() {
           </div>
           <Separator />
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Role</span>
+            <span className="text-sm text-muted-foreground">{t("role")}</span>
             <Badge variant="secondary">{user?.role}</Badge>
           </div>
         </CardContent>

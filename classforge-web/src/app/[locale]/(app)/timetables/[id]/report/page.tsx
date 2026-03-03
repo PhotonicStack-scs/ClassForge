@@ -16,6 +16,7 @@ export default function TimetableReportPage({
 }) {
   const { id, locale } = use(params);
   const t = useTranslations("timetable");
+  const tc = useTranslations("common");
   const { data: items = [], isLoading } = useTimetableReport(id);
 
   const errors = items.filter((i) => i.type === "Error");
@@ -23,7 +24,7 @@ export default function TimetableReportPage({
   const infos = items.filter((i) => i.type === "Info");
 
   if (isLoading) {
-    return <div className="p-8 text-muted-foreground">Laster rapport...</div>;
+    return <div className="p-8 text-muted-foreground">{tc("loading")}</div>;
   }
 
   return (
@@ -49,7 +50,7 @@ export default function TimetableReportPage({
 
       {items.length === 0 && (
         <div className="text-center py-16 text-muted-foreground">
-          Ingen problemer funnet
+          {t("noIssuesFound")}
         </div>
       )}
     </div>

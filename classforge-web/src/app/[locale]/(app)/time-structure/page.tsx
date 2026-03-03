@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useQueryClient, useQueries } from "@tanstack/react-query";
 import {
   useSchoolDays,
@@ -31,19 +32,6 @@ import type { components } from "@/lib/api/schema";
 
 type TimeSlotResponse = components["schemas"]["TimeSlotResponse"];
 
-const WEEKDAYS = [
-  { dow: 1, label: "Mon" },
-  { dow: 2, label: "Tue" },
-  { dow: 3, label: "Wed" },
-  { dow: 4, label: "Thu" },
-  { dow: 5, label: "Fri" },
-];
-
-const WEEKEND = [
-  { dow: 6, label: "Sat" },
-  { dow: 0, label: "Sun" },
-];
-
 function deriveTemplate(slotsByDay: Map<string, TimeSlotResponse[]>): PeriodDef[] {
   const seen = new Map<number, PeriodDef>();
   for (const slots of slotsByDay.values()) {
@@ -62,6 +50,8 @@ function deriveTemplate(slotsByDay: Map<string, TimeSlotResponse[]>): PeriodDef[
 }
 
 export default function TimeStructurePage() {
+  const t = useTranslations("timeStructure");
+  const tc = useTranslations("common");
   const qc = useQueryClient();
   const { data: days = [], isLoading } = useSchoolDays();
   const createDay = useCreateSchoolDay();
@@ -74,6 +64,19 @@ export default function TimeStructurePage() {
   const [toggling, setToggling] = useState<Set<string>>(new Set());
 
   const activeDays = days.filter((d) => d.isActive);
+
+  const WEEKDAYS = [
+    { dow: 1, label: t("monday") },
+    { dow: 2, label: t("tuesday") },
+    { dow: 3, label: t("wednesday") },
+    { dow: 4, label: t("thursday") },
+    { dow: 5, label: t("friday") },
+  ];
+
+  const WEEKEND = [
+    { dow: 6, label: t("saturdayShort") },
+    { dow: 0, label: t("sundayShort") },
+  ];
 
   // Fetch slots for all active days in parallel
   const slotQueries = useQueries({
@@ -122,13 +125,13 @@ export default function TimeStructurePage() {
           body: { isActive: !existing.isActive, sortOrder: existing.sortOrder ?? dow },
         });
       } catch {
-        toast.error("Failed to update day");
+        toast.error(tc("error"));
       }
     } else {
       try {
         await createDay.mutateAsync({ dayOfWeek: dow, isActive: true, sortOrder: dow === 0 ? 7 : dow });
       } catch {
-        toast.error("Failed to enable day");
+        toast.error(tc("error"));
       }
     }
   }
@@ -179,10 +182,10 @@ export default function TimeStructurePage() {
 
     setApplying(false);
     if (errors > 0) {
-      toast.error(`Failed to apply template to ${errors} day(s)`);
+      toast.error(tc("error"));
     } else {
       setTemplateDirty(false);
-      toast.success(`Template applied to ${activeDays.length} day(s)`);
+      toast.success(t("applyToAllDays"));
     }
   }
 
@@ -210,7 +213,7 @@ export default function TimeStructurePage() {
       }
       await qc.invalidateQueries({ queryKey: ["school-days", dayId, "time-slots"] });
     } catch {
-      toast.error("Failed to update slot");
+      toast.error(tc("error"));
     } finally {
       setToggling((prev) => {
         const next = new Set(prev);
@@ -220,19 +223,18 @@ export default function TimeStructurePage() {
     }
   }
 
-  if (isLoading) return <div className="p-8">Loading…</div>;
+  if (isLoading) return <div className="p-8">{tc("loading")}</div>;
 
   const templatePeriodCount = periods.filter((p) => !p.isBreak).length;
-  const templateBreakCount = periods.filter((p) => p.isBreak).length;
 
   return (
     <div className="container mx-auto p-8 max-w-4xl space-y-8">
-      <h1 className="text-2xl font-bold">Time Structure</h1>
+      <h1 className="text-2xl font-bold">{t("title")}</h1>
 
       {/* Teaching Days */}
       <Card>
         <CardHeader>
-          <CardTitle>School Days</CardTitle>
+          <CardTitle>{t("schoolDays")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap items-center gap-4">
@@ -254,7 +256,7 @@ export default function TimeStructurePage() {
               );
             })}
             <div className="flex items-center gap-3 pl-4 border-l">
-              <span className="text-xs text-muted-foreground">Weekend</span>
+              <span className="text-xs text-muted-foreground">{t("weekend")}</span>
               {WEEKEND.map(({ dow, label }) => {
                 const day = days.find((d) => d.dayOfWeek === dow);
                 const isActive = day?.isActive ?? false;
@@ -280,13 +282,11 @@ export default function TimeStructurePage() {
       {/* Period Template */}
       <Card>
         <CardHeader>
-          <CardTitle>Period Template</CardTitle>
+          <CardTitle>{t("periodTemplate")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Define the canonical periods and breaks for your school day. Use{" "}
-            <strong>Apply to all days</strong> in the weekly schedule below to push
-            these times to every active teaching day at once.
+            {t("schoolHoursDescription")}
           </p>
           <PeriodTemplateBuilder periods={periods} onChange={handlePeriodsChange} />
         </CardContent>
@@ -298,9 +298,9 @@ export default function TimeStructurePage() {
           {/* Section header with Apply button */}
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-lg font-semibold">Weekly Schedule</h2>
+              <h2 className="text-lg font-semibold">{t("weeklySchedule")}</h2>
               <p className="text-sm text-muted-foreground">
-                Toggle individual cells to enable or disable a slot for a specific day.
+                {t("toggleCellDesc")}
               </p>
             </div>
             <Button
@@ -312,7 +312,7 @@ export default function TimeStructurePage() {
               )}
               onClick={() => {
                 if (templatePeriodCount === 0) {
-                  toast.error("Add at least one period to the template first");
+                  toast.error(t("addPeriodFirstToSeeSchedule"));
                   return;
                 }
                 setShowConfirm(true);
@@ -320,7 +320,7 @@ export default function TimeStructurePage() {
               disabled={applying}
             >
               <RotateCcw className="w-4 h-4 mr-2" />
-              {applying ? "Applying…" : "Apply to all days"}
+              {applying ? t("applying") : t("applyToAllDays")}
             </Button>
           </div>
 
@@ -328,12 +328,7 @@ export default function TimeStructurePage() {
           {templateDirty && (
             <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
               <TriangleAlert className="w-4 h-4 mt-0.5 shrink-0" />
-              <span>
-                The template has unsaved changes. Click{" "}
-                <strong>Apply to all days</strong> to reset the entire schedule to
-                the new template, or keep toggling individual cells — new cells will
-                use the updated times.
-              </span>
+              <span>{t("templateChangeWarning")}</span>
             </div>
           )}
 
@@ -350,7 +345,7 @@ export default function TimeStructurePage() {
       {/* Prompt when no days/template yet */}
       {activeDays.length === 0 && periods.length > 0 && (
         <p className="text-sm text-muted-foreground">
-          Enable at least one school day above to see the weekly schedule.
+          {t("noSchoolDaySelected")}
         </p>
       )}
 
@@ -358,25 +353,16 @@ export default function TimeStructurePage() {
       <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reset all active days to template?</DialogTitle>
+            <DialogTitle>{t("resetToTemplateTitle")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            This will <strong>replace all existing time slots</strong> for{" "}
-            <strong>{activeDays.length} active day(s)</strong> with{" "}
-            <strong>{templatePeriodCount} period{templatePeriodCount !== 1 ? "s" : ""}</strong>
-            {templateBreakCount > 0 && (
-              <>
-                {" "}and{" "}
-                <strong>{templateBreakCount} break{templateBreakCount !== 1 ? "s" : ""}</strong>
-              </>
-            )}
-            . Any per-day customisations will be lost.
+            {t("resetToTemplateDesc")}
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirm(false)}>
-              Cancel
+              {tc("cancel")}
             </Button>
-            <Button onClick={applyTemplate}>Apply to all days</Button>
+            <Button onClick={applyTemplate}>{t("applyToAllDays")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

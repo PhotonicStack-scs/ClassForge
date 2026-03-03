@@ -13,5 +13,7 @@
   "yearName": "Trinnnavn",
   "className": "Klassenavn",
   "noYears": "Ingen trinn lagt til ennå",
-  "noClasses": "Ingen klasser for dette trinnet"
+  "noClasses": "Ingen klasser for dette trinnet",
+  "sortOrder": "Sorteringsrekkefølge",
+  "yearNamePlaceholder": "f.eks. 1. klasse"
 }

@@ -34,6 +34,7 @@ export function CellEditPopover({
   onSuccess,
 }: CellEditPopoverProps) {
   const t = useTranslations("timetable");
+  const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [subjectId, setSubjectId] = useState("");
   const [teacherId, setTeacherId] = useState("");
@@ -53,15 +54,15 @@ export function CellEditPopover({
           roomId: roomId || null,
         },
       });
-      toast.success("Entry updated");
+      toast.success(t("entryUpdated"));
       setOpen(false);
       onSuccess?.();
     } catch (err: unknown) {
       const status = (err as { status?: number }).status;
       if (status === 409) {
-        toast.error(t("conflictError", { message: "Schedule conflict detected" }));
+        toast.error(t("conflictError", { message: t("conflictDetected") }));
       } else {
-        toast.error("Failed to update entry");
+        toast.error(t("updateFailed"));
       }
     }
   };
@@ -75,7 +76,7 @@ export function CellEditPopover({
           <Label className="text-xs">{t("subject")}</Label>
           <Select value={subjectId} onValueChange={setSubjectId}>
             <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Select subject..." />
+              <SelectValue placeholder={t("selectSubjectPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {subjects.map((s) => (
@@ -88,7 +89,7 @@ export function CellEditPopover({
           <Label className="text-xs">{t("teacher")}</Label>
           <Select value={teacherId} onValueChange={setTeacherId}>
             <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Select teacher..." />
+              <SelectValue placeholder={t("selectTeacherPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {teachers.map((teacher) => (
@@ -101,10 +102,10 @@ export function CellEditPopover({
           <Label className="text-xs">{t("room")}</Label>
           <Select value={roomId} onValueChange={setRoomId}>
             <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Select room..." />
+              <SelectValue placeholder={t("selectRoomPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="" className="text-xs">None</SelectItem>
+              <SelectItem value="" className="text-xs">{t("noRoom")}</SelectItem>
               {rooms.map((r) => (
                 <SelectItem key={r.id} value={r.id} className="text-xs">{r.name}</SelectItem>
               ))}
@@ -113,10 +114,10 @@ export function CellEditPopover({
         </div>
         <div className="flex gap-2 justify-end pt-1">
           <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
-            Cancel
+            {tc("cancel")}
           </Button>
           <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
-            Save
+            {tc("save")}
           </Button>
         </div>
       </PopoverContent>

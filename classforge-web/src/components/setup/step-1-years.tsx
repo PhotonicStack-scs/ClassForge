@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useWizardStore } from "@/lib/stores/wizard-store";
 import { useYears, useCreateYear, useDeleteYear } from "@/lib/api/hooks/use-years";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,9 @@ import { Trash2, Plus, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 
 export function Step1Years() {
+  const t = useTranslations("setup");
+  const ty = useTranslations("years");
+  const tc = useTranslations("common");
   const { markStepCompleted, setCurrentStep } = useWizardStore();
   const { data: years = [], isLoading } = useYears();
   const createYear = useCreateYear();
@@ -24,7 +28,7 @@ export function Step1Years() {
       await createYear.mutateAsync({ name: name.trim(), sortOrder: years.length });
       setName("");
     } catch {
-      toast.error("Failed to add year");
+      toast.error(tc("error"));
     }
   }
 
@@ -38,10 +42,10 @@ export function Step1Years() {
       <div>
         <h2 className="text-xl font-semibold flex items-center gap-2">
           <GraduationCap className="w-5 h-5" />
-          Years
+          {ty("title")}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Add the year levels at your school (e.g. Year 1, Year 2, … Year 10).
+          {t("step1Description")}
         </p>
       </div>
 
@@ -49,19 +53,19 @@ export function Step1Years() {
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Year name (e.g. Year 1)"
+          placeholder={ty("yearNamePlaceholder")}
           className="max-w-xs"
         />
         <Button type="submit" size="sm" disabled={createYear.isPending || !name.trim()}>
           <Plus className="w-4 h-4 mr-1" />
-          Add
+          {tc("add")}
         </Button>
       </form>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
       ) : years.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No years added yet.</p>
+        <p className="text-sm text-muted-foreground">{ty("noYears")}</p>
       ) : (
         <ul className="space-y-1">
           {years.map((y) => (
@@ -82,10 +86,10 @@ export function Step1Years() {
 
       <div className="pt-2 space-y-1">
         <Button onClick={handleContinue} disabled={years.length === 0}>
-          Continue{years.length > 0 && <Badge variant="secondary" className="ml-2">{years.length} year{years.length !== 1 ? "s" : ""}</Badge>}
+          {tc("continue")}{years.length > 0 && <Badge variant="secondary" className="ml-2">{years.length}</Badge>}
         </Button>
         {years.length === 0 && (
-          <p className="text-xs text-muted-foreground">Add at least one year to continue</p>
+          <p className="text-xs text-muted-foreground">{t("addYearFirst")}</p>
         )}
       </div>
     </div>

@@ -9,5 +9,7 @@
   "color": "Color",
   "hoursPerWeek": "Hours per week",
   "noSubjects": "No subjects added yet",
-  "pickColor": "Pick a color"
+  "pickColor": "Pick a color",
+  "requiresSpecialRoom": "Requires special room",
+  "selectRoom": "Select a room"
 }

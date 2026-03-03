@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWizardStore } from "@/lib/stores/wizard-store";
 import { useYears } from "@/lib/api/hooks/use-years";
@@ -62,6 +63,8 @@ function useDeleteCurriculumEntry(yearId: string) {
 }
 
 function RequirementsForYear({ yearId, yearName }: { yearId: string; yearName: string }) {
+  const t = useTranslations("setup");
+  const tc = useTranslations("common");
   const { data: requirements = [] } = useYearCurriculum(yearId);
   const { data: subjects = [] } = useSubjects();
   const createReq = useCreateCurriculumEntry(yearId);
@@ -85,7 +88,7 @@ function RequirementsForYear({ yearId, yearName }: { yearId: string; yearName: s
       });
       setSubjectId("");
     } catch {
-      toast.error("Failed to add requirement");
+      toast.error(tc("error"));
     }
   }
 
@@ -99,7 +102,7 @@ function RequirementsForYear({ yearId, yearName }: { yearId: string; yearName: s
             <li key={r.id} className="flex items-center justify-between text-sm">
               <span>{r.subjectName ?? subjects.find((s) => s.id === r.subjectId)?.name ?? "—"}</span>
               <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">{r.periodsPerWeek} periods/week</span>
+                <span className="text-muted-foreground">{r.periodsPerWeek} {t("periodsPerWeekLabel")}</span>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -117,10 +120,10 @@ function RequirementsForYear({ yearId, yearName }: { yearId: string; yearName: s
       {availableSubjects.length > 0 && (
         <form onSubmit={handleAdd} className="flex items-end gap-2">
           <div className="space-y-1">
-            <Label className="text-xs">Subject</Label>
+            <Label className="text-xs">{t("lessonRequirements")}</Label>
             <Select value={subjectId} onValueChange={setSubjectId}>
               <SelectTrigger className="w-44 h-8 text-xs">
-                <SelectValue placeholder="Select subject" />
+                <SelectValue placeholder={t("lessonRequirements")} />
               </SelectTrigger>
               <SelectContent>
                 {availableSubjects.map((s) => (
@@ -130,7 +133,7 @@ function RequirementsForYear({ yearId, yearName }: { yearId: string; yearName: s
             </Select>
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Periods/week</Label>
+            <Label className="text-xs">{t("periodsPerWeek")}</Label>
             <Input
               value={periods}
               onChange={(e) => setPeriods(e.target.value)}
@@ -147,13 +150,15 @@ function RequirementsForYear({ yearId, yearName }: { yearId: string; yearName: s
       )}
 
       {availableSubjects.length === 0 && requirements.length === 0 && (
-        <p className="text-xs text-muted-foreground">No subjects available — add subjects in step 2 first.</p>
+        <p className="text-xs text-muted-foreground">{t("noSubjectsAvailable")}</p>
       )}
     </div>
   );
 }
 
 export function Step6LessonConfig() {
+  const t = useTranslations("setup");
+  const tc = useTranslations("common");
   const { markStepCompleted, setCurrentStep } = useWizardStore();
   const { data: years = [], isLoading } = useYears();
 
@@ -162,17 +167,17 @@ export function Step6LessonConfig() {
       <div>
         <h2 className="text-xl font-semibold flex items-center gap-2">
           <LayoutGrid className="w-5 h-5" />
-          Lesson Requirements
+          {t("lessonRequirements")}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Set how many periods per week each subject should be taught per year.
+          {t("step6Description")}
         </p>
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
       ) : years.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No years found — go back and add years first.</p>
+        <p className="text-sm text-muted-foreground">{t("noYearsFound")}</p>
       ) : (
         <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
           {years.map((y) => (
@@ -183,8 +188,8 @@ export function Step6LessonConfig() {
 
       <div className="pt-2">
         <Button onClick={() => { markStepCompleted(6); setCurrentStep(7); }}>
-          Continue to Review
-          {years.length > 0 && <Badge variant="secondary" className="ml-2">{years.length} year{years.length !== 1 ? "s" : ""}</Badge>}
+          {t("continueToReview")}
+          {years.length > 0 && <Badge variant="secondary" className="ml-2">{years.length}</Badge>}
         </Button>
       </div>
     </div>

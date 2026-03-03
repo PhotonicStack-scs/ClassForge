@@ -19,19 +19,20 @@ function useMyTeacher() {
 }
 
 export default function MySchedulePage() {
-  const t = useTranslations("common");
+  const tc = useTranslations("common");
+  const t = useTranslations("timetable");
   const { data: teacher, isLoading, error } = useMyTeacher();
 
   if (isLoading) {
-    return <div className="p-8 text-muted-foreground">{t("loading")}</div>;
+    return <div className="p-8 text-muted-foreground">{tc("loading")}</div>;
   }
 
   if (error || teacher == null) {
     return (
       <div className="p-8 space-y-2">
-        <h1 className="text-2xl font-bold">{t("mySchedule")}</h1>
+        <h1 className="text-2xl font-bold">{tc("mySchedule")}</h1>
         <p className="text-muted-foreground">
-          No teacher profile linked to your account. Contact your administrator.
+          {t("noTeacherProfile")}
         </p>
       </div>
     );
@@ -40,14 +41,14 @@ export default function MySchedulePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{t("mySchedule")}</h1>
+        <h1 className="text-2xl font-bold">{tc("mySchedule")}</h1>
         <p className="text-muted-foreground mt-1">
           {teacher.name ?? "-"}
           {teacher.email ? " " + teacher.email : ""}
         </p>
       </div>
       <div className="rounded-md border p-6 text-center text-muted-foreground">
-        Your published timetable will appear here.
+        {t("noPublishedSchedule")}
       </div>
     </div>
   );

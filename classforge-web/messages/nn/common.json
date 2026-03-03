@@ -32,5 +32,6 @@
   "timetables": "Timeplanar",
   "users": "Brukarar",
   "settings": "Innstillingar",
-  "mySchedule": "Min timeplan"
+  "mySchedule": "Min timeplan",
+  "continue": "Fortset"
 }
