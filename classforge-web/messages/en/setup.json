@@ -22,7 +22,7 @@
   "progressSaved": "Your progress has been saved",
   "wizardSubtitle": "Complete each step to configure your school for timetable generation",
   "previous": "Previous",
-  "step1Description": "Add the year levels at your school (e.g. Year 1, Year 2, … Year 10).",
+  "step1Description": "Add the year levels at your school and the classes within each year (e.g. Year 8 with classes A, B, C).",
   "step2Description": "Add the subjects taught at your school. Each subject gets a color for the timetable.",
   "step3Description": "Add the classrooms and special rooms at your school.",
   "step4Description": "Enable teaching days and define a period schedule to apply to all of them.",

@@ -22,7 +22,7 @@
   "progressSaved": "Framdrifta di er lagra",
   "wizardSubtitle": "Fullfør kvart steg for å konfigurere skulen din for timeplanlegging",
   "previous": "Førre",
-  "step1Description": "Legg til trinna ved skulen din (t.d. 1. trinn, 2. trinn, … 10. trinn).",
+  "step1Description": "Legg til trinna ved skulen din og klassane innanfor kvart trinn (t.d. 8. trinn med klasse A, B, C).",
   "step2Description": "Legg til faga som blir undervist ved skulen din. Kvart fag får ei farge i timeplanen.",
   "step3Description": "Legg til klasserom og spesialrom ved skulen din.",
   "step4Description": "Aktiver undervisningsdagar og definer ein timemal som gjeld for alle.",

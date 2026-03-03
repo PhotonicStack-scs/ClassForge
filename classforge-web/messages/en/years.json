@@ -15,5 +15,6 @@
   "noYears": "No years added yet",
   "noClasses": "No classes for this year",
   "sortOrder": "Sort order",
-  "yearNamePlaceholder": "e.g. Year 1"
+  "yearNamePlaceholder": "e.g. Year 1",
+  "classNamePlaceholder": "e.g. A, B, C"
 }
