@@ -1,0 +1,15 @@
+{
+  "welcomeBack": "Welcome back, {name}",
+  "manage": "Manage",
+  "publishedTimetable": "Published Timetable",
+  "published": "Published",
+  "viewTimetable": "View Timetable",
+  "latestTimetable": "Latest Timetable",
+  "noTimetablesYet": "No Timetables Yet",
+  "viewAllTimetables": "View All Timetables",
+  "generateFirst": "Generate your first timetable to get started.",
+  "generateTimetable": "Generate Timetable",
+  "completeSetup": "Complete your school setup",
+  "setupDescription": "Add years, subjects, rooms, and teachers before generating a timetable.",
+  "openSetupWizard": "Setup Wizard"
+}

@@ -70,7 +70,9 @@ src/
     routing.ts      defineRouting
     request.ts      Server-side message loading
   messages/
-    nb/ nn/ en/     11 JSON namespaces each
+    nb/ nn/ en/     12 JSON namespaces each:
+                    common, auth, dashboard, setup, years, subjects,
+                    rooms, teachers, timeStructure, timetable, users, settings
   proxy.ts          next-intl locale routing + cf_has_session cookie guard
 ```
 
@@ -128,6 +130,8 @@ const t = await getTranslations("auth");
 const t = useTranslations("auth");
 ```
 Translation files: `messages/{nb,nn,en}/{namespace}.json`
+
+Adding a new namespace requires two steps: create the JSON file in all three locales **and** register it in `src/i18n/request.ts` (add to both the `Promise.all` import array and the returned `messages` object).
 
 ### shadcn/ui
 Install new components: `npx shadcn@latest add <component>`

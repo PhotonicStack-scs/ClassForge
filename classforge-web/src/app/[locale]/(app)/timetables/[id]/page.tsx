@@ -18,8 +18,7 @@ import { toast } from "sonner";
 import { ArrowLeft, FileText } from "lucide-react";
 
 type ViewMode = "class" | "teacher";
-const DAY_NAMES = ["Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag"];
-const DEFAULT_SLOTS = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ slotNumber: n, label: `Time ${n}` }));
+const DEFAULT_SLOTS = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ slotNumber: n, label: `${n}` }));
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   Draft: "secondary", Generating: "outline", Generated: "default", Published: "default", Failed: "destructive",
 };
@@ -27,6 +26,7 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "
 export default function TimetableDetailPage({ params }: { params: Promise<{ id: string; locale: string }> }) {
   const { id, locale } = use(params);
   const t = useTranslations("timetable");
+  const ts = useTranslations("timeStructure");
   const [viewMode, setViewMode] = useState<ViewMode>("class");
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
@@ -39,13 +39,15 @@ export default function TimetableDetailPage({ params }: { params: Promise<{ id: 
     label: teacher.name ?? "",
   })) ?? [];
 
+  const DAY_NAMES = [ts("monday"), ts("tuesday"), ts("wednesday"), ts("thursday"), ts("friday")];
+
   const { data: classView } = useTimetableByClass(id, viewMode === "class" && selectedClassId ? selectedClassId : null);
   const { data: teacherView } = useTimetableByTeacher(id, viewMode === "teacher" && selectedTeacherId ? selectedTeacherId : null);
   const entries = viewMode === "class" ? classView?.entries ?? [] : teacherView?.entries ?? [];
   const hasSelection = viewMode === "class" ? !!selectedClassId : !!selectedTeacherId;
 
-  if (isLoading) return <div className="p-8 text-muted-foreground">Laster...</div>;
-  if (!timetable) return <div className="p-8">Timeplan ikke funnet.</div>;
+  if (isLoading) return <div className="p-8 text-muted-foreground">{t("generationProgress")}</div>;
+  if (!timetable) return <div className="p-8">{t("notFound")}</div>;
 
   return (
     <div className="space-y-6">
@@ -71,7 +73,14 @@ export default function TimetableDetailPage({ params }: { params: Promise<{ id: 
         </div>
         <div className="flex items-center gap-2">
           {(timetable.status === "Generated" || timetable.status === "Draft") && (
-            <Button onClick={async () => { try { await publishMutation.mutateAsync(id); toast.success("Timeplan publisert"); } catch { toast.error("Publisering mislyktes"); } }} disabled={publishMutation.isPending}>
+            <Button onClick={async () => {
+              try {
+                await publishMutation.mutateAsync(id);
+                toast.success(t("published"));
+              } catch {
+                toast.error(t("publishFailed"));
+              }
+            }} disabled={publishMutation.isPending}>
               {t("publish")}
             </Button>
           )}
@@ -101,14 +110,14 @@ export default function TimetableDetailPage({ params }: { params: Promise<{ id: 
           {viewMode === "class" && (
             <Input
               className="w-72"
-              placeholder="Klasse-ID (lim inn fra klasser-siden)"
+              placeholder={t("classIdPlaceholder")}
               value={selectedClassId}
               onChange={(e) => setSelectedClassId(e.target.value)}
             />
           )}
           {viewMode === "teacher" && (
             <Select value={selectedTeacherId} onValueChange={setSelectedTeacherId}>
-              <SelectTrigger className="w-56"><SelectValue placeholder="Velg lærer..." /></SelectTrigger>
+              <SelectTrigger className="w-56"><SelectValue placeholder={t("selectTeacherPlaceholder")} /></SelectTrigger>
               <SelectContent>
                 {teachers.map((teacher) => (
                   <SelectItem key={teacher.id} value={teacher.id}>{teacher.label}</SelectItem>
@@ -122,7 +131,7 @@ export default function TimetableDetailPage({ params }: { params: Promise<{ id: 
       {hasSelection && <TimetableGrid entries={entries} days={DAY_NAMES} slots={DEFAULT_SLOTS} />}
       {!hasSelection && timetable.status !== "Generating" && (
         <div className="text-center py-16 text-muted-foreground">
-          Velg en {viewMode === "class" ? "klasse" : "lærer"} for å vise timeplanen.
+          {viewMode === "class" ? t("selectToViewClass") : t("selectToViewTeacher")}
         </div>
       )}
     </div>

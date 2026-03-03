@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useWizardStore } from "@/lib/stores/wizard-store";
 import { Step0Template } from "./step-0-template";
 import { Step1Years } from "./step-1-years";
@@ -14,19 +15,21 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
-const STEPS = [
-  "Template",
-  "Years",
-  "Rooms",
-  "Subjects",
-  "Time",
-  "Teachers",
-  "Curriculum",
-  "Review",
-];
-
 export function WizardShell({ locale }: { locale: string }) {
+  const t = useTranslations("setup");
+  const tc = useTranslations("common");
   const { currentStep, setCurrentStep, completedSteps } = useWizardStore();
+
+  const STEPS = [
+    t("step0"),
+    t("step1"),
+    t("step2"),
+    t("step3"),
+    t("step4"),
+    t("step5"),
+    t("step6"),
+    t("step7"),
+  ];
 
   const stepComponents = [
     <Step0Template key={0} />,
@@ -46,8 +49,8 @@ export function WizardShell({ locale }: { locale: string }) {
       <div className="container mx-auto px-4 py-8 max-w-3xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-extrabold mb-1">School Setup</h1>
-          <p className="text-muted-foreground text-sm">Complete each step to configure your school for timetable generation</p>
+          <h1 className="text-3xl font-extrabold mb-1">{t("title")}</h1>
+          <p className="text-muted-foreground text-sm">{t("wizardSubtitle")}</p>
           <Progress value={progress} className="h-1.5 mt-4" />
         </div>
 
@@ -88,14 +91,14 @@ export function WizardShell({ locale }: { locale: string }) {
             onClick={() => setCurrentStep((currentStep - 1) as 0)}
             disabled={currentStep === 0}
           >
-            Previous
+            {t("previous")}
           </Button>
           <Button
             variant="ghost"
             onClick={() => setCurrentStep((currentStep + 1) as 0)}
             disabled={currentStep === 7}
           >
-            Skip
+            {tc("skip")}
           </Button>
         </div>
       </div>

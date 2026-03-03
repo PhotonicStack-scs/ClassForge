@@ -18,5 +18,12 @@
   "csvImport": "CSV-import",
   "addQualification": "Legg til kvalifikasjon",
   "gradeRange": "Trinnområde",
-  "blockReason": "Grunngjeving for blokkering"
+  "blockReason": "Grunngjeving for blokkering",
+  "fullName": "Fullt namn",
+  "teacherNotFound": "Lærar ikkje funne",
+  "selectSubject": "Vel fag",
+  "timeSlotId": "Tidsluke-ID",
+  "reason": "Årsak",
+  "block": "Blokker",
+  "blocked": "Blokkert"
 }

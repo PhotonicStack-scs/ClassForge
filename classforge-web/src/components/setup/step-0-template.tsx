@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { useWizardStore } from "@/lib/stores/wizard-store";
 import { useBulkCreateYears, useYears } from "@/lib/api/hooks/use-years";
@@ -9,11 +10,11 @@ import { SUBJECT_COLORS } from "@/lib/utils/color";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const TEMPLATES = [
-  { id: "barneskole", label: "Barneskole", description: "Primary school (1–7)" },
-  { id: "ungdomsskole", label: "Ungdomsskole", description: "Lower secondary (8–10)" },
-  { id: "combined", label: "Combined", description: "K–10 school" },
-  { id: "videregaende", label: "Videregående", description: "Upper secondary" },
-  { id: "custom", label: "Custom", description: "Start from scratch" },
+  { id: "barneskole", key: "barneskole" },
+  { id: "ungdomsskole", key: "ungdomsskole" },
+  { id: "combined", key: "combined" },
+  { id: "videregaende", key: "videregaende" },
+  { id: "custom", key: "customSetup" },
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
@@ -40,6 +41,7 @@ const TEMPLATE_SUBJECTS: Record<TemplateId, { name: string; color: string }[]> =
 };
 
 export function Step0Template() {
+  const t = useTranslations("setup");
   const { template, setTemplate, markStepCompleted, setCurrentStep } = useWizardStore();
   const [seeding, setSeeding] = useState(false);
 
@@ -82,19 +84,19 @@ export function Step0Template() {
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">
-        Choose a Template
+        {t("selectTemplate")}
         {seeding && <Loader2 className="inline-block ml-2 h-4 w-4 animate-spin" />}
       </h2>
       <div className={"grid grid-cols-1 sm:grid-cols-2 gap-4" + (seeding ? " pointer-events-none opacity-50" : "")}>
-        {TEMPLATES.map((t) => (
+        {TEMPLATES.map((tmpl) => (
           <Card
-            key={t.id}
-            className={"cursor-pointer border-2 transition-colors " + (template === t.id ? "border-primary" : "border-border hover:border-primary/50")}
-            onClick={() => handleSelect(t.id)}
+            key={tmpl.id}
+            className={"cursor-pointer border-2 transition-colors " + (template === tmpl.id ? "border-primary" : "border-border hover:border-primary/50")}
+            onClick={() => handleSelect(tmpl.id)}
           >
             <CardHeader>
-              <CardTitle>{t.label}</CardTitle>
-              <CardDescription>{t.description}</CardDescription>
+              <CardTitle>{t(tmpl.key)}</CardTitle>
+              <CardDescription>{t("templateDescription")}</CardDescription>
             </CardHeader>
           </Card>
         ))}

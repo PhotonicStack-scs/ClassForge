@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRooms, useCreateRoom, useUpdateRoom, useDeleteRoom } from "@/lib/api/hooks/use-rooms";
 import { useState } from "react";
 import { Pencil, Trash2, Check, X } from "lucide-react";
@@ -9,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function RoomsPage() {
+  const t = useTranslations("rooms");
+  const tc = useTranslations("common");
   const { data: rooms, isLoading } = useRooms();
   const createRoom = useCreateRoom();
   const updateRoom = useUpdateRoom();
@@ -39,24 +42,24 @@ export default function RoomsPage() {
     );
   }
 
-  if (isLoading) return <div className="p-8">Loading...</div>;
+  if (isLoading) return <div className="p-8">{tc("loading")}</div>;
 
   return (
     <div className="container mx-auto p-8 max-w-3xl">
-      <h1 className="text-2xl font-bold mb-6">Rooms</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>
       <Card className="mb-6">
-        <CardHeader><CardTitle>Add Room</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t("addRoom")}</CardTitle></CardHeader>
         <CardContent>
           <div className="flex gap-3 items-end">
             <div className="flex-1 space-y-1">
-              <Label htmlFor="roomName">Room name</Label>
-              <Input id="roomName" placeholder="e.g. Klasserom 1" value={name} onChange={(e) => setName(e.target.value)} />
+              <Label htmlFor="roomName">{t("roomName")}</Label>
+              <Input id="roomName" placeholder={t("roomNamePlaceholder")} value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="w-28 space-y-1">
-              <Label htmlFor="capacity">Capacity</Label>
+              <Label htmlFor="capacity">{t("capacity")}</Label>
               <Input id="capacity" type="number" value={capacity} onChange={(e) => setCapacity(Number(e.target.value))} />
             </div>
-            <Button onClick={handleCreate} disabled={createRoom.isPending}>Add</Button>
+            <Button onClick={handleCreate} disabled={createRoom.isPending}>{tc("add")}</Button>
           </div>
         </CardContent>
       </Card>
@@ -97,7 +100,7 @@ export default function RoomsPage() {
             <div key={room.id!} className="flex items-center justify-between px-4 py-3 rounded-xl border bg-card shadow-sm">
               <div>
                 <span className="font-medium">{room.name}</span>
-                <p className="text-xs text-muted-foreground">Capacity: {room.capacity}</p>
+                <p className="text-xs text-muted-foreground">{t("capacityPrefix")}{room.capacity}</p>
               </div>
               <div className="flex gap-1">
                 <Button
@@ -119,6 +122,9 @@ export default function RoomsPage() {
               </div>
             </div>
           )
+        )}
+        {rooms?.length === 0 && (
+          <p className="text-sm text-muted-foreground py-4 text-center">{t("noRooms")}</p>
         )}
       </div>
     </div>

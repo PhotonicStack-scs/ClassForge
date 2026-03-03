@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useWizardStore } from "@/lib/stores/wizard-store";
 import {
   useSchoolDays,
@@ -21,20 +22,10 @@ import type { components } from "@/lib/api/schema";
 
 type TimeSlotResponse = components["schemas"]["TimeSlotResponse"];
 
-const WEEKDAYS = [
-  { dow: 1, label: "Monday" },
-  { dow: 2, label: "Tuesday" },
-  { dow: 3, label: "Wednesday" },
-  { dow: 4, label: "Thursday" },
-  { dow: 5, label: "Friday" },
-];
-
-const WEEKEND = [
-  { dow: 6, label: "Saturday" },
-  { dow: 0, label: "Sunday" },
-];
-
 export function Step4TimeStructure() {
+  const t = useTranslations("setup");
+  const ts = useTranslations("timeStructure");
+  const tc = useTranslations("common");
   const { markStepCompleted, setCurrentStep } = useWizardStore();
   const { data: days = [], isLoading } = useSchoolDays();
   const createDay = useCreateSchoolDay();
@@ -45,6 +36,19 @@ export function Step4TimeStructure() {
 
   const activeDays = days.filter((d) => d.isActive);
 
+  const WEEKDAYS = [
+    { dow: 1, label: ts("monday") },
+    { dow: 2, label: ts("tuesday") },
+    { dow: 3, label: ts("wednesday") },
+    { dow: 4, label: ts("thursday") },
+    { dow: 5, label: ts("friday") },
+  ];
+
+  const WEEKEND = [
+    { dow: 6, label: ts("saturdayShort") },
+    { dow: 0, label: ts("sundayShort") },
+  ];
+
   async function toggleDay(dow: number) {
     const existing = days.find((d) => d.dayOfWeek === dow);
     if (existing) {
@@ -54,24 +58,24 @@ export function Step4TimeStructure() {
           body: { isActive: !existing.isActive, sortOrder: existing.sortOrder ?? dow },
         });
       } catch {
-        toast.error("Failed to update day");
+        toast.error(tc("error"));
       }
     } else {
       try {
         await createDay.mutateAsync({ dayOfWeek: dow, isActive: true, sortOrder: dow === 0 ? 7 : dow });
       } catch {
-        toast.error("Failed to enable day");
+        toast.error(tc("error"));
       }
     }
   }
 
   async function handleApplyAndContinue() {
     if (activeDays.length === 0) {
-      toast.error("Enable at least one school day first");
+      toast.error(t("enableSchoolDayFirst"));
       return;
     }
     if (periods.filter((p) => !p.isBreak).length === 0) {
-      toast.error("Add at least one period to the template first");
+      toast.error(t("addPeriodFirst"));
       return;
     }
 
@@ -80,13 +84,11 @@ export function Step4TimeStructure() {
 
     for (const day of activeDays) {
       try {
-        // Fetch current slots
         const { data: existing } = await apiClient.GET(
           "/api/v1/school-days/{dayId}/time-slots",
           { params: { path: { dayId: day.id! } } }
         );
 
-        // Delete existing slots in parallel
         await Promise.all(
           (existing ?? []).map((slot: TimeSlotResponse) =>
             apiClient.DELETE("/api/v1/school-days/{dayId}/time-slots/{id}", {
@@ -95,7 +97,6 @@ export function Step4TimeStructure() {
           )
         );
 
-        // Bulk create from template
         const { error } = await apiClient.POST(
           "/api/v1/school-days/{dayId}/time-slots/bulk",
           {
@@ -119,7 +120,7 @@ export function Step4TimeStructure() {
     setApplying(false);
 
     if (errors > 0) {
-      toast.error(`Failed to apply template to ${errors} day(s)`);
+      toast.error(tc("error"));
       return;
     }
 
@@ -132,20 +133,20 @@ export function Step4TimeStructure() {
       <div>
         <h2 className="text-xl font-semibold flex items-center gap-2">
           <Clock className="w-5 h-5" />
-          Time Structure
+          {ts("title")}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Enable teaching days and define a period schedule to apply to all of them.
+          {t("step4Description")}
         </p>
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{tc("loading")}</p>
       ) : (
         <>
           {/* Day toggles */}
           <div className="space-y-1">
-            <p className="text-sm font-medium">School Days</p>
+            <p className="text-sm font-medium">{ts("schoolDays")}</p>
             <div className="flex flex-wrap items-center gap-4 py-2">
               {WEEKDAYS.map(({ dow, label }) => {
                 const day = days.find((d) => d.dayOfWeek === dow);
@@ -168,7 +169,7 @@ export function Step4TimeStructure() {
                 );
               })}
               <div className="flex items-center gap-3 pl-4 border-l">
-                <span className="text-xs text-muted-foreground">Weekend</span>
+                <span className="text-xs text-muted-foreground">{ts("weekend")}</span>
                 {WEEKEND.map(({ dow, label }) => {
                   const day = days.find((d) => d.dayOfWeek === dow);
                   const isActive = day?.isActive ?? false;
@@ -195,7 +196,7 @@ export function Step4TimeStructure() {
 
           {/* Period template */}
           <div className="space-y-2">
-            <p className="text-sm font-medium">Period Schedule</p>
+            <p className="text-sm font-medium">{ts("periodTemplate")}</p>
             <PeriodTemplateBuilder periods={periods} onChange={setPeriods} />
           </div>
         </>
@@ -207,17 +208,17 @@ export function Step4TimeStructure() {
           disabled={applying || activeDays.length === 0 || periods.filter((p) => !p.isBreak).length === 0}
         >
           {applying
-            ? "Applying…"
-            : "Apply to all active days & continue →"}
+            ? ts("applying")
+            : ts("applyToAllAndContinue")}
         </Button>
         {activeDays.length === 0 && (
           <p className="text-xs text-muted-foreground">
-            Enable at least one school day to continue.
+            {t("enableSchoolDayFirst")}
           </p>
         )}
         {activeDays.length > 0 && periods.filter((p) => !p.isBreak).length === 0 && (
           <p className="text-xs text-muted-foreground">
-            Add at least one period to the template to continue.
+            {t("addPeriodFirst")}
           </p>
         )}
       </div>

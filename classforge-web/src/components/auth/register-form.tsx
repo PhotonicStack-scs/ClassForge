@@ -97,7 +97,7 @@ export function RegisterForm({ locale }: RegisterFormProps) {
           id="password"
           type="password"
           autoComplete="new-password"
-          {...register("password", { required: ct("required"), minLength: { value: 8, message: "Min 8 tegn" } })}
+          {...register("password", { required: ct("required"), minLength: { value: 8, message: t("passwordMinLength") } })}
           aria-invalid={!!errors.password}
         />
         {errors.password && (

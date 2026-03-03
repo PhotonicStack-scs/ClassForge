@@ -20,6 +20,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     timetable,
     users,
     settings,
+    dashboard,
   ] = await Promise.all([
     import(`../../messages/${locale}/common.json`),
     import(`../../messages/${locale}/auth.json`),
@@ -32,6 +33,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../../messages/${locale}/timetable.json`),
     import(`../../messages/${locale}/users.json`),
     import(`../../messages/${locale}/settings.json`),
+    import(`../../messages/${locale}/dashboard.json`),
   ]);
 
   return {
@@ -48,6 +50,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       timetable: timetable.default,
       users: users.default,
       settings: settings.default,
+      dashboard: dashboard.default,
     },
   };
 });

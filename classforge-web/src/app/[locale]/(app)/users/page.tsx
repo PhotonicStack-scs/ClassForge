@@ -29,9 +29,9 @@ export default function UsersPage() {
     if (ok === false) return;
     try {
       await deleteMutation.mutateAsync(id);
-      toast.success((name ?? "User") + " deleted");
+      toast.success(t("deleteSuccess", { name: name ?? "User" }));
     } catch {
-      toast.error("Failed to delete user");
+      toast.error(t("deleteFailed"));
     }
   };
 

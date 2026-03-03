@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useYears, useCreateYear, useUpdateYear, useDeleteYear } from "@/lib/api/hooks/use-years";
 import { useState } from "react";
 import { Pencil, Trash2, Check, X } from "lucide-react";
@@ -9,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function YearsPage() {
+  const t = useTranslations("years");
+  const tc = useTranslations("common");
   const { data: years, isLoading } = useYears();
   const createYear = useCreateYear();
   const updateYear = useUpdateYear();
@@ -39,24 +42,24 @@ export default function YearsPage() {
     );
   }
 
-  if (isLoading) return <div className="p-8">Loading...</div>;
+  if (isLoading) return <div className="p-8">{tc("loading")}</div>;
 
   return (
     <div className="container mx-auto p-8 max-w-3xl">
-      <h1 className="text-2xl font-bold mb-6">Years</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>
       <Card className="mb-6">
-        <CardHeader><CardTitle>Add Year</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t("addYear")}</CardTitle></CardHeader>
         <CardContent>
           <div className="flex gap-3 items-end">
             <div className="flex-1 space-y-1">
-              <Label htmlFor="yearName">Year name</Label>
-              <Input id="yearName" placeholder="e.g. 1. klasse" value={name} onChange={(e) => setName(e.target.value)} />
+              <Label htmlFor="yearName">{t("yearName")}</Label>
+              <Input id="yearName" placeholder={t("yearNamePlaceholder")} value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="w-28 space-y-1">
-              <Label htmlFor="sortOrder">Sort order</Label>
+              <Label htmlFor="sortOrder">{t("sortOrder")}</Label>
               <Input id="sortOrder" type="number" value={sortOrder} onChange={(e) => setSortOrder(Number(e.target.value))} />
             </div>
-            <Button onClick={handleCreate} disabled={createYear.isPending}>Add</Button>
+            <Button onClick={handleCreate} disabled={createYear.isPending}>{tc("add")}</Button>
           </div>
         </CardContent>
       </Card>
@@ -116,6 +119,9 @@ export default function YearsPage() {
               </div>
             </div>
           )
+        )}
+        {years?.length === 0 && (
+          <p className="text-sm text-muted-foreground py-4 text-center">{t("noYears")}</p>
         )}
       </div>
     </div>

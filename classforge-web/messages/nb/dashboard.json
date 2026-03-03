@@ -1,0 +1,15 @@
+{
+  "welcomeBack": "Velkommen tilbake, {name}",
+  "manage": "Administrer",
+  "publishedTimetable": "Publisert timeplan",
+  "published": "Publisert",
+  "viewTimetable": "Se timeplan",
+  "latestTimetable": "Siste timeplan",
+  "noTimetablesYet": "Ingen timeplaner ennå",
+  "viewAllTimetables": "Se alle timeplaner",
+  "generateFirst": "Generer din første timeplan for å komme i gang.",
+  "generateTimetable": "Generer timeplan",
+  "completeSetup": "Fullfør skoleoppsettet ditt",
+  "setupDescription": "Legg til trinn, fag, rom og lærere før du genererer en timeplan.",
+  "openSetupWizard": "Oppsettveiviser"
+}

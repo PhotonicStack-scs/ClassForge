@@ -5,5 +5,22 @@
   "school": "School",
   "changePassword": "Change password",
   "saveSettings": "Save settings",
-  "settingsSaved": "Settings saved"
+  "settingsSaved": "Settings saved",
+  "subtitle": "Manage your school and account settings",
+  "schoolSettings": "School Settings",
+  "schoolSettingsDesc": "Update your school name and default language",
+  "schoolName": "School Name",
+  "enterSchoolName": "Enter school name",
+  "defaultLanguage": "Default Language",
+  "saving": "Saving...",
+  "saveChanges": "Save Changes",
+  "setupWizardSection": "Setup Wizard",
+  "setupWizardDesc": "Re-run the school setup wizard to review or update your configuration",
+  "openSetupWizard": "Open Setup Wizard",
+  "account": "Account",
+  "accountDesc": "Your account information",
+  "role": "Role",
+  "bokmaal": "Norwegian Bokmål",
+  "nynorsk": "Norwegian Nynorsk",
+  "english": "English"
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useSubjects, useCreateSubject, useUpdateSubject, useDeleteSubject } from "@/lib/api/hooks/use-subjects";
 import { useRooms } from "@/lib/api/hooks/use-rooms";
 import { useState, useEffect } from "react";
@@ -13,6 +14,8 @@ import { SUBJECT_COLORS, getNextUnusedColor } from "@/lib/utils/color";
 import { SubjectColorPicker } from "@/components/ui/subject-color-picker";
 
 export default function SubjectsPage() {
+  const t = useTranslations("subjects");
+  const tc = useTranslations("common");
   const { data: subjects, isLoading } = useSubjects();
   const { data: rooms = [] } = useRooms();
   const createSubject = useCreateSubject();
@@ -63,18 +66,18 @@ export default function SubjectsPage() {
     );
   }
 
-  if (isLoading) return <div className="p-8">Loading...</div>;
+  if (isLoading) return <div className="p-8">{tc("loading")}</div>;
 
   return (
     <div className="container mx-auto p-8 max-w-3xl">
-      <h1 className="text-2xl font-bold mb-6">Subjects</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>
       <Card className="mb-6">
-        <CardHeader><CardTitle>Add Subject</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t("addSubject")}</CardTitle></CardHeader>
         <CardContent>
           <div className="flex gap-2 items-start">
             <div className="flex-1 space-y-2">
               <div className="flex gap-2">
-                <Input placeholder="Subject name" value={name} onChange={(e) => setName(e.target.value)} className="flex-1" />
+                <Input placeholder={t("subjectName")} value={name} onChange={(e) => setName(e.target.value)} className="flex-1" />
                 <SubjectColorPicker value={color} onChange={setColor} />
               </div>
               <div className="flex items-center gap-2">
@@ -86,11 +89,11 @@ export default function SubjectsPage() {
                     if (!v) setSpecialRoomId(null);
                   }}
                 />
-                <label htmlFor="specialRoom" className="text-sm shrink-0">Requires special room</label>
+                <label htmlFor="specialRoom" className="text-sm shrink-0">{t("requiresSpecialRoom")}</label>
                 {requiresSpecialRoom && (
                   <Select value={specialRoomId ?? ""} onValueChange={(v) => setSpecialRoomId(v || null)}>
                     <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Select a room" />
+                      <SelectValue placeholder={t("selectRoom")} />
                     </SelectTrigger>
                     <SelectContent>
                       {rooms.map((r) => (
@@ -101,7 +104,7 @@ export default function SubjectsPage() {
                 )}
               </div>
             </div>
-            <Button onClick={handleCreate} disabled={createSubject.isPending}>Add</Button>
+            <Button onClick={handleCreate} disabled={createSubject.isPending}>{tc("add")}</Button>
           </div>
         </CardContent>
       </Card>
@@ -130,11 +133,11 @@ export default function SubjectsPage() {
                           if (!v) setEditSpecialRoomId(null);
                         }}
                       />
-                      <span className="text-sm shrink-0">Requires special room</span>
+                      <span className="text-sm shrink-0">{t("requiresSpecialRoom")}</span>
                       {editRequiresSpecialRoom && (
                         <Select value={editSpecialRoomId ?? ""} onValueChange={(v) => setEditSpecialRoomId(v || null)}>
                           <SelectTrigger className="flex-1">
-                            <SelectValue placeholder="Select a room" />
+                            <SelectValue placeholder={t("selectRoom")} />
                           </SelectTrigger>
                           <SelectContent>
                             {rooms.map((r) => (
@@ -176,7 +179,7 @@ export default function SubjectsPage() {
                   <span className="font-medium">{s.name}</span>
                   {s.requiresSpecialRoom && (
                     <p className="text-xs text-muted-foreground">
-                      Requires special room{room ? `: ${room.name}` : ""}
+                      {t("requiresSpecialRoom")}{room ? `: ${room.name}` : ""}
                     </p>
                   )}
                 </div>
@@ -202,6 +205,9 @@ export default function SubjectsPage() {
             </div>
           );
         })}
+        {subjects?.length === 0 && (
+          <p className="text-sm text-muted-foreground py-4 text-center">{t("noSubjects")}</p>
+        )}
       </div>
     </div>
   );

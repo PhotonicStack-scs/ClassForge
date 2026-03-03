@@ -8,5 +8,7 @@
   "roomName": "Romnavn",
   "capacity": "Kapasitet",
   "noRooms": "Ingen rom lagt til ennå",
-  "confirmDelete": "Er du sikker på at du vil slette dette rommet?"
+  "confirmDelete": "Er du sikker på at du vil slette dette rommet?",
+  "roomNamePlaceholder": "f.eks. Klasserom 1",
+  "capacityPrefix": "Kapasitet: "
 }

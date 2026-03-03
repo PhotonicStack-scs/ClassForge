@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,7 @@ type Props = {
 };
 
 export function PeriodTemplateBuilder({ periods, onChange }: Props) {
+  const t = useTranslations("timeStructure");
   function addEntry(isBreak: boolean) {
     const last = periods[periods.length - 1];
     const startTime = last ? last.endTime : "08:00";
@@ -58,8 +60,8 @@ export function PeriodTemplateBuilder({ periods, onChange }: Props) {
       {periods.length > 0 && (
         <div className="grid grid-cols-[48px_1fr_1fr_36px] gap-2 text-xs font-medium text-muted-foreground px-1">
           <span>#</span>
-          <span>Start</span>
-          <span>End</span>
+          <span>{t("startTime")}</span>
+          <span>{t("end")}</span>
           <span />
         </div>
       )}
@@ -78,7 +80,7 @@ export function PeriodTemplateBuilder({ periods, onChange }: Props) {
                 variant="outline"
                 className="text-xs px-1.5 py-0 font-normal text-muted-foreground"
               >
-                Brk
+                {t("breakShort")}
               </Badge>
             ) : (
               <span className="text-sm font-medium text-center">
@@ -119,7 +121,7 @@ export function PeriodTemplateBuilder({ periods, onChange }: Props) {
           className="flex-1"
         >
           <Plus className="w-4 h-4 mr-1" />
-          Add period
+          {t("addPeriod")}
         </Button>
         <Button
           type="button"
@@ -129,7 +131,7 @@ export function PeriodTemplateBuilder({ periods, onChange }: Props) {
           className="flex-1"
         >
           <Coffee className="w-4 h-4 mr-1" />
-          Add break
+          {t("addBreak")}
         </Button>
       </div>
     </div>

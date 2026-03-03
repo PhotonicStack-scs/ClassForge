@@ -5,5 +5,22 @@
   "school": "Skule",
   "changePassword": "Endre passord",
   "saveSettings": "Lagra innstillingar",
-  "settingsSaved": "Innstillingane er lagra"
+  "settingsSaved": "Innstillingane er lagra",
+  "subtitle": "Administrer skule- og kontoinnstillingar",
+  "schoolSettings": "Skuleinnstillingar",
+  "schoolSettingsDesc": "Oppdater skulens namn og standardspråk",
+  "schoolName": "Skulenamn",
+  "enterSchoolName": "Skriv inn skulenamn",
+  "defaultLanguage": "Standardspråk",
+  "saving": "Lagrar...",
+  "saveChanges": "Lagre endringar",
+  "setupWizardSection": "Oppsettvegleiar",
+  "setupWizardDesc": "Køyr oppsettvegleiaren på nytt for å gjennomgå konfigurasjonen din",
+  "openSetupWizard": "Opne oppsettvegleiar",
+  "account": "Konto",
+  "accountDesc": "Din kontoinformasjon",
+  "role": "Rolle",
+  "bokmaal": "Norsk bokmål",
+  "nynorsk": "Norsk nynorsk",
+  "english": "Engelsk"
 }

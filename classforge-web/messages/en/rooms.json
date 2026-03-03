@@ -8,5 +8,7 @@
   "roomName": "Room name",
   "capacity": "Capacity",
   "noRooms": "No rooms added yet",
-  "confirmDelete": "Are you sure you want to delete this room?"
+  "confirmDelete": "Are you sure you want to delete this room?",
+  "roomNamePlaceholder": "e.g. Room 101",
+  "capacityPrefix": "Capacity: "
 }

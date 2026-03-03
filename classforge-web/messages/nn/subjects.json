@@ -9,5 +9,7 @@
   "color": "Farge",
   "hoursPerWeek": "Timar per veke",
   "noSubjects": "Ingen fag lagde til enno",
-  "pickColor": "Vel farge"
+  "pickColor": "Vel farge",
+  "requiresSpecialRoom": "Krev spesialrom",
+  "selectRoom": "Vel eit rom"
 }

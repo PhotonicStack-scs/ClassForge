@@ -15,5 +15,7 @@
   },
   "authMethod": "Autentiseringsmetode",
   "noUsers": "Ingen brukarar funne",
-  "confirmDelete": "Er du sikker på at du vil slette denne brukaren?"
+  "confirmDelete": "Er du sikker på at du vil slette denne brukaren?",
+  "deleteSuccess": "{name} sletta",
+  "deleteFailed": "Klarte ikkje å slette brukar"
 }

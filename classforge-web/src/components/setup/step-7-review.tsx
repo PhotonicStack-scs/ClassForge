@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useWizardStore } from "@/lib/stores/wizard-store";
 import { useUpdateSetupProgress } from "@/lib/api/hooks/use-setup";
@@ -12,13 +13,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Circle, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 
-interface StepSummaryRow {
-  label: string;
-  count: number;
-  unit: string;
-}
-
-function SummaryRow({ label, count, unit }: StepSummaryRow) {
+function SummaryRow({ label, count, notConfigured }: { label: string; count: number; notConfigured: string }) {
   const ok = count > 0;
   return (
     <div className="flex items-center gap-3 py-2">
@@ -29,14 +24,16 @@ function SummaryRow({ label, count, unit }: StepSummaryRow) {
       )}
       <span className={ok ? "text-sm" : "text-sm text-muted-foreground"}>{label}</span>
       {ok && (
-        <span className="ml-auto text-sm text-muted-foreground">{count} {unit}{count !== 1 ? "s" : ""}</span>
+        <span className="ml-auto text-sm text-muted-foreground">{count}</span>
       )}
-      {!ok && <span className="ml-auto text-xs text-destructive">Not configured</span>}
+      {!ok && <span className="ml-auto text-xs text-destructive">{notConfigured}</span>}
     </div>
   );
 }
 
 export function Step7Review({ locale }: { locale: string }) {
+  const t = useTranslations("setup");
+  const tc = useTranslations("common");
   const router = useRouter();
   const { completedSteps, markStepCompleted } = useWizardStore();
   const { mutate, isPending } = useUpdateSetupProgress();
@@ -48,6 +45,7 @@ export function Step7Review({ locale }: { locale: string }) {
   const { data: days = [] } = useSchoolDays();
 
   const activeDays = days.filter((d) => d.isActive);
+  const notConfigured = t("notConfigured");
 
   function handleComplete() {
     const progress: Record<string, boolean> = {};
@@ -59,11 +57,11 @@ export function Step7Review({ locale }: { locale: string }) {
       {
         onSuccess: () => {
           markStepCompleted(7);
-          toast.success("Setup complete! Welcome to ClassForge.");
+          toast.success(t("setupComplete"));
           router.push(`/${locale}/dashboard`);
         },
         onError: () => {
-          toast.error("Failed to save setup progress");
+          toast.error(t("saveFailed"));
         },
       }
     );
@@ -76,29 +74,29 @@ export function Step7Review({ locale }: { locale: string }) {
       <div>
         <h2 className="text-xl font-semibold flex items-center gap-2">
           <PartyPopper className="w-5 h-5" />
-          Review & Complete
+          {t("reviewTitle")}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Review your school configuration before completing setup.
+          {t("step7Description")}
         </p>
       </div>
 
       <div className="border rounded-lg divide-y">
-        <SummaryRow label="Years" count={years.length} unit="year" />
-        <SummaryRow label="Subjects" count={subjects.length} unit="subject" />
-        <SummaryRow label="Rooms" count={rooms.length} unit="room" />
-        <SummaryRow label="Teachers" count={teachers.length} unit="teacher" />
-        <SummaryRow label="School days" count={activeDays.length} unit="day" />
+        <SummaryRow label={tc("years")} count={years.length} notConfigured={notConfigured} />
+        <SummaryRow label={tc("subjects")} count={subjects.length} notConfigured={notConfigured} />
+        <SummaryRow label={tc("rooms")} count={rooms.length} notConfigured={notConfigured} />
+        <SummaryRow label={tc("teachers")} count={teachers.length} notConfigured={notConfigured} />
+        <SummaryRow label={t("schoolDaysLabel")} count={activeDays.length} notConfigured={notConfigured} />
       </div>
 
       {!allConfigured && (
         <p className="text-sm text-amber-600 dark:text-amber-400">
-          Some sections are not configured yet. You can still complete setup and configure them later from the sidebar.
+          {t("incompleteSetupNote")}
         </p>
       )}
 
       <Button onClick={handleComplete} disabled={isPending} size="lg">
-        {isPending ? "Saving…" : "Complete Setup"}
+        {isPending ? t("saving") : t("completeSetup")}
       </Button>
     </div>
   );
