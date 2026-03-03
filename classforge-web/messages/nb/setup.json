@@ -22,7 +22,7 @@
   "progressSaved": "Fremgangen din er lagret",
   "wizardSubtitle": "Fullfør hvert trinn for å konfigurere skolen din for timeplanlegging",
   "previous": "Forrige",
-  "step1Description": "Legg til trinnene ved skolen din (f.eks. 1. trinn, 2. trinn, … 10. trinn).",
+  "step1Description": "Legg til trinnene ved skolen din og klassene innenfor hvert trinn (f.eks. 8. trinn med klasse A, B, C).",
   "step2Description": "Legg til fagene som undervises ved skolen din. Hvert fag får en farge i timeplanen.",
   "step3Description": "Legg til klasserom og spesialrom ved skolen din.",
   "step4Description": "Aktiver undervisningsdager og definer en timemal som gjelder for alle.",

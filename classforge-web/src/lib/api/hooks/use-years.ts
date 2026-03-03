@@ -10,6 +10,7 @@ type ClassResponse = components["schemas"]["ClassResponse"];
 type CreateYearRequest = components["schemas"]["CreateYearRequest"];
 type UpdateYearRequest = components["schemas"]["UpdateYearRequest"];
 type CreateClassRequest = components["schemas"]["CreateClassRequest"];
+type UpdateClassRequest = components["schemas"]["UpdateClassRequest"];
 
 export function useYears() {
   return useQuery({
@@ -98,6 +99,35 @@ export function useCreateClass(yearId: string) {
       );
       if (error) throw error;
       return data!;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["years", yearId, "classes"] }),
+  });
+}
+
+export function useUpdateClass(yearId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, body }: { id: string; body: UpdateClassRequest }) => {
+      const { data, error } = await apiClient.PUT(
+        "/api/v1/years/{yearId}/classes/{id}",
+        { params: { path: { yearId, id } }, body }
+      );
+      if (error) throw error;
+      return data!;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["years", yearId, "classes"] }),
+  });
+}
+
+export function useDeleteClass(yearId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await apiClient.DELETE(
+        "/api/v1/years/{yearId}/classes/{id}",
+        { params: { path: { yearId, id } } }
+      );
+      if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["years", yearId, "classes"] }),
   });

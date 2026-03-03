@@ -15,5 +15,6 @@
   "noYears": "Ingen trinn lagde til enno",
   "noClasses": "Ingen klassar for dette trinnet",
   "sortOrder": "Sorteringsrekkjefølge",
-  "yearNamePlaceholder": "t.d. 1. klasse"
+  "yearNamePlaceholder": "t.d. 1. klasse",
+  "classNamePlaceholder": "t.d. A, B, C"
 }
